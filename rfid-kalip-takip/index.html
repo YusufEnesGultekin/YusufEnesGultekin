@@ -272,6 +272,18 @@
   .park-row span:first-child{color:#444;}
   .park-row span:last-child{font-weight:800;}
   .park-row.total{border-top:1px solid var(--border);margin-top:4px;padding-top:9px;}
+
+  /* Sortable table headers */
+  thead th[data-field]{cursor:pointer;user-select:none;}
+  thead th[data-field]:hover{color:#3a3f4b;}
+  .sort-ind{font-size:9px;letter-spacing:0;}
+
+  /* Location summary bar */
+  .loc-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:14px 0 6px;background:#EFEFEF;}
+  .loc-bar span{height:100%;}
+  .loc-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
+  .loc-legend b{color:var(--text);font-weight:700;}
+  .loc-legend .sw{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -313,8 +325,8 @@
         <div class="val" id="clock-val">—</div>
       </div>
       <div class="userchip" id="userchip">
-        <div class="avatar" id="user-avatar">K</div>
-        <div class="who"><b id="user-display-name">KLEMSAN</b><span>Yönetici Paneli</span></div>
+        <div class="avatar" id="user-avatar">YE</div>
+        <div class="who"><b id="user-display-name">Yusuf Enes Gültekin</b><span>Yönetici Paneli</span></div>
         <div class="user-menu" id="user-menu">
           <button type="button" id="btn-logout">Çıkış Yap</button>
         </div>
@@ -326,6 +338,7 @@
     <nav class="sidebar">
       <div class="nav-item active" data-page="dashboard"><span class="dot"></span>Dashboard</div>
       <div class="nav-item" data-page="sicil"><span class="dot"></span>Kalıp Sicili</div>
+      <div class="nav-item" data-page="hareket"><span class="dot"></span>Kalıp Hareketleri</div>
       <div class="nav-item" data-page="uretim"><span class="dot"></span>Üretim Takibi</div>
       <div class="nav-item" data-page="bakim"><span class="dot"></span>Bakım Uyarıları</div>
       <div class="nav-item" data-page="raporlar"><span class="dot"></span>Raporlar</div>
@@ -428,10 +441,67 @@
           </div>
           <div class="panel-head"><h3>Kalıp Listesi</h3><span class="badge-tag" id="sicil-count">~3.000 kayıt — örnek görünüm</span></div>
           <table>
-            <thead><tr><th>Kalıp Kodu</th><th>Adı</th><th>Konum</th><th>Toplam Üretim</th><th>Son Bakım</th><th>Durum</th></tr></thead>
+            <thead id="sicil-thead"><tr>
+              <th data-field="code">Kalıp Kodu <span class="sort-ind"></span></th>
+              <th data-field="name">Adı <span class="sort-ind"></span></th>
+              <th data-field="location">Konum <span class="sort-ind"></span></th>
+              <th data-field="total">Toplam Üretim <span class="sort-ind"></span></th>
+              <th data-field="lastMaint">Son Bakım <span class="sort-ind"></span></th>
+              <th data-field="status">Durum <span class="sort-ind"></span></th>
+            </tr></thead>
             <tbody id="sicil-table"></tbody>
           </table>
           <p id="sicil-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
+        </div>
+      </section>
+
+      <!-- KALIP HAREKETLERI -->
+      <section id="page-hareket" class="page">
+        <div class="page-head">
+          <h2>Kalıp Hareketleri</h2>
+          <p>Kalıpların anlık konum dağılımı ve tüm giriş-çıkış geçmişi — nereden, nereye, kim ve ne zaman</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="lbl">KALIPHANEDE</div><div class="val">1.850</div><div class="sub">Depoda / rafta bekleyen</div></div>
+          <div class="stat-card"><div class="lbl">ÜRETİMHANEDE</div><div class="val">1.070</div><div class="sub">480 Enj. · 350 Oto.Pres · 240 Eks.Pres</div></div>
+          <div class="stat-card"><div class="lbl">BAKIMDA</div><div class="val">80</div><div class="sub">Bakım atölyesinde</div></div>
+          <div class="stat-card"><div class="lbl">TOPLAM KALIP</div><div class="val accent">~3.000</div><div class="sub">Tüm konumlar toplamı</div></div>
+        </div>
+        <div class="panel">
+          <div class="loc-bar">
+            <span style="width:61.7%;background:#9CA3AF;" title="Kalıphanede — 1.850"></span>
+            <span style="width:35.7%;background:#E07B1E;" title="Üretimhanede — 1.070"></span>
+            <span style="width:2.6%;background:#EF4444;" title="Bakımda — 80"></span>
+          </div>
+          <div class="loc-legend">
+            <span><span class="sw" style="background:#9CA3AF;"></span>Kalıphanede — <b>%62</b></span>
+            <span><span class="sw" style="background:#E07B1E;"></span>Üretimhanede — <b>%36</b></span>
+            <span><span class="sw" style="background:#EF4444;"></span>Bakımda — <b>%2</b></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="search-row">
+            <div class="search-box"><input type="text" id="hareket-search" placeholder="Kalıp kodu veya adı ara..."></div>
+            <div class="chip active" data-filter="hepsi">Tümü</div>
+            <div class="chip" data-filter="giris">Giriş</div>
+            <div class="chip" data-filter="cikis">Çıkış</div>
+          </div>
+          <div class="panel-head"><h3>Hareket Geçmişi</h3><span class="badge-tag" id="hareket-count">0 kayıt</span></div>
+          <table>
+            <thead id="hareket-thead"><tr>
+              <th data-field="code">Kalıp <span class="sort-ind"></span></th>
+              <th data-field="dir">Yön <span class="sort-ind"></span></th>
+              <th data-field="from">Nereden <span class="sort-ind"></span></th>
+              <th data-field="to">Nereye <span class="sort-ind"></span></th>
+              <th data-field="person">Kim <span class="sort-ind"></span></th>
+              <th data-field="ts">Tarih / Saat <span class="sort-ind"></span></th>
+              <th data-field="reason">Amaç <span class="sort-ind"></span></th>
+              <th data-field="status">Durum <span class="sort-ind"></span></th>
+            </tr></thead>
+            <tbody id="hareket-table"></tbody>
+          </table>
         </div>
       </section>
 
@@ -451,7 +521,14 @@
         <div class="panel">
           <div class="panel-head"><h3>Aktif İş Emirleri</h3><span class="badge-tag" id="uretim-source">22 makina · Sayım kaynağı: Makina sayacı (entegre)</span></div>
           <table>
-            <thead><tr><th>Makina</th><th>Aktif İş / Kalıp</th><th>Başlangıç Tarihi</th><th>Operatör</th><th id="uretim-col-h">Üretilen / Hedef</th><th>İlerleme</th></tr></thead>
+            <thead id="uretim-thead"><tr>
+              <th data-field="machine">Makina <span class="sort-ind"></span></th>
+              <th data-field="name">Aktif İş / Kalıp <span class="sort-ind"></span></th>
+              <th data-field="start">Başlangıç Tarihi <span class="sort-ind"></span></th>
+              <th data-field="operator">Operatör <span class="sort-ind"></span></th>
+              <th data-field="produced" id="uretim-col-h"><span id="uretim-col-label">Üretilen / Hedef</span> <span class="sort-ind"></span></th>
+              <th data-field="pct">İlerleme <span class="sort-ind"></span></th>
+            </tr></thead>
             <tbody id="uretim-table"></tbody>
           </table>
           <p id="uretim-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
@@ -473,7 +550,14 @@
         <div class="panel">
           <div class="panel-head"><h3>Bakım Listesi</h3></div>
           <table>
-            <thead><tr><th>Kalıp</th><th>Ömür Durumu</th><th>Planlanan Tarih</th><th>Sorumlu</th><th>Durum</th><th></th></tr></thead>
+            <thead id="bakim-thead"><tr>
+              <th data-field="code">Kalıp <span class="sort-ind"></span></th>
+              <th data-field="life">Ömür Durumu <span class="sort-ind"></span></th>
+              <th data-field="planlanan">Planlanan Tarih <span class="sort-ind"></span></th>
+              <th>Sorumlu</th>
+              <th data-field="status">Durum <span class="sort-ind"></span></th>
+              <th></th>
+            </tr></thead>
             <tbody id="bakim-table"></tbody>
           </table>
         </div>
@@ -502,6 +586,11 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Bugüne Kadar Üretilen — Kategori Bazlı</h3></div>
+          <div class="kv-list" id="report-category-totals"></div>
+          <p style="font-size:11.5px;color:var(--muted);font-style:italic;margin:10px 2px 0;">Görüntülenen örnek kalıp kayıtlarından hesaplanmıştır — gerçek sistemde ~3.000 kalıbın tamamından toplanır.</p>
         </div>
         <div class="panel">
           <div class="panel-head"><h3>Not</h3></div>
@@ -595,6 +684,103 @@
 
   const statusLabel = {normal:'Normal', yaklasiyor:'Bakım Yaklaşıyor', kritik:'Kritik', bakimda:'Bakımda'};
 
+  /* ---------- KATEGORİ / KONUM ---------- */
+  function categoryOf(location){
+    if(location.startsWith('Enjeksiyon')) return 'Enjeksiyon';
+    if(location.startsWith('Otomatik Pres')) return 'Otomatik Pres';
+    if(location.startsWith('Eksantrik Pres')) return 'Eksantrik Pres';
+    return 'Kalıphane / Depo';
+  }
+  function computeCategoryTotals(){
+    const order = ['Enjeksiyon','Otomatik Pres','Eksantrik Pres','Kalıphane / Depo'];
+    const totals = {};
+    molds.forEach(m=>{
+      const cat = categoryOf(m.location);
+      if(!totals[cat]) totals[cat] = {sum:0, unit:m.unit};
+      totals[cat].sum += m.total;
+    });
+    return order.filter(c=>totals[c]).map(c=>({name:c, sum:totals[c].sum, unit:totals[c].unit}));
+  }
+
+  /* ---------- KALIP HAREKETLERİ (giriş/çıkış kaydı) ---------- */
+  const reasonLocationMap = {
+    'Üretimden dönüş':'Üretim Hattı',
+    'Bakımdan dönüş':'Bakım Atölyesi',
+    'Depodan transfer':'Depo',
+    'Diğer':'Diğer',
+    'Üretime gönderildi':'Üretim Hattı',
+    'Bakıma gönderildi':'Bakım Atölyesi',
+    'Depoya kaldırıldı':'Depo'
+  };
+  let movementIdCounter = 1;
+  function seedTs(day,h,mi){ return new Date(2026,8,day,h,mi).getTime(); } // 2026 Eylül (ay index 8)
+  const movementLog = [
+    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'GİRİŞ', from:'Üretim Hattı', to:'Kalıphane', person:'S. Yıldız', reason:'Üretimden dönüş', ts:seedTs(5,8,12), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(5,8,40), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0087', name:'Kapak Preslemesi', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(6,7,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0301', name:'Röle Kapağı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(6,22,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0044', name:'Terminal Klipsi', dir:'GİRİŞ', from:'Bakım Atölyesi', to:'Kalıphane', person:'C. Aydın', reason:'Bakımdan dönüş', ts:seedTs(6,22,50), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0055', name:'Gövde Kapağı', dir:'GİRİŞ', from:'—', to:'Kalıphane', person:'—', reason:'—', ts:seedTs(7,6,55), status:'missed'},
+    {id:movementIdCounter++, code:'KLP-0271', name:'Yay Baskı Parçası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'B. Koç', reason:'Üretime gönderildi', ts:seedTs(7,6,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0119', name:'Röle Tabanı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(7,5,45), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0033', name:'Terminal Kapağı', dir:'GİRİŞ', from:'Depo', to:'Kalıphane', person:'M. Şahin', reason:'Depodan transfer', ts:seedTs(7,7,40), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0362', name:'Baza Plakası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'H. Kara', reason:'Üretime gönderildi', ts:seedTs(7,9,35), status:'ok'}
+  ];
+
+  /* ---------- SIRALAMA ALTYAPISI ---------- */
+  const sicilSort = {field:null, dir:'asc'};
+  const uretimSort = {field:null, dir:'asc'};
+  const bakimSort = {field:null, dir:'asc'};
+  const hareketSort = {field:'ts', dir:'desc'};
+
+  function compareValues(a,b,dir){
+    if(a==null && b==null) return 0;
+    if(a==null) return 1;
+    if(b==null) return -1;
+    if(typeof a === 'string') a = a.toLowerCase();
+    if(typeof b === 'string') b = b.toLowerCase();
+    const r = a < b ? -1 : (a > b ? 1 : 0);
+    return dir==='desc' ? -r : r;
+  }
+  function sortGeneric(rows, state, accessor){
+    if(!state.field) return rows;
+    return rows.slice().sort((a,b)=>compareValues(accessor(a,state.field), accessor(b,state.field), state.dir));
+  }
+  function updateSortIndicators(theadId, state){
+    document.querySelectorAll('#'+theadId+' th[data-field]').forEach(th=>{
+      const ind = th.querySelector('.sort-ind');
+      if(!ind) return;
+      ind.textContent = th.dataset.field===state.field ? (state.dir==='asc'?'▲':'▼') : '';
+    });
+  }
+  function attachSort(theadId, state, rerender){
+    document.getElementById(theadId).addEventListener('click', function(e){
+      const th = e.target.closest('th[data-field]');
+      if(!th) return;
+      const field = th.dataset.field;
+      if(state.field === field) state.dir = state.dir==='asc' ? 'desc' : 'asc';
+      else { state.field = field; state.dir = 'asc'; }
+      rerender();
+    });
+  }
+  function parseTRDate(s){
+    if(!s || s==='—') return null;
+    const [d,m,y] = s.split('.').map(Number);
+    return new Date(y, m-1, d).getTime();
+  }
+  function parseTRDateTime(s){
+    const [datePart, timePart] = s.split(' ');
+    const [d,m,y] = datePart.split('.').map(Number);
+    const [hh,mi] = (timePart||'00:00').split(':').map(Number);
+    return new Date(y, m-1, d, hh, mi).getTime();
+  }
+  function bakimDateRank(m){
+    if(m.status==='kritik') return 0;
+    if(m.status==='bakimda') return Number.MAX_SAFE_INTEGER;
+    if(m.plannedDate) return parseTRDate(m.plannedDate);
+    return Number.MAX_SAFE_INTEGER - 1;
+  }
+
   /* ---------- HELPERS ---------- */
   function fmt(n){ return n.toLocaleString('tr-TR'); }
   function badge(status, textOverride){
@@ -646,14 +832,21 @@
   }
 
   /* ---------- RENDER: SICIL ---------- */
+  function sicilAccessor(m, field){
+    if(field==='lastMaint') return parseTRDate(m.lastMaint);
+    if(field==='status') return statusLabel[m.status];
+    return m[field];
+  }
   function renderSicil(){
     const q = (document.getElementById('sicil-search').value||'').toLowerCase();
     const activeChip = document.querySelector('#page-sicil .chip.active').dataset.filter;
-    const rows = molds.filter(m=>{
+    let rows = molds.filter(m=>{
       const matchesText = (m.code+' '+m.name+' '+m.location).toLowerCase().includes(q);
       const matchesFilter = activeChip==='hepsi' || m.status===activeChip;
       return matchesText && matchesFilter;
     });
+    rows = sortGeneric(rows, sicilSort, sicilAccessor);
+    updateSortIndicators('sicil-thead', sicilSort);
     document.getElementById('sicil-count').textContent = (q||activeChip!=='hepsi')
       ? rows.length + ' sonuç'
       : '~' + fmt(TOTAL_MOLDS) + ' kayıt — örnek görünüm';
@@ -673,18 +866,27 @@
   }
 
   /* ---------- RENDER: URETIM ---------- */
+  function uretimAccessor(r, field){
+    if(field==='name') return r.name;
+    if(field==='pct') return r.produced/r.target;
+    if(field==='start') return parseTRDateTime(r.start);
+    return r[field];
+  }
   function renderUretim(){
     const group = workOrders[uretimTab];
     const labels = uretimLabels[uretimTab];
     document.getElementById('uretim-title').textContent = 'Üretim Takibi — ' + labels.title;
     document.getElementById('uretim-sub').textContent = group.total + ' makina · ' + labels.sub;
-    document.getElementById('uretim-col-h').textContent = labels.colH;
+    document.getElementById('uretim-col-label').textContent = labels.colH;
     document.getElementById('uretim-source').textContent = group.total + ' makina · Sayım kaynağı: ' + labels.source;
     document.getElementById('tab-enjeksiyon').classList.toggle('tab-active', uretimTab==='enjeksiyon');
     document.getElementById('tab-otomatikpres').classList.toggle('tab-active', uretimTab==='otomatikpres');
     document.getElementById('tab-eksantrikpres').classList.toggle('tab-active', uretimTab==='eksantrikpres');
 
-    const rows = group.list;
+    const activeRows = sortGeneric(group.list.filter(r=>!r.idle), uretimSort, uretimAccessor);
+    const idleRows = group.list.filter(r=>r.idle);
+    const rows = activeRows.concat(idleRows);
+    updateSortIndicators('uretim-thead', uretimSort);
     document.getElementById('uretim-table').innerHTML = rows.map(r=>{
       if(r.idle){
         return `<tr><td class="mono">${r.machine}</td><td colspan="4" style="color:var(--muted);">Boşta — iş emri bekleniyor</td></tr>`;
@@ -709,8 +911,16 @@
   }
 
   /* ---------- RENDER: BAKIM ---------- */
+  function bakimAccessor(m, field){
+    if(field==='code') return m.code+' '+m.name;
+    if(field==='planlanan') return bakimDateRank(m);
+    if(field==='status') return statusLabel[m.status];
+    return m[field];
+  }
   function renderBakim(){
-    const list = molds.filter(m=>m.status!=='normal');
+    let list = molds.filter(m=>m.status!=='normal');
+    list = sortGeneric(list, bakimSort, bakimAccessor);
+    updateSortIndicators('bakim-thead', bakimSort);
     document.getElementById('bakim-table').innerHTML = list.map(m=>{
       let actionBtn;
       if(m.status==='kritik') actionBtn = `<button class="btn btn-primary" data-action="bakima-al" data-code="${m.code}">Bakıma Al</button>`;
@@ -754,6 +964,87 @@
     renderAll();
   });
 
+  /* ---------- RENDER: KALIP HAREKETLERİ ---------- */
+  function formatDateTime(ts){
+    const d = new Date(ts);
+    return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear()
+      +' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+  function formatTime(ts){
+    const d = new Date(ts);
+    return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+  function dirBadge(dir){
+    return `<span class="badge ${dir==='GİRİŞ'?'normal':'kritik'}">${dir}</span>`;
+  }
+  function movementStatusLabel(status){
+    return status==='ok' ? 'Tamamlandı' : (status==='wait' ? 'Bekliyor' : 'Eksik Giriş');
+  }
+  function movementStatusBadge(status){
+    const cls = status==='ok' ? 'normal' : (status==='wait' ? 'yaklasiyor' : 'kritik');
+    return `<span class="badge ${cls}">${movementStatusLabel(status)}</span>`;
+  }
+  function hareketAccessor(r, field){
+    if(field==='status') return movementStatusLabel(r.status);
+    return r[field];
+  }
+  function renderMovementPage(){
+    const q = (document.getElementById('hareket-search').value||'').toLowerCase();
+    const activeChip = document.querySelector('#page-hareket .chip.active').dataset.filter;
+    let rows = movementLog.filter(r=>{
+      const matchesText = (r.code+' '+r.name).toLowerCase().includes(q);
+      const matchesDir = activeChip==='hepsi' || (activeChip==='giris' && r.dir==='GİRİŞ') || (activeChip==='cikis' && r.dir==='ÇIKIŞ');
+      return matchesText && matchesDir;
+    });
+    rows = sortGeneric(rows, hareketSort, hareketAccessor);
+    updateSortIndicators('hareket-thead', hareketSort);
+    document.getElementById('hareket-count').textContent = fmt(rows.length) + ' kayıt';
+    document.getElementById('hareket-table').innerHTML = rows.map(r=>`
+      <tr>
+        <td class="mono">${r.code} — ${r.name}</td>
+        <td>${dirBadge(r.dir)}</td>
+        <td>${r.from}</td>
+        <td>${r.to}</td>
+        <td>${r.person}</td>
+        <td>${formatDateTime(r.ts)}</td>
+        <td>${r.reason}</td>
+        <td>${movementStatusBadge(r.status)}</td>
+      </tr>`).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Kayıt bulunamadı.</td></tr>`;
+  }
+  function renderDashboardEvents(){
+    const wrap = document.getElementById('event-log');
+    const recent = movementLog.slice(0,5);
+    if(!recent.length){
+      wrap.innerHTML = '<div style="color:var(--muted);font-size:12.5px;padding:8px 4px;">Henüz geçiş yok — yukarıdaki butonla bir kalıp geçişi simüle edin.</div>';
+      return;
+    }
+    wrap.innerHTML = recent.map(r=>`
+      <div class="event-row">
+        <span class="event-dir ${r.dir==='GİRİŞ'?'giris':'cikis'}">${r.dir}</span>
+        <span class="mono">${r.code}</span>
+        <span class="event-time">${formatTime(r.ts)}</span>
+        <span class="event-status ${r.status}">${movementStatusLabel(r.status)}</span>
+      </div>`).join('');
+  }
+  function addMovementRecord(mold, dir){
+    const rec = {
+      id: movementIdCounter++,
+      code: mold.code,
+      name: mold.name,
+      dir: dir,
+      from: dir==='GİRİŞ' ? '—' : 'Kalıphane',
+      to: dir==='GİRİŞ' ? 'Kalıphane' : '—',
+      person: '—',
+      reason: '—',
+      ts: Date.now(),
+      status: 'wait'
+    };
+    movementLog.unshift(rec);
+    renderDashboardEvents();
+    renderMovementPage();
+    return rec;
+  }
+
   /* ---------- RENDER: RAPORLAR ---------- */
   function renderRaporlar(){
     const data = [
@@ -768,6 +1059,14 @@
     }).join('');
     document.getElementById('report-donut').style.background =
       'conic-gradient(#22C55E 0% 55%, #F59E0B 55% 80%, #EF4444 80% 92%, #9CA3AF 92% 100%)';
+
+    const cats = computeCategoryTotals();
+    const adetTotal = cats.filter(c=>c.unit==='adet').reduce((s,c)=>s+c.sum, 0);
+    const vurusTotal = cats.filter(c=>c.unit==='vuruş').reduce((s,c)=>s+c.sum, 0);
+    document.getElementById('report-category-totals').innerHTML =
+      cats.map(c=>`<div><span>${c.name}</span><span>${fmt(c.sum)} ${c.unit}</span></div>`).join('')
+      + `<div><span><b>Toplam — adet bazlı kalıplar</b></span><span><b>${fmt(adetTotal)} adet</b></span></div>`
+      + `<div><span><b>Toplam — vuruş bazlı kalıplar</b></span><span><b>${fmt(vurusTotal)} vuruş</b></span></div>`;
   }
 
   function renderAll(){
@@ -777,12 +1076,15 @@
     renderSicil();
     renderUretim();
     renderBakim();
+    renderMovementPage();
+    renderDashboardEvents();
   }
 
   /* ---------- NAV ---------- */
   const subtitles = {
     dashboard:'Kalıp • Makina • Operatör • Üretim — Tek Panelde',
     sicil:'Kalıp Sicili — konum, üretim ve bakım geçmişi',
+    hareket:'Kalıp Hareketleri — konum özeti ve giriş/çıkış kaydı',
     uretim:'Üretim Takibi — Enjeksiyon / Otomatik Pres / Eksantrik Pres',
     bakim:'Bakım Uyarıları — otomatik MES eşik takibi',
     raporlar:'Raporlar — haftalık eğilim ve ömür dağılımı'
@@ -809,6 +1111,20 @@
   document.getElementById('tab-enjeksiyon').addEventListener('click', ()=>{ uretimTab='enjeksiyon'; renderUretim(); });
   document.getElementById('tab-otomatikpres').addEventListener('click', ()=>{ uretimTab='otomatikpres'; renderUretim(); });
   document.getElementById('tab-eksantrikpres').addEventListener('click', ()=>{ uretimTab='eksantrikpres'; renderUretim(); });
+
+  document.getElementById('hareket-search').addEventListener('input', renderMovementPage);
+  document.querySelectorAll('#page-hareket .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#page-hareket .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderMovementPage();
+    });
+  });
+
+  attachSort('sicil-thead', sicilSort, renderSicil);
+  attachSort('uretim-thead', uretimSort, renderUretim);
+  attachSort('bakim-thead', bakimSort, renderBakim);
+  attachSort('hareket-thead', hareketSort, renderMovementPage);
 
   /* ---------- CLOCK ---------- */
   function tickClock(){
@@ -846,23 +1162,8 @@
   const token = document.getElementById('mold-token');
   const antLeft = document.getElementById('ant-left');
   const antRight = document.getElementById('ant-right');
-  const eventLog = document.getElementById('event-log');
   const alarmBanner = document.getElementById('alarm-banner');
   let countdownTimer = null;
-
-  function addEvent(mold, dir, status){
-    if(eventLog.children.length===1 && eventLog.children[0].style.color==='var(--muted)') eventLog.innerHTML='';
-    const now = new Date();
-    const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-    const row = document.createElement('div');
-    row.className='event-row';
-    const statusTxt = status==='ok' ? 'Tamamlandı' : (status==='wait' ? 'Bekliyor' : 'Eksik Giriş');
-    row.innerHTML = `<span class="event-dir ${dir==='GİRİŞ'?'giris':'cikis'}">${dir}</span>
-      <span class="mono">${mold.code}</span>
-      <span class="event-time">${t}</span>
-      <span class="event-status ${status}">${statusTxt}</span>`;
-    eventLog.prepend(row);
-  }
 
   document.getElementById('btn-simulate').addEventListener('click', ()=>{
     if(gateBusy){ toast('Bir geçiş zaten işleniyor, lütfen bekleyin.', 'warn'); return; }
@@ -895,8 +1196,8 @@
       else { antRight.classList.add('lit'); }
       toast(`${mold.code} okundu — yön otomatik belirlendi: ${dir}`, 'ok');
       recentReads[mold.code] = Date.now();
-      addEvent(mold, dir, 'wait');
-      openDataEntryModal(mold, dir);
+      const record = addMovementRecord(mold, dir);
+      openDataEntryModal(mold, dir, record);
     }, 700);
 
     setTimeout(()=>{
@@ -907,21 +1208,21 @@
     }, 1800);
   });
 
-  function openDataEntryModal(mold, dir){
+  function openDataEntryModal(mold, dir, record){
     const modal = document.getElementById('gate-modal');
     const fields = document.getElementById('modal-fields');
     document.getElementById('modal-title').textContent = `${dir} kaydı — ${mold.code}`;
     document.getElementById('modal-sub').textContent = dir==='GİRİŞ'
-      ? 'Kalıp giriş bandından okundu. Geliş nedeni ve getiren kişiyi girin.'
-      : 'Kalıp çıkış bandından okundu. Yapılan işlemi / son durumu girin.';
+      ? 'Kalıp giriş bandından okundu (kalıphaneye giriyor). Geliş nedeni ve getiren kişiyi girin.'
+      : 'Kalıp çıkış bandından okundu (kalıphaneden çıkıyor). Yapılan işlemi ve teslim edeni girin.';
 
     if(dir==='GİRİŞ'){
       fields.innerHTML = `
-        <label>Geliş Nedeni</label>
+        <label>Geliş Nedeni (Nereden)</label>
         <select id="f-reason">
-          <option>Üretime hazırlık</option>
+          <option>Üretimden dönüş</option>
           <option>Bakımdan dönüş</option>
-          <option>Depoya iade</option>
+          <option>Depodan transfer</option>
           <option>Diğer</option>
         </select>
         <label>Getiren Kişi</label>
@@ -930,10 +1231,10 @@
         </select>`;
     } else {
       fields.innerHTML = `
-        <label>Yapılan İşlem / Son Durum</label>
+        <label>Yapılan İşlem (Nereye)</label>
         <select id="f-reason">
           <option>Üretime gönderildi</option>
-          <option>Bakıma alındı</option>
+          <option>Bakıma gönderildi</option>
           <option>Depoya kaldırıldı</option>
         </select>
         <label>Teslim Eden</label>
@@ -967,7 +1268,7 @@
       if(secondsLeft<=0){
         clearInterval(countdownTimer);
         closeModal();
-        triggerAlarm(mold, dir, totalSeconds);
+        triggerAlarm(mold, dir, totalSeconds, record);
       }
     }, 1000);
 
@@ -985,27 +1286,23 @@
       closeModal();
       const reason = document.getElementById('f-reason').value;
       const person = document.getElementById('f-person').value;
+      record.reason = reason;
+      record.person = person;
+      record.status = 'ok';
+      if(dir==='GİRİŞ') record.from = reasonLocationMap[reason] || 'Diğer';
+      else record.to = reasonLocationMap[reason] || 'Diğer';
       toast(`Kayıt tamamlandı — ${dir==='GİRİŞ'?'Neden':'İşlem'}: ${reason} (${person})`, 'ok');
-      updateEventStatus(mold.code, 'ok');
+      renderDashboardEvents();
+      renderMovementPage();
     };
   }
 
-  function updateEventStatus(code, status){
-    const rows = eventLog.querySelectorAll('.event-row');
-    for(const row of rows){
-      if(row.querySelector('.mono').textContent===code && row.querySelector('.event-status').textContent==='Bekliyor'){
-        const s = row.querySelector('.event-status');
-        s.className = 'event-status '+status;
-        s.textContent = status==='ok' ? 'Tamamlandı' : 'Eksik Giriş';
-        break;
-      }
-    }
-  }
-
-  function triggerAlarm(mold, dir, seconds){
+  function triggerAlarm(mold, dir, seconds, record){
     alarmBanner.classList.add('show');
     toast(`⚠ ${mold.code} için ${seconds} sn içinde veri girilmedi — tepe lambası ve siren tetiklendi.`, 'danger');
-    updateEventStatus(mold.code, 'missed');
+    record.status = 'missed';
+    renderDashboardEvents();
+    renderMovementPage();
     setTimeout(()=>{ alarmBanner.classList.remove('show'); }, 6000);
   }
 
@@ -1019,11 +1316,13 @@
   const loginUserInput = document.getElementById('login-user');
   const loginPassInput = document.getElementById('login-pass');
 
-  function showApp(username){
+  const DISPLAY_NAME = 'Yusuf Enes Gültekin';
+  const DISPLAY_INITIALS = 'YE';
+  function showApp(){
     loginScreen.style.display = 'none';
     appRoot.style.display = 'flex';
-    document.getElementById('user-display-name').textContent = username;
-    document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+    document.getElementById('user-display-name').textContent = DISPLAY_NAME;
+    document.getElementById('user-avatar').textContent = DISPLAY_INITIALS;
   }
   function showLogin(){
     appRoot.style.display = 'none';
@@ -1040,7 +1339,7 @@
     if(user.toUpperCase() === VALID_USER && pass === VALID_PASS){
       loginError.classList.remove('show');
       try{ sessionStorage.setItem('klemsan_auth', user.toUpperCase()); }catch(e){}
-      showApp(user.toUpperCase());
+      showApp();
     } else {
       loginError.classList.add('show');
       loginPassInput.value = '';
@@ -1068,7 +1367,7 @@
 
   let savedUser = null;
   try{ savedUser = sessionStorage.getItem('klemsan_auth'); }catch(e){}
-  if(savedUser){ showApp(savedUser); } else { showLogin(); }
+  if(savedUser){ showApp(); } else { showLogin(); }
 
 })();
 </script>
