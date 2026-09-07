@@ -234,10 +234,70 @@
 
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-thumb{background:#D6D6D9;border-radius:99px;}
+
+  /* Login screen */
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:20px;}
+  .login-card{background:#fff;border-radius:18px;padding:38px 34px;width:380px;max-width:100%;
+    box-shadow:0 30px 60px rgba(0,0,0,0.3);text-align:center;}
+  .login-card .logo-box{width:56px;height:56px;margin:0 auto 16px;background:var(--primary);
+    color:#fff;border:none;font-size:24px;}
+  .login-card h2{margin:0 0 4px;font-size:19px;font-weight:800;}
+  .login-card p.sub{margin:0 0 24px;font-size:12.5px;color:var(--muted);}
+  .login-field{text-align:left;margin-bottom:14px;}
+  .login-field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:#444;}
+  .login-field input{width:100%;padding:11px 13px;border:1px solid #D8D8DC;border-radius:10px;font-size:14px;}
+  .login-field input:focus{outline:none;border-color:var(--primary);}
+  .login-error{background:var(--red-bg);color:var(--red-text);font-size:12.5px;font-weight:600;
+    border-radius:9px;padding:9px 12px;margin-bottom:14px;display:none;text-align:left;}
+  .login-error.show{display:block;}
+  .login-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--primary);
+    color:#fff;font-size:14.5px;font-weight:800;cursor:pointer;margin-top:6px;}
+  .login-btn:hover{filter:brightness(0.95);}
+  .login-hint{margin-top:18px;font-size:11.5px;color:#B0B0B4;}
+
+  /* User dropdown */
+  .userchip{cursor:pointer;position:relative;}
+  .user-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);min-width:150px;overflow:hidden;display:none;z-index:60;}
+  .user-menu.show{display:block;}
+  .user-menu button{width:100%;text-align:left;padding:11px 16px;border:none;background:#fff;
+    color:#C0231E;font-size:13px;font-weight:700;cursor:pointer;}
+  .user-menu button:hover{background:#FBEEEE;}
+
+  /* Makina Parkı sidebar panel */
+  .park-box{margin-top:16px;padding:14px 12px 4px;border-top:1px solid var(--border);}
+  .park-box .park-title{font-size:10.5px;letter-spacing:.6px;color:var(--muted);font-weight:800;margin-bottom:10px;padding:0 2px;}
+  .park-row{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 2px;}
+  .park-row span:first-child{color:#444;}
+  .park-row span:last-child{font-weight:800;}
+  .park-row.total{border-top:1px solid var(--border);margin-top:4px;padding-top:9px;}
 </style>
 </head>
 <body>
-<div class="app">
+
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="logo-box" style="border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;">K</div>
+    <h2>Klemsan Kalıp ve Üretim Takip Sistemi</h2>
+    <p class="sub">Devam etmek için giriş yapın</p>
+    <div class="login-error" id="login-error">Kullanıcı adı veya şifre hatalı.</div>
+    <form id="login-form">
+      <div class="login-field">
+        <label>Kullanıcı Adı</label>
+        <input type="text" id="login-user" autocomplete="username" placeholder="Kullanıcı adınızı girin">
+      </div>
+      <div class="login-field">
+        <label>Şifre</label>
+        <input type="password" id="login-pass" autocomplete="current-password" placeholder="Şifrenizi girin">
+      </div>
+      <button type="submit" class="login-btn">Giriş Yap</button>
+    </form>
+    <div class="login-hint">Klemsan A.Ş. — Üretim Birimi · Yetkili erişim gerektirir</div>
+  </div>
+</div>
+
+<div class="app" id="app-root" style="display:none;">
 
   <header class="topbar">
     <div class="topbar-left">
@@ -252,9 +312,12 @@
         <div class="lbl">TARİH / SAAT</div>
         <div class="val" id="clock-val">—</div>
       </div>
-      <div class="userchip">
-        <div class="avatar">Y</div>
-        <div class="who"><b>Yönetici Paneli</b><span>Üretim Müdürlüğü Erişimi</span></div>
+      <div class="userchip" id="userchip">
+        <div class="avatar" id="user-avatar">K</div>
+        <div class="who"><b id="user-display-name">KLEMSAN</b><span>Yönetici Paneli</span></div>
+        <div class="user-menu" id="user-menu">
+          <button type="button" id="btn-logout">Çıkış Yap</button>
+        </div>
       </div>
     </div>
   </header>
@@ -266,6 +329,13 @@
       <div class="nav-item" data-page="uretim"><span class="dot"></span>Üretim Takibi</div>
       <div class="nav-item" data-page="bakim"><span class="dot"></span>Bakım Uyarıları</div>
       <div class="nav-item" data-page="raporlar"><span class="dot"></span>Raporlar</div>
+      <div class="park-box">
+        <div class="park-title">MAKİNA PARKI</div>
+        <div class="park-row"><span>Enjeksiyon</span><span>22</span></div>
+        <div class="park-row"><span>Otomatik Pres</span><span>14</span></div>
+        <div class="park-row"><span>Eksantrik Pres</span><span>13</span></div>
+        <div class="park-row total"><span>Toplam Makina</span><span>49</span></div>
+      </div>
     </nav>
 
     <main class="content">
@@ -278,10 +348,10 @@
         </div>
 
         <div class="stat-grid">
-          <div class="stat-card"><div class="lbl">AKTİF KALIP</div><div class="val" id="stat-aktif-kalip">142</div><div class="sub">Kalıphane + sahada</div></div>
+          <div class="stat-card"><div class="lbl">TOPLAM KAYITLI KALIP</div><div class="val">~3.000</div><div class="sub">RFID etiketli, kalıphane + sahada</div></div>
           <div class="stat-card"><div class="lbl">BUGÜN ÜRETİLEN</div><div class="val accent" id="stat-bugun-uretilen">8.430 adet</div><div class="sub">Enjeksiyon + pres toplamı</div></div>
           <div class="stat-card"><div class="lbl">BAKIM YAKLAŞAN</div><div class="val" id="stat-bakim-yaklasan">6</div><div class="sub">Vuruş ömrü eşiğine yakın</div></div>
-          <div class="stat-card"><div class="lbl">AKTİF OPERATÖR</div><div class="val">14</div><div class="sub">Vardiyada</div></div>
+          <div class="stat-card"><div class="lbl">TOPLAM OPERATÖR</div><div class="val">50</div><div class="sub">25 Enjeksiyon · 25 Pres</div></div>
         </div>
 
         <div class="two-col">
@@ -331,10 +401,10 @@
             <div class="side-note" style="background:#fff;border:1px solid var(--border);border-radius:14px;color:var(--text);">
               <div style="font-weight:800;font-size:11px;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;">SAYIM KAYNAĞI</div>
               <div class="kv-list">
-                <div><span>Enjeksiyon makinaları</span><span>Makina sayacı (entegre)</span></div>
-                <div><span>Pres makinaları</span><span>Vuruş (darbe) sayısı</span></div>
+                <div><span>Enjeksiyon (22 makina)</span><span>Makina sayacı</span></div>
+                <div><span>Otomatik Pres (14 makina)</span><span>Vuruş sayısı</span></div>
+                <div><span>Eksantrik Pres (13 makina)</span><span>Vuruş sayısı</span></div>
                 <div><span>Eşleştirme kaynağı</span><span>Faz 2 — Kalıp ↔ Makina</span></div>
-                <div><span>Veri girişi</span><span>RFID okutma, elle giriş yok</span></div>
               </div>
             </div>
           </div>
@@ -345,7 +415,7 @@
       <section id="page-sicil" class="page">
         <div class="page-head">
           <h2>Kalıp Sicili</h2>
-          <p>Tüm kalıpların konum, üretim ve bakım geçmişi — 142 kayıtlı kalıptan 8'i örnek gösteriliyor</p>
+          <p>Tüm kalıpların konum, üretim ve bakım geçmişi — ~3.000 kayıtlı kalıp</p>
         </div>
         <div class="panel">
           <div class="search-row">
@@ -356,11 +426,12 @@
             <div class="chip" data-filter="kritik">Kritik</div>
             <div class="chip" data-filter="bakimda">Bakımda</div>
           </div>
-          <div class="panel-head"><h3>Kalıp Listesi</h3><span class="badge-tag" id="sicil-count">142 kayıt</span></div>
+          <div class="panel-head"><h3>Kalıp Listesi</h3><span class="badge-tag" id="sicil-count">~3.000 kayıt — örnek görünüm</span></div>
           <table>
             <thead><tr><th>Kalıp Kodu</th><th>Adı</th><th>Konum</th><th>Toplam Üretim</th><th>Son Bakım</th><th>Durum</th></tr></thead>
             <tbody id="sicil-table"></tbody>
           </table>
+          <p id="sicil-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
         </div>
       </section>
 
@@ -373,15 +444,17 @@
           </div>
           <div class="tab-row">
             <button class="btn btn-outline tab-active" id="tab-enjeksiyon">Enjeksiyon</button>
-            <button class="btn btn-outline" id="tab-pres">Pres</button>
+            <button class="btn btn-outline" id="tab-otomatikpres">Otomatik Pres</button>
+            <button class="btn btn-outline" id="tab-eksantrikpres">Eksantrik Pres</button>
           </div>
         </div>
         <div class="panel">
-          <div class="panel-head"><h3>Aktif İş Emirleri</h3><span class="badge-tag" id="uretim-source">Sayım kaynağı: Makina sayacı (entegre)</span></div>
+          <div class="panel-head"><h3>Aktif İş Emirleri</h3><span class="badge-tag" id="uretim-source">22 makina · Sayım kaynağı: Makina sayacı (entegre)</span></div>
           <table>
             <thead><tr><th>Makina</th><th>Aktif İş / Kalıp</th><th>Başlangıç Tarihi</th><th>Operatör</th><th id="uretim-col-h">Üretilen / Hedef</th><th>İlerleme</th></tr></thead>
             <tbody id="uretim-table"></tbody>
           </table>
+          <p id="uretim-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
         </div>
       </section>
 
@@ -467,31 +540,53 @@
   "use strict";
 
   /* ---------- STATE ---------- */
+  const TOTAL_MOLDS = 3000;
   const molds = [
     {code:'KLP-0142', name:'Konnektör Gövde', location:'Enjeksiyon-06', operator:'M. Şahin', total:128400, unit:'adet', lastMaint:'12.07.2026', life:38, status:'normal', todayProduced:3210},
-    {code:'KLP-0087', name:'Kapak Preslemesi', location:'Pres-03', operator:'A. Demir', total:61200, unit:'vuruş', lastMaint:'02.06.2026', life:82, status:'yaklasiyor', todayProduced:1865},
+    {code:'KLP-0087', name:'Kapak Preslemesi', location:'Otomatik Pres-03', operator:'A. Demir', total:61200, unit:'vuruş', lastMaint:'02.06.2026', life:82, status:'yaklasiyor', todayProduced:1865},
     {code:'KLP-0210', name:'Klemens Alt Gövde', location:'Enjeksiyon-11', operator:'S. Yıldız', total:152000, unit:'adet', lastMaint:'20.05.2026', life:95, status:'kritik', todayProduced:5540},
-    {code:'KLP-0033', name:'Terminal Kapağı', location:'Kalıphane (rafta)', operator:'M. Şahin', total:44800, unit:'adet', lastMaint:'30.07.2026', life:21, status:'normal', todayProduced:2120},
-    {code:'KLP-0119', name:'Röle Tabanı', location:'Pres-05', operator:'A. Demir', total:38700, unit:'vuruş', lastMaint:'15.06.2026', life:77, status:'yaklasiyor', todayProduced:3870},
+    {code:'KLP-0044', name:'Terminal Klipsi', location:'Eksantrik Pres-02', operator:'C. Aydın', total:72100, unit:'vuruş', lastMaint:'08.07.2026', life:98, status:'kritik', todayProduced:4920},
+    {code:'KLP-0119', name:'Röle Tabanı', location:'Otomatik Pres-05', operator:'A. Demir', total:38700, unit:'vuruş', lastMaint:'15.06.2026', life:77, status:'yaklasiyor', todayProduced:3870},
     {code:'KLP-0301', name:'Röle Kapağı', location:'Enjeksiyon-09', operator:'S. Yıldız', total:96500, unit:'adet', lastMaint:'25.07.2026', life:99, status:'kritik', todayProduced:6480},
-    {code:'KLP-0044', name:'Terminal Klipsi', location:'Pres-07', operator:'C. Aydın', total:72100, unit:'vuruş', lastMaint:'08.07.2026', life:98, status:'bakimda', todayProduced:4920},
+    {code:'KLP-0362', name:'Baza Plakası', location:'Otomatik Pres-07', operator:'H. Kara', total:18400, unit:'vuruş', lastMaint:'22.07.2026', life:45, status:'normal', todayProduced:1140},
+    {code:'KLP-0271', name:'Yay Baskı Parçası', location:'Eksantrik Pres-06', operator:'B. Koç', total:29600, unit:'vuruş', lastMaint:'11.08.2026', life:55, status:'normal', todayProduced:2340},
+    {code:'KLP-0033', name:'Terminal Kapağı', location:'Kalıphane (rafta)', operator:'M. Şahin', total:44800, unit:'adet', lastMaint:'30.07.2026', life:21, status:'normal', todayProduced:2120},
     {code:'KLP-0055', name:'Gövde Kapağı', location:'Kalıphane (rafta)', operator:'—', total:21900, unit:'adet', lastMaint:'18.08.2026', life:12, status:'normal', todayProduced:0}
   ];
 
   const workOrders = {
-    enjeksiyon: [
-      {machine:'Enjeksiyon-02', code:'KLEMENS-1', name:'Konnektör Gövde', start:'07.09.2026 08:15', operator:'M. Şahin', produced:2120, target:5000},
-      {machine:'Enjeksiyon-06', code:'KLP-0142', name:'Konnektör Gövde', start:'07.09.2026 06:40', operator:'M. Şahin', produced:3210, target:4000},
-      {machine:'Enjeksiyon-09', code:'KLP-0301', name:'Röle Kapağı', start:'06.09.2026 22:10', operator:'S. Yıldız', produced:6480, target:6500},
-      {machine:'Enjeksiyon-11', code:'KLP-0210', name:'Klemens Alt Gövde', start:'07.09.2026 09:05', operator:'S. Yıldız', produced:5540, target:6000},
-      {machine:'Enjeksiyon-14', idle:true}
-    ],
-    pres: [
-      {machine:'Pres-03', code:'KLP-0087', name:'Kapak Preslemesi', start:'07.09.2026 07:20', operator:'A. Demir', produced:1865, target:2500},
-      {machine:'Pres-05', code:'KLP-0119', name:'Röle Tabanı', start:'07.09.2026 05:50', operator:'A. Demir', produced:3870, target:5000},
-      {machine:'Pres-07', code:'KLP-0044', name:'Terminal Klipsi', start:'06.09.2026 23:15', operator:'C. Aydın', produced:4920, target:5000},
-      {machine:'Pres-08', idle:true}
-    ]
+    enjeksiyon: {
+      total:22,
+      list:[
+        {machine:'Enjeksiyon-02', code:'KLEMENS-1', name:'Konnektör Gövde', start:'07.09.2026 08:15', operator:'M. Şahin', produced:2120, target:5000},
+        {machine:'Enjeksiyon-06', code:'KLP-0142', name:'Konnektör Gövde', start:'07.09.2026 06:40', operator:'M. Şahin', produced:3210, target:4000},
+        {machine:'Enjeksiyon-09', code:'KLP-0301', name:'Röle Kapağı', start:'06.09.2026 22:10', operator:'S. Yıldız', produced:6480, target:6500},
+        {machine:'Enjeksiyon-11', code:'KLP-0210', name:'Klemens Alt Gövde', start:'07.09.2026 09:05', operator:'S. Yıldız', produced:5540, target:6000},
+        {machine:'Enjeksiyon-14', idle:true}
+      ]
+    },
+    otomatikpres: {
+      total:14,
+      list:[
+        {machine:'Otomatik Pres-03', code:'KLP-0087', name:'Kapak Preslemesi', start:'07.09.2026 07:20', operator:'A. Demir', produced:1865, target:2500},
+        {machine:'Otomatik Pres-05', code:'KLP-0119', name:'Röle Tabanı', start:'07.09.2026 05:50', operator:'A. Demir', produced:3870, target:5000},
+        {machine:'Otomatik Pres-07', code:'KLP-0362', name:'Baza Plakası', start:'07.09.2026 09:40', operator:'H. Kara', produced:1140, target:3000},
+        {machine:'Otomatik Pres-11', idle:true}
+      ]
+    },
+    eksantrikpres: {
+      total:13,
+      list:[
+        {machine:'Eksantrik Pres-02', code:'KLP-0044', name:'Terminal Klipsi', start:'06.09.2026 23:15', operator:'C. Aydın', produced:4920, target:5000},
+        {machine:'Eksantrik Pres-06', code:'KLP-0271', name:'Yay Baskı Parçası', start:'07.09.2026 06:10', operator:'B. Koç', produced:2340, target:4000},
+        {machine:'Eksantrik Pres-09', idle:true}
+      ]
+    }
+  };
+  const uretimLabels = {
+    enjeksiyon:{title:'Enjeksiyon', sub:'aktif iş, başlangıç tarihi, operatör ve üretilen adet', colH:'Üretilen / Hedef', source:'Makina sayacı (entegre)'},
+    otomatikpres:{title:'Otomatik Pres', sub:'vuruş (darbe) sayımı, operatör ve hedef', colH:'Vuruş / Hedef', source:'Vuruş (darbe) sayısı'},
+    eksantrikpres:{title:'Eksantrik Pres', sub:'vuruş (darbe) sayımı, operatör ve hedef', colH:'Vuruş / Hedef', source:'Vuruş (darbe) sayısı'}
   };
 
   let uretimTab = 'enjeksiyon';
@@ -559,7 +654,9 @@
       const matchesFilter = activeChip==='hepsi' || m.status===activeChip;
       return matchesText && matchesFilter;
     });
-    document.getElementById('sicil-count').textContent = rows.length + ' kayıt (142 toplam kalıptan)';
+    document.getElementById('sicil-count').textContent = (q||activeChip!=='hepsi')
+      ? rows.length + ' sonuç'
+      : '~' + fmt(TOTAL_MOLDS) + ' kayıt — örnek görünüm';
     document.getElementById('sicil-table').innerHTML = rows.map(m=>`
       <tr>
         <td class="mono">${m.code}</td>
@@ -569,21 +666,25 @@
         <td>${m.lastMaint}</td>
         <td>${badge(m.status)}</td>
       </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Sonuç bulunamadı.</td></tr>`;
+    const moreNote = document.getElementById('sicil-more-note');
+    moreNote.textContent = (!q && activeChip==='hepsi')
+      ? `+ ~${fmt(TOTAL_MOLDS - molds.length)} kalıp daha — arama ve filtreleme ile tam liste görüntülenebilir.`
+      : '';
   }
 
   /* ---------- RENDER: URETIM ---------- */
   function renderUretim(){
-    const isEnj = uretimTab === 'enjeksiyon';
-    document.getElementById('uretim-title').textContent = 'Üretim Takibi — ' + (isEnj?'Enjeksiyon':'Pres');
-    document.getElementById('uretim-sub').textContent = isEnj
-      ? 'Aktif iş emirleri, başlangıç zamanı, operatör ve üretilen adet'
-      : 'Aktif iş emirleri, vuruş (darbe) sayımı, operatör ve hedef';
-    document.getElementById('uretim-col-h').textContent = isEnj ? 'Üretilen / Hedef' : 'Vuruş / Hedef';
-    document.getElementById('uretim-source').textContent = 'Sayım kaynağı: ' + (isEnj ? 'Makina sayacı (entegre)' : 'Vuruş (darbe) sayısı');
-    document.getElementById('tab-enjeksiyon').classList.toggle('tab-active', isEnj);
-    document.getElementById('tab-pres').classList.toggle('tab-active', !isEnj);
+    const group = workOrders[uretimTab];
+    const labels = uretimLabels[uretimTab];
+    document.getElementById('uretim-title').textContent = 'Üretim Takibi — ' + labels.title;
+    document.getElementById('uretim-sub').textContent = group.total + ' makina · ' + labels.sub;
+    document.getElementById('uretim-col-h').textContent = labels.colH;
+    document.getElementById('uretim-source').textContent = group.total + ' makina · Sayım kaynağı: ' + labels.source;
+    document.getElementById('tab-enjeksiyon').classList.toggle('tab-active', uretimTab==='enjeksiyon');
+    document.getElementById('tab-otomatikpres').classList.toggle('tab-active', uretimTab==='otomatikpres');
+    document.getElementById('tab-eksantrikpres').classList.toggle('tab-active', uretimTab==='eksantrikpres');
 
-    const rows = workOrders[uretimTab];
+    const rows = group.list;
     document.getElementById('uretim-table').innerHTML = rows.map(r=>{
       if(r.idle){
         return `<tr><td class="mono">${r.machine}</td><td colspan="4" style="color:var(--muted);">Boşta — iş emri bekleniyor</td></tr>`;
@@ -598,6 +699,13 @@
         <td><div class="progress"><div class="track"><div class="fill" style="width:${pct}%"></div></div><span class="pct">${pct}%</span></div></td>
       </tr>`;
     }).join('');
+
+    const shown = rows.length;
+    const more = group.total - shown;
+    const unitWord = uretimTab==='enjeksiyon' ? 'enjeksiyon' : (uretimTab==='otomatikpres' ? 'otomatik pres' : 'eksantrik pres');
+    document.getElementById('uretim-more-note').textContent = more > 0
+      ? `+ ${more} ${unitWord} makinası daha aktif — tam liste ve geçmiş Raporlar sekmesinde.`
+      : '';
   }
 
   /* ---------- RENDER: BAKIM ---------- */
@@ -675,7 +783,7 @@
   const subtitles = {
     dashboard:'Kalıp • Makina • Operatör • Üretim — Tek Panelde',
     sicil:'Kalıp Sicili — konum, üretim ve bakım geçmişi',
-    uretim:'Üretim Takibi — Enjeksiyon / Pres makinaları',
+    uretim:'Üretim Takibi — Enjeksiyon / Otomatik Pres / Eksantrik Pres',
     bakim:'Bakım Uyarıları — otomatik MES eşik takibi',
     raporlar:'Raporlar — haftalık eğilim ve ömür dağılımı'
   };
@@ -699,7 +807,8 @@
     });
   });
   document.getElementById('tab-enjeksiyon').addEventListener('click', ()=>{ uretimTab='enjeksiyon'; renderUretim(); });
-  document.getElementById('tab-pres').addEventListener('click', ()=>{ uretimTab='pres'; renderUretim(); });
+  document.getElementById('tab-otomatikpres').addEventListener('click', ()=>{ uretimTab='otomatikpres'; renderUretim(); });
+  document.getElementById('tab-eksantrikpres').addEventListener('click', ()=>{ uretimTab='eksantrikpres'; renderUretim(); });
 
   /* ---------- CLOCK ---------- */
   function tickClock(){
@@ -714,8 +823,8 @@
   /* ---------- LIVE PRODUCTION SIMULATION ---------- */
   setInterval(()=>{
     // bump a random active work order
-    ['enjeksiyon','pres'].forEach(kind=>{
-      const active = workOrders[kind].filter(r=>!r.idle && r.produced < r.target);
+    ['enjeksiyon','otomatikpres','eksantrikpres'].forEach(kind=>{
+      const active = workOrders[kind].list.filter(r=>!r.idle && r.produced < r.target);
       if(active.length){
         const r = active[Math.floor(Math.random()*active.length)];
         r.produced = Math.min(r.target, r.produced + Math.floor(Math.random()*12)+3);
@@ -900,9 +1009,66 @@
     setTimeout(()=>{ alarmBanner.classList.remove('show'); }, 6000);
   }
 
+  /* ---------- LOGIN / LOGOUT ---------- */
+  const VALID_USER = 'KLEMSAN';
+  const VALID_PASS = '12345';
+  const loginScreen = document.getElementById('login-screen');
+  const appRoot = document.getElementById('app-root');
+  const loginForm = document.getElementById('login-form');
+  const loginError = document.getElementById('login-error');
+  const loginUserInput = document.getElementById('login-user');
+  const loginPassInput = document.getElementById('login-pass');
+
+  function showApp(username){
+    loginScreen.style.display = 'none';
+    appRoot.style.display = 'flex';
+    document.getElementById('user-display-name').textContent = username;
+    document.getElementById('user-avatar').textContent = username.charAt(0).toUpperCase();
+  }
+  function showLogin(){
+    appRoot.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    loginError.classList.remove('show');
+    loginForm.reset();
+    loginUserInput.focus();
+  }
+
+  loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const user = loginUserInput.value.trim();
+    const pass = loginPassInput.value;
+    if(user.toUpperCase() === VALID_USER && pass === VALID_PASS){
+      loginError.classList.remove('show');
+      try{ sessionStorage.setItem('klemsan_auth', user.toUpperCase()); }catch(e){}
+      showApp(user.toUpperCase());
+    } else {
+      loginError.classList.add('show');
+      loginPassInput.value = '';
+      loginPassInput.focus();
+    }
+  });
+
+  document.getElementById('userchip').addEventListener('click', function(e){
+    document.getElementById('user-menu').classList.toggle('show');
+    e.stopPropagation();
+  });
+  document.addEventListener('click', function(){
+    document.getElementById('user-menu').classList.remove('show');
+  });
+  document.getElementById('btn-logout').addEventListener('click', function(e){
+    e.stopPropagation();
+    try{ sessionStorage.removeItem('klemsan_auth'); }catch(e){}
+    document.getElementById('user-menu').classList.remove('show');
+    showLogin();
+  });
+
   /* ---------- INIT ---------- */
   renderAll();
   renderRaporlar();
+
+  let savedUser = null;
+  try{ savedUser = sessionStorage.getItem('klemsan_auth'); }catch(e){}
+  if(savedUser){ showApp(savedUser); } else { showLogin(); }
 
 })();
 </script>
