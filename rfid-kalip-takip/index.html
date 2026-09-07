@@ -396,7 +396,7 @@
                 </div>
                 <div class="gate-controls">
                   <button class="btn btn-primary" id="btn-simulate">▶ Kalıp Geçişini Simüle Et</button>
-                  <label><input type="checkbox" id="chk-fastdemo" checked> Hızlı demo (10 sn geri sayım — gerçek sistemde 60 sn)</label>
+                  <label><input type="checkbox" id="chk-fastdemo" checked> Hızlı demo (30 sn geri sayım — gerçek sistemde 60 sn)</label>
                 </div>
                 <div>
                   <div class="panel-head" style="margin-bottom:8px;"><h3 style="font-size:13.5px;">Son Geçişler</h3></div>
@@ -703,28 +703,20 @@
   }
 
   /* ---------- KALIP HAREKETLERİ (giriş/çıkış kaydı) ---------- */
-  const reasonLocationMap = {
-    'Üretimden dönüş':'Üretim Hattı',
-    'Bakımdan dönüş':'Bakım Atölyesi',
-    'Depodan transfer':'Depo',
-    'Diğer':'Diğer',
-    'Üretime gönderildi':'Üretim Hattı',
-    'Bakıma gönderildi':'Bakım Atölyesi',
-    'Depoya kaldırıldı':'Depo'
-  };
+  // Yön sabittir: GİRİŞ = Üretimhane -> Kalıphane, ÇIKIŞ = Kalıphane -> Üretimhane. Seçim yok.
   let movementIdCounter = 1;
   function seedTs(day,h,mi){ return new Date(2026,8,day,h,mi).getTime(); } // 2026 Eylül (ay index 8)
   const movementLog = [
-    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'GİRİŞ', from:'Üretim Hattı', to:'Kalıphane', person:'S. Yıldız', reason:'Üretimden dönüş', ts:seedTs(5,8,12), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(5,8,40), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0087', name:'Kapak Preslemesi', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(6,7,5), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0301', name:'Röle Kapağı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(6,22,5), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0044', name:'Terminal Klipsi', dir:'GİRİŞ', from:'Bakım Atölyesi', to:'Kalıphane', person:'C. Aydın', reason:'Bakımdan dönüş', ts:seedTs(6,22,50), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0055', name:'Gövde Kapağı', dir:'GİRİŞ', from:'—', to:'Kalıphane', person:'—', reason:'—', ts:seedTs(7,6,55), status:'missed'},
-    {id:movementIdCounter++, code:'KLP-0271', name:'Yay Baskı Parçası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'B. Koç', reason:'Üretime gönderildi', ts:seedTs(7,6,5), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0119', name:'Röle Tabanı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(7,5,45), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0033', name:'Terminal Kapağı', dir:'GİRİŞ', from:'Depo', to:'Kalıphane', person:'M. Şahin', reason:'Depodan transfer', ts:seedTs(7,7,40), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0362', name:'Baza Plakası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretim Hattı', person:'H. Kara', reason:'Üretime gönderildi', ts:seedTs(7,9,35), status:'ok'}
+    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'S. Yıldız', reason:'Periyodik bakım zamanı geldi', ts:seedTs(5,8,12), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'S. Yıldız', reason:'Bakımı tamamlandı - üretime hazır', ts:seedTs(5,8,40), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0087', name:'Kapak Preslemesi', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(6,7,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0301', name:'Röle Kapağı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(6,22,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0044', name:'Terminal Klipsi', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'C. Aydın', reason:'Yüzeyde aşınma tespit edildi', ts:seedTs(6,22,50), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0055', name:'Gövde Kapağı', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'—', reason:'—', ts:seedTs(7,6,55), status:'missed'},
+    {id:movementIdCounter++, code:'KLP-0271', name:'Yay Baskı Parçası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'B. Koç', reason:'Üretime gönderildi', ts:seedTs(7,6,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0119', name:'Röle Tabanı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(7,5,45), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0033', name:'Terminal Kapağı', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'M. Şahin', reason:'Arıza yok - üretim sonu teslim', ts:seedTs(7,7,40), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0362', name:'Baza Plakası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'H. Kara', reason:'Üretime gönderildi', ts:seedTs(7,9,35), status:'ok'}
   ];
 
   /* ---------- SIRALAMA ALTYAPISI ---------- */
@@ -1032,8 +1024,8 @@
       code: mold.code,
       name: mold.name,
       dir: dir,
-      from: dir==='GİRİŞ' ? '—' : 'Kalıphane',
-      to: dir==='GİRİŞ' ? 'Kalıphane' : '—',
+      from: dir==='GİRİŞ' ? 'Üretimhane' : 'Kalıphane',
+      to: dir==='GİRİŞ' ? 'Kalıphane' : 'Üretimhane',
       person: '—',
       reason: '—',
       ts: Date.now(),
@@ -1213,17 +1205,17 @@
     const fields = document.getElementById('modal-fields');
     document.getElementById('modal-title').textContent = `${dir} kaydı — ${mold.code}`;
     document.getElementById('modal-sub').textContent = dir==='GİRİŞ'
-      ? 'Kalıp giriş bandından okundu (kalıphaneye giriyor). Geliş nedeni ve getiren kişiyi girin.'
-      : 'Kalıp çıkış bandından okundu (kalıphaneden çıkıyor). Yapılan işlemi ve teslim edeni girin.';
+      ? 'Kalıp üretimhaneden kalıphaneye giriyor. Sorunu / yapılacak işlemi ve getiren kişiyi seçin.'
+      : 'Kalıp kalıphaneden üretimhaneye çıkıyor. Yapılan işlemi / son durumu ve teslim edeni seçin.';
 
     if(dir==='GİRİŞ'){
       fields.innerHTML = `
-        <label>Geliş Nedeni (Nereden)</label>
+        <label>Sorun / Yapılacak İşlem</label>
         <select id="f-reason">
-          <option>Üretimden dönüş</option>
-          <option>Bakımdan dönüş</option>
-          <option>Depodan transfer</option>
-          <option>Diğer</option>
+          <option>Periyodik bakım zamanı geldi</option>
+          <option>Yüzeyde aşınma tespit edildi</option>
+          <option>Arıza var - tamir gerekiyor</option>
+          <option>Arıza yok - üretim sonu teslim</option>
         </select>
         <label>Getiren Kişi</label>
         <select id="f-person">
@@ -1231,11 +1223,12 @@
         </select>`;
     } else {
       fields.innerHTML = `
-        <label>Yapılan İşlem (Nereye)</label>
+        <label>Yapılan İşlem / Son Durum</label>
         <select id="f-reason">
+          <option>Bakımı tamamlandı - üretime hazır</option>
+          <option>Tamir edildi - üretime hazır</option>
+          <option>Kontrol edildi - sorun bulunmadı</option>
           <option>Üretime gönderildi</option>
-          <option>Bakıma gönderildi</option>
-          <option>Depoya kaldırıldı</option>
         </select>
         <label>Teslim Eden</label>
         <select id="f-person">
@@ -1246,7 +1239,7 @@
     modal.classList.remove('hidden');
 
     const fastDemo = document.getElementById('chk-fastdemo').checked;
-    let secondsLeft = fastDemo ? 10 : 60;
+    let secondsLeft = fastDemo ? 30 : 60;
     const totalSeconds = secondsLeft;
     const fillEl = document.getElementById('countdown-fill');
     const txtEl = document.getElementById('countdown-txt');
@@ -1289,9 +1282,7 @@
       record.reason = reason;
       record.person = person;
       record.status = 'ok';
-      if(dir==='GİRİŞ') record.from = reasonLocationMap[reason] || 'Diğer';
-      else record.to = reasonLocationMap[reason] || 'Diğer';
-      toast(`Kayıt tamamlandı — ${dir==='GİRİŞ'?'Neden':'İşlem'}: ${reason} (${person})`, 'ok');
+      toast(`Kayıt tamamlandı — ${dir==='GİRİŞ'?'Sorun':'İşlem'}: ${reason} (${person})`, 'ok');
       renderDashboardEvents();
       renderMovementPage();
     };
