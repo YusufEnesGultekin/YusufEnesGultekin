@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klemsan Kalıp ve Üretim Takip Sistemi</title>
+<style>
+  :root{
+    --primary:#E07B1E;
+    --primary-dark:#C25A0E;
+    --bg:#F5F6F8;
+    --card:#FFFFFF;
+    --border:#E9E9EC;
+    --text:#1F2430;
+    --muted:#6B7280;
+    --green-bg:#DCFCE7; --green-text:#15803D;
+    --amber-bg:#FDE7CE; --amber-text:#B45A0E;
+    --red-bg:#FBE0E0; --red-text:#C0231E;
+    --gray-bg:#EDEDED; --gray-text:#5B5B5B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{min-height:100vh;display:flex;flex-direction:column;}
+
+  /* Topbar */
+  .topbar{
+    background:linear-gradient(120deg,var(--primary),var(--primary-dark));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 28px;
+    gap:20px;
+  }
+  .topbar-left{display:flex;align-items:center;gap:16px;}
+  .logo-box{
+    width:48px;height:48px;border-radius:12px;
+    background:rgba(255,255,255,0.18);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:20px;border:1px solid rgba(255,255,255,0.35);
+  }
+  .topbar-title h1{font-size:20px;margin:0 0 2px;font-weight:800;letter-spacing:0.2px;}
+  .topbar-title p{margin:0;font-size:12.5px;opacity:0.92;}
+  .topbar-right{display:flex;align-items:center;gap:22px;}
+  .clock{text-align:right;}
+  .clock .lbl{font-size:10px;letter-spacing:1px;opacity:0.85;}
+  .clock .val{font-size:14px;font-weight:700;}
+  .userchip{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.15);
+    border:1px solid rgba(255,255,255,0.35);border-radius:999px;padding:6px 14px 6px 6px;}
+  .userchip .avatar{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--primary-dark);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+  .userchip .who b{display:block;font-size:12.5px;}
+  .userchip .who span{display:block;font-size:10.5px;opacity:0.9;}
+
+  /* Layout */
+  .layout{flex:1;display:flex;}
+  .sidebar{
+    width:230px;background:#fff;border-right:1px solid var(--border);
+    padding:18px 12px;flex-shrink:0;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 14px;border-radius:10px;cursor:pointer;
+    font-size:14px;font-weight:600;color:#3a3f4b;margin-bottom:4px;
+    transition:background .15s,color .15s;user-select:none;
+  }
+  .nav-item .dot{width:7px;height:7px;border-radius:50%;background:#c7c9ce;flex-shrink:0;}
+  .nav-item:hover{background:#FBEEDF;}
+  .nav-item.active{background:var(--primary);color:#fff;}
+  .nav-item.active .dot{background:#fff;}
+
+  .content{flex:1;padding:28px 30px;overflow-x:hidden;}
+  .page{display:none;}
+  .page.active{display:block;animation:fade .18s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .page-head h2{margin:0 0 4px;font-size:24px;font-weight:800;}
+  .page-head p{margin:0 0 20px;color:var(--muted);font-size:13.5px;}
+
+  /* Cards */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;}
+  .stat-card .lbl{font-size:11px;letter-spacing:0.6px;color:var(--muted);font-weight:700;margin-bottom:8px;}
+  .stat-card .val{font-size:26px;font-weight:800;margin-bottom:4px;}
+  .stat-card .val.accent{color:var(--primary-dark);}
+  .stat-card .sub{font-size:12px;color:var(--muted);}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:20px;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .panel-head h3{margin:0;font-size:16px;font-weight:800;}
+  .badge-tag{background:var(--amber-bg);color:var(--amber-text);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;}
+
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    text-align:left;font-size:10.5px;letter-spacing:0.5px;color:var(--muted);
+    font-weight:700;padding:8px 10px;border-bottom:1px solid var(--border);
+    text-transform:uppercase;
+  }
+  tbody td{padding:13px 10px;font-size:13.5px;border-bottom:1px solid #F1F1F3;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#FAFAFB;}
+  .mono{font-weight:700;}
+
+  .badge{display:inline-block;padding:4px 11px;border-radius:999px;font-size:11.5px;font-weight:700;white-space:nowrap;}
+  .badge.normal{background:var(--green-bg);color:var(--green-text);}
+  .badge.yaklasiyor{background:var(--amber-bg);color:var(--amber-text);}
+  .badge.kritik{background:var(--red-bg);color:var(--red-text);}
+  .badge.bakimda{background:var(--gray-bg);color:var(--gray-text);}
+
+  .progress{display:flex;align-items:center;gap:10px;}
+  .progress .track{width:120px;height:7px;background:#EFEFEF;border-radius:99px;overflow:hidden;flex-shrink:0;}
+  .progress .fill{height:100%;border-radius:99px;background:var(--primary);transition:width .5s ease;}
+  .progress.life .fill.normal{background:#22C55E;}
+  .progress.life .fill.yaklasiyor{background:#F59E0B;}
+  .progress.life .fill.kritik{background:#EF4444;}
+  .progress.life .fill.bakimda{background:#9CA3AF;}
+  .progress .pct{font-size:12.5px;font-weight:700;width:36px;flex-shrink:0;}
+
+  .side-note{background:#FFF6EC;border:1px solid #FBE3C4;border-radius:12px;padding:14px 16px;font-size:12.5px;color:#8A5A22;line-height:1.5;margin-bottom:20px;}
+  .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;align-items:start;}
+  @media(max-width:1180px){.two-col{grid-template-columns:1fr;} .stat-grid{grid-template-columns:repeat(2,1fr);}}
+
+  .kv-list div{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F1F1F3;font-size:13px;}
+  .kv-list div:last-child{border-bottom:none;}
+  .kv-list span:first-child{color:var(--muted);}
+  .kv-list span:last-child{font-weight:700;}
+
+  .maint-row{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px 16px;margin-bottom:10px;}
+  .maint-row.kritik{background:#FDF1F1;border-color:#F6D6D6;}
+  .maint-row.yaklasiyor{background:#FFF7EE;border-color:#FBE3C4;}
+  .maint-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;flex-shrink:0;}
+  .maint-icon.kritik{background:#D9453F;}
+  .maint-icon.yaklasiyor{background:var(--primary);}
+  .maint-body{flex:1;min-width:0;}
+  .maint-body b{display:block;font-size:13.5px;}
+  .maint-body span{font-size:12px;color:var(--muted);}
+
+  .btn{border:none;border-radius:9px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;transition:filter .15s;}
+  .btn:hover{filter:brightness(0.95);}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-outline{background:#fff;border:1px solid #D8D8DC;color:#333;}
+  .btn-outline.tab-active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn-gray{background:#EDEDED;color:#777;cursor:default;}
+
+  .search-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .search-box{flex:1;min-width:220px;position:relative;}
+  .search-box input{width:100%;padding:10px 14px 10px 34px;border:1px solid #D8D8DC;border-radius:10px;font-size:13.5px;}
+  .search-box::before{content:"🔍";position:absolute;left:11px;top:9px;font-size:13px;opacity:.55;}
+  .chip{padding:8px 14px;border-radius:999px;border:1px solid #D8D8DC;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .chip.active{background:var(--text);color:#fff;border-color:var(--text);}
+
+  .tab-row{display:flex;gap:8px;}
+
+  /* Gate simulation */
+  .gate-wrap{display:flex;flex-direction:column;gap:16px;}
+  .gate-stage{position:relative;height:150px;background:#FAFAFA;border:1px dashed #DADADC;border-radius:14px;overflow:hidden;}
+  .gate-zone{position:absolute;top:0;bottom:0;display:flex;align-items:flex-end;justify-content:center;font-size:10.5px;font-weight:700;letter-spacing:.4px;color:#9AA0AA;padding-bottom:8px;}
+  .zone-giris{left:0;width:36%;background:linear-gradient(180deg,rgba(34,197,94,0.07),transparent);border-right:1px solid #E3E3E6;}
+  .zone-ara{left:36%;width:28%;}
+  .zone-cikis{left:64%;width:36%;background:linear-gradient(180deg,rgba(239,68,68,0.07),transparent);border-left:1px solid #E3E3E6;}
+  .antenna{position:absolute;top:14px;width:14px;height:34px;background:#B8BCC4;border-radius:4px;transform:rotate(22deg);transition:background .2s,box-shadow .2s;}
+  .antenna.left{left:22%;}
+  .antenna.right{right:22%;transform:rotate(-22deg);}
+  .antenna.lit{background:#22C55E;box-shadow:0 0 14px #22C55E;}
+  .antenna.lit.right{background:#EF4444;box-shadow:0 0 14px #EF4444;}
+  .column{position:absolute;top:0;bottom:0;width:8px;background:#D3D3D6;}
+  .column.c1{left:2%;}
+  .column.c2{right:2%;}
+  .mold-token{
+    position:absolute;bottom:14px;left:6%;
+    background:#3a3f4b;color:#fff;font-size:11px;font-weight:700;
+    padding:6px 10px;border-radius:8px;white-space:nowrap;
+    transition:left 1.6s cubic-bezier(.4,.1,.3,1);box-shadow:0 3px 8px rgba(0,0,0,0.18);
+  }
+  .gate-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .gate-controls label{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+
+  .event-log{max-height:230px;overflow-y:auto;}
+  .event-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #F1F1F3;font-size:12.8px;}
+  .event-row:last-child{border-bottom:none;}
+  .event-dir{width:56px;flex-shrink:0;font-weight:800;font-size:11px;padding:3px 0;text-align:center;border-radius:6px;}
+  .event-dir.giris{background:var(--green-bg);color:var(--green-text);}
+  .event-dir.cikis{background:var(--red-bg);color:var(--red-text);}
+  .event-time{color:var(--muted);width:56px;flex-shrink:0;}
+  .event-status{margin-left:auto;font-weight:700;font-size:11.5px;flex-shrink:0;}
+  .event-status.ok{color:#15803D;}
+  .event-status.wait{color:#B45A0E;}
+  .event-status.missed{color:#C0231E;}
+
+  /* Alarm */
+  .alarm-banner{display:none;align-items:center;gap:12px;background:#C0231E;color:#fff;border-radius:12px;padding:12px 16px;font-weight:700;font-size:13px;margin-bottom:14px;animation:pulse 1s infinite;}
+  .alarm-banner.show{display:flex;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
+
+  /* Modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,20,25,0.45);display:flex;align-items:center;justify-content:center;z-index:50;}
+  .modal-overlay.hidden{display:none;}
+  .modal-box{background:#fff;border-radius:16px;width:420px;max-width:92vw;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,0.25);}
+  .modal-box h3{margin:0 0 4px;font-size:17px;}
+  .modal-box .sub{font-size:12.5px;color:var(--muted);margin-bottom:16px;}
+  .modal-box label{font-size:12.5px;font-weight:700;display:block;margin:12px 0 6px;}
+  .modal-box select,.modal-box input[type=text]{width:100%;padding:9px 11px;border:1px solid #D8D8DC;border-radius:9px;font-size:13.5px;}
+  .countdown-wrap{margin-top:16px;}
+  .countdown-bar{height:8px;border-radius:99px;background:#EFEFEF;overflow:hidden;margin-bottom:6px;}
+  .countdown-bar .fill{height:100%;background:var(--primary);width:100%;transition:width 1s linear,background .3s;}
+  .countdown-txt{font-size:11.5px;color:var(--muted);display:flex;justify-content:space-between;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .modal-actions .btn{flex:1;}
+
+  /* Toasts */
+  #toast-container{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:100;}
+  .toast{background:#25282F;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,0.25);animation:toastin .2s ease;max-width:320px;}
+  .toast.ok{background:#15803D;}
+  .toast.warn{background:#B45A0E;}
+  .toast.danger{background:#C0231E;}
+  @keyframes toastin{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  /* Reports */
+  .bars{display:flex;align-items:flex-end;gap:14px;height:170px;padding-top:10px;}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .bar-col .bar{width:100%;max-width:38px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));border-radius:6px 6px 0 0;}
+  .bar-col .bar-val{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;}
+  .bar-col .bar-lbl{font-size:11.5px;color:var(--muted);margin-top:8px;font-weight:600;}
+  .donut-wrap{display:flex;align-items:center;gap:22px;}
+  .donut{width:130px;height:130px;border-radius:50%;flex-shrink:0;}
+  .legend div{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:8px;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#D6D6D9;border-radius:99px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo-box">K</div>
+      <div class="topbar-title">
+        <h1>KLEMSAN KALIP VE ÜRETİM TAKİP SİSTEMİ</h1>
+        <p id="page-subtitle">Kalıp • Makina • Operatör • Üretim — Tek Panelde</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="clock">
+        <div class="lbl">TARİH / SAAT</div>
+        <div class="val" id="clock-val">—</div>
+      </div>
+      <div class="userchip">
+        <div class="avatar">Y</div>
+        <div class="who"><b>Yönetici Paneli</b><span>Üretim Müdürlüğü Erişimi</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="nav-item active" data-page="dashboard"><span class="dot"></span>Dashboard</div>
+      <div class="nav-item" data-page="sicil"><span class="dot"></span>Kalıp Sicili</div>
+      <div class="nav-item" data-page="uretim"><span class="dot"></span>Üretim Takibi</div>
+      <div class="nav-item" data-page="bakim"><span class="dot"></span>Bakım Uyarıları</div>
+      <div class="nav-item" data-page="raporlar"><span class="dot"></span>Raporlar</div>
+    </nav>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page active">
+        <div class="page-head">
+          <h2>Genel Bakış</h2>
+          <p>Kalıp bazlı üretim özeti ve bakım durumu — canlı veri</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="lbl">AKTİF KALIP</div><div class="val" id="stat-aktif-kalip">142</div><div class="sub">Kalıphane + sahada</div></div>
+          <div class="stat-card"><div class="lbl">BUGÜN ÜRETİLEN</div><div class="val accent" id="stat-bugun-uretilen">8.430 adet</div><div class="sub">Enjeksiyon + pres toplamı</div></div>
+          <div class="stat-card"><div class="lbl">BAKIM YAKLAŞAN</div><div class="val" id="stat-bakim-yaklasan">6</div><div class="sub">Vuruş ömrü eşiğine yakın</div></div>
+          <div class="stat-card"><div class="lbl">AKTİF OPERATÖR</div><div class="val">14</div><div class="sub">Vardiyada</div></div>
+        </div>
+
+        <div class="two-col">
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Kalıp Bazlı Üretim Özeti</h3><span class="badge-tag">Faz 3 — Üretim Takibi</span></div>
+              <table>
+                <thead><tr><th>Kalıp</th><th>Makina</th><th>Operatör</th><th>Üretilen Adet</th><th>Vuruş Ömrü</th><th>Durum</th></tr></thead>
+                <tbody id="dash-mold-table"></tbody>
+              </table>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <h3>Canlı Geçit Simülasyonu</h3>
+                <span class="badge-tag" style="background:var(--green-bg);color:var(--green-text);">RFID Geçidi — Faz 1</span>
+              </div>
+              <div id="alarm-banner" class="alarm-banner">🚨 EKSİM GİRİŞ ALARMI — Tepe lambası ve siren tetiklendi, veri girişi bekleniyor</div>
+              <div class="gate-wrap">
+                <div class="gate-stage" id="gate-stage">
+                  <div class="column c1"></div>
+                  <div class="column c2"></div>
+                  <div class="gate-zone zone-giris">GİRİŞ BANDI</div>
+                  <div class="gate-zone zone-ara">ARA BÖLGE — okunmuyor</div>
+                  <div class="gate-zone zone-cikis">ÇIKIŞ BANDI</div>
+                  <div class="antenna left" id="ant-left"></div>
+                  <div class="antenna right" id="ant-right"></div>
+                  <div class="mold-token" id="mold-token" style="display:none;"></div>
+                </div>
+                <div class="gate-controls">
+                  <button class="btn btn-primary" id="btn-simulate">▶ Kalıp Geçişini Simüle Et</button>
+                  <label><input type="checkbox" id="chk-fastdemo" checked> Hızlı demo (10 sn geri sayım — gerçek sistemde 60 sn)</label>
+                </div>
+                <div>
+                  <div class="panel-head" style="margin-bottom:8px;"><h3 style="font-size:13.5px;">Son Geçişler</h3></div>
+                  <div class="event-log" id="event-log"><div style="color:var(--muted);font-size:12.5px;padding:8px 4px;">Henüz geçiş yok — yukarıdaki butonla bir kalıp geçişi simüle edin.</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="panel">
+              <div class="panel-head"><h3>Bakım Uyarıları</h3><span class="badge-tag">Otomatik (MES)</span></div>
+              <div id="dash-maint-list"></div>
+            </div>
+            <div class="side-note" style="background:#fff;border:1px solid var(--border);border-radius:14px;color:var(--text);">
+              <div style="font-weight:800;font-size:11px;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;">SAYIM KAYNAĞI</div>
+              <div class="kv-list">
+                <div><span>Enjeksiyon makinaları</span><span>Makina sayacı (entegre)</span></div>
+                <div><span>Pres makinaları</span><span>Vuruş (darbe) sayısı</span></div>
+                <div><span>Eşleştirme kaynağı</span><span>Faz 2 — Kalıp ↔ Makina</span></div>
+                <div><span>Veri girişi</span><span>RFID okutma, elle giriş yok</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KALIP SICILI -->
+      <section id="page-sicil" class="page">
+        <div class="page-head">
+          <h2>Kalıp Sicili</h2>
+          <p>Tüm kalıpların konum, üretim ve bakım geçmişi — 142 kayıtlı kalıptan 8'i örnek gösteriliyor</p>
+        </div>
+        <div class="panel">
+          <div class="search-row">
+            <div class="search-box"><input type="text" id="sicil-search" placeholder="Kalıp kodu, adı veya konum ara..."></div>
+            <div class="chip active" data-filter="hepsi">Tümü</div>
+            <div class="chip" data-filter="normal">Normal</div>
+            <div class="chip" data-filter="yaklasiyor">Yaklaşıyor</div>
+            <div class="chip" data-filter="kritik">Kritik</div>
+            <div class="chip" data-filter="bakimda">Bakımda</div>
+          </div>
+          <div class="panel-head"><h3>Kalıp Listesi</h3><span class="badge-tag" id="sicil-count">142 kayıt</span></div>
+          <table>
+            <thead><tr><th>Kalıp Kodu</th><th>Adı</th><th>Konum</th><th>Toplam Üretim</th><th>Son Bakım</th><th>Durum</th></tr></thead>
+            <tbody id="sicil-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- URETIM TAKIBI -->
+      <section id="page-uretim" class="page">
+        <div class="page-head" style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <h2 id="uretim-title">Üretim Takibi — Enjeksiyon</h2>
+            <p id="uretim-sub">Aktif iş emirleri, başlangıç zamanı, operatör ve üretilen adet</p>
+          </div>
+          <div class="tab-row">
+            <button class="btn btn-outline tab-active" id="tab-enjeksiyon">Enjeksiyon</button>
+            <button class="btn btn-outline" id="tab-pres">Pres</button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Aktif İş Emirleri</h3><span class="badge-tag" id="uretim-source">Sayım kaynağı: Makina sayacı (entegre)</span></div>
+          <table>
+            <thead><tr><th>Makina</th><th>Aktif İş / Kalıp</th><th>Başlangıç Tarihi</th><th>Operatör</th><th id="uretim-col-h">Üretilen / Hedef</th><th>İlerleme</th></tr></thead>
+            <tbody id="uretim-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- BAKIM UYARILARI -->
+      <section id="page-bakim" class="page">
+        <div class="page-head">
+          <h2>Bakım Uyarıları</h2>
+          <p>Vuruş/üretim ömrü eşiklerine göre otomatik oluşturulan bakım kayıtları (MES)</p>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="lbl">KRİTİK</div><div class="val" id="bakim-stat-kritik" style="color:#C0231E;">2</div><div class="sub">Hemen bakıma alınmalı</div></div>
+          <div class="stat-card"><div class="lbl">YAKLAŞIYOR</div><div class="val" id="bakim-stat-yaklasiyor" style="color:var(--primary-dark);">4</div><div class="sub">7 gün içinde eşik aşılır</div></div>
+          <div class="stat-card"><div class="lbl">BAKIMDA</div><div class="val" id="bakim-stat-bakimda">1</div><div class="sub">Şu an devre dışı</div></div>
+          <div class="stat-card"><div class="lbl">BU AY TAMAMLANAN</div><div class="val" id="bakim-stat-tamamlanan" style="color:#15803D;">9</div><div class="sub">Planlı bakım</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Bakım Listesi</h3></div>
+          <table>
+            <thead><tr><th>Kalıp</th><th>Ömür Durumu</th><th>Planlanan Tarih</th><th>Sorumlu</th><th>Durum</th><th></th></tr></thead>
+            <tbody id="bakim-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- RAPORLAR -->
+      <section id="page-raporlar" class="page">
+        <div class="page-head">
+          <h2>Raporlar</h2>
+          <p>Haftalık üretim eğilimi ve kalıp ömür dağılımı</p>
+        </div>
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head"><h3>Son 7 Gün — Toplam Üretim</h3><span class="badge-tag">Enjeksiyon + Pres</span></div>
+            <div class="bars" id="report-bars"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Kalıp Ömür Dağılımı</h3></div>
+            <div class="donut-wrap">
+              <div class="donut" id="report-donut"></div>
+              <div class="legend">
+                <div><span class="sw" style="background:#22C55E;"></span>Normal — %55</div>
+                <div><span class="sw" style="background:#F59E0B;"></span>Yaklaşıyor — %25</div>
+                <div><span class="sw" style="background:#EF4444;"></span>Kritik — %12</div>
+                <div><span class="sw" style="background:#9CA3AF;"></span>Bakımda — %8</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Not</h3></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin:0;">
+            Bu panel, sunumdaki Faz 2 (Kalıp–Makina Eşleştirme) ve Faz 3 (Üretim Takibi / MES) verisini tek ekranda birleştiren
+            konsept arayüzün canlı çalışan bir demosudur. Gerçek sistemde tüm değerler RFID okuma olaylarından ve makina/pres
+            sayaçlarından otomatik beslenir; bu sayfadaki sayılar gösterim amaçlı örnek verilerdir.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<div class="modal-overlay hidden" id="gate-modal">
+  <div class="modal-box">
+    <h3 id="modal-title">Veri Girişi Bekleniyor</h3>
+    <div class="sub" id="modal-sub">Kalıp geçitten okundu — 60 saniye içinde ilgili bilgiyi girin.</div>
+    <div id="modal-fields"></div>
+    <div class="countdown-wrap">
+      <div class="countdown-bar"><div class="fill" id="countdown-fill"></div></div>
+      <div class="countdown-txt"><span>Kalan süre</span><span id="countdown-txt">60 sn</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="modal-cancel">Kapat</button>
+      <button class="btn btn-primary" id="modal-submit">Kaydı Tamamla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- STATE ---------- */
+  const molds = [
+    {code:'KLP-0142', name:'Konnektör Gövde', location:'Enjeksiyon-06', operator:'M. Şahin', total:128400, unit:'adet', lastMaint:'12.07.2026', life:38, status:'normal', todayProduced:3210},
+    {code:'KLP-0087', name:'Kapak Preslemesi', location:'Pres-03', operator:'A. Demir', total:61200, unit:'vuruş', lastMaint:'02.06.2026', life:82, status:'yaklasiyor', todayProduced:1865},
+    {code:'KLP-0210', name:'Klemens Alt Gövde', location:'Enjeksiyon-11', operator:'S. Yıldız', total:152000, unit:'adet', lastMaint:'20.05.2026', life:95, status:'kritik', todayProduced:5540},
+    {code:'KLP-0033', name:'Terminal Kapağı', location:'Kalıphane (rafta)', operator:'M. Şahin', total:44800, unit:'adet', lastMaint:'30.07.2026', life:21, status:'normal', todayProduced:2120},
+    {code:'KLP-0119', name:'Röle Tabanı', location:'Pres-05', operator:'A. Demir', total:38700, unit:'vuruş', lastMaint:'15.06.2026', life:77, status:'yaklasiyor', todayProduced:3870},
+    {code:'KLP-0301', name:'Röle Kapağı', location:'Enjeksiyon-09', operator:'S. Yıldız', total:96500, unit:'adet', lastMaint:'25.07.2026', life:99, status:'kritik', todayProduced:6480},
+    {code:'KLP-0044', name:'Terminal Klipsi', location:'Pres-07', operator:'C. Aydın', total:72100, unit:'vuruş', lastMaint:'08.07.2026', life:98, status:'bakimda', todayProduced:4920},
+    {code:'KLP-0055', name:'Gövde Kapağı', location:'Kalıphane (rafta)', operator:'—', total:21900, unit:'adet', lastMaint:'18.08.2026', life:12, status:'normal', todayProduced:0}
+  ];
+
+  const workOrders = {
+    enjeksiyon: [
+      {machine:'Enjeksiyon-02', code:'KLEMENS-1', name:'Konnektör Gövde', start:'07.09.2026 08:15', operator:'M. Şahin', produced:2120, target:5000},
+      {machine:'Enjeksiyon-06', code:'KLP-0142', name:'Konnektör Gövde', start:'07.09.2026 06:40', operator:'M. Şahin', produced:3210, target:4000},
+      {machine:'Enjeksiyon-09', code:'KLP-0301', name:'Röle Kapağı', start:'06.09.2026 22:10', operator:'S. Yıldız', produced:6480, target:6500},
+      {machine:'Enjeksiyon-11', code:'KLP-0210', name:'Klemens Alt Gövde', start:'07.09.2026 09:05', operator:'S. Yıldız', produced:5540, target:6000},
+      {machine:'Enjeksiyon-14', idle:true}
+    ],
+    pres: [
+      {machine:'Pres-03', code:'KLP-0087', name:'Kapak Preslemesi', start:'07.09.2026 07:20', operator:'A. Demir', produced:1865, target:2500},
+      {machine:'Pres-05', code:'KLP-0119', name:'Röle Tabanı', start:'07.09.2026 05:50', operator:'A. Demir', produced:3870, target:5000},
+      {machine:'Pres-07', code:'KLP-0044', name:'Terminal Klipsi', start:'06.09.2026 23:15', operator:'C. Aydın', produced:4920, target:5000},
+      {machine:'Pres-08', idle:true}
+    ]
+  };
+
+  let uretimTab = 'enjeksiyon';
+  let gateBusy = false;
+  const recentReads = {}; // code -> timestamp, duplicate-read guard
+
+  const statusLabel = {normal:'Normal', yaklasiyor:'Bakım Yaklaşıyor', kritik:'Kritik', bakimda:'Bakımda'};
+
+  /* ---------- HELPERS ---------- */
+  function fmt(n){ return n.toLocaleString('tr-TR'); }
+  function badge(status, textOverride){
+    return `<span class="badge ${status}">${textOverride || statusLabel[status]}</span>`;
+  }
+  function lifeBar(life,status){
+    return `<div class="progress life"><div class="track"><div class="fill ${status}" style="width:${life}%"></div></div><span class="pct">${life}%</span></div>`;
+  }
+  function toast(msg, kind){
+    const c = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast' + (kind ? ' '+kind : '');
+    el.textContent = msg;
+    c.appendChild(el);
+    setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3600);
+  }
+  function recomputeMaintCounts(){
+    const kritik = molds.filter(m=>m.status==='kritik').length;
+    const yaklasiyor = molds.filter(m=>m.status==='yaklasiyor').length;
+    const bakimda = molds.filter(m=>m.status==='bakimda').length;
+    document.getElementById('stat-bakim-yaklasan').textContent = kritik + yaklasiyor;
+    document.getElementById('bakim-stat-kritik').textContent = kritik;
+    document.getElementById('bakim-stat-yaklasiyor').textContent = yaklasiyor;
+    document.getElementById('bakim-stat-bakimda').textContent = bakimda;
+  }
+
+  /* ---------- RENDER: DASHBOARD ---------- */
+  function renderDashboardTable(){
+    const tbody = document.getElementById('dash-mold-table');
+    tbody.innerHTML = molds.slice(0,4).map(m=>`
+      <tr>
+        <td class="mono">${m.code} — ${m.name}</td>
+        <td>${m.location}</td>
+        <td>${m.operator}</td>
+        <td>${fmt(m.todayProduced)} ${m.unit}</td>
+        <td>${lifeBar(m.life,m.status)}</td>
+        <td>${badge(m.status)}</td>
+      </tr>`).join('');
+  }
+  function renderDashboardMaint(){
+    const wrap = document.getElementById('dash-maint-list');
+    const list = molds.filter(m=>m.status==='kritik' || m.status==='yaklasiyor').slice(0,3);
+    wrap.innerHTML = list.map(m=>`
+      <div class="maint-row ${m.status}">
+        <div class="maint-icon ${m.status}">${m.status==='kritik'?'!':'⏻'}</div>
+        <div class="maint-body"><b>${m.code} — ${m.name}</b><span>Vuruş ömrü %${m.life} — ${m.status==='kritik'?'bakıma alınmalı':'yaklaşıyor'}</span></div>
+        ${badge(m.status)}
+      </div>`).join('') || `<div style="color:var(--muted);font-size:13px;">Bekleyen bakım uyarısı yok.</div>`;
+  }
+
+  /* ---------- RENDER: SICIL ---------- */
+  function renderSicil(){
+    const q = (document.getElementById('sicil-search').value||'').toLowerCase();
+    const activeChip = document.querySelector('#page-sicil .chip.active').dataset.filter;
+    const rows = molds.filter(m=>{
+      const matchesText = (m.code+' '+m.name+' '+m.location).toLowerCase().includes(q);
+      const matchesFilter = activeChip==='hepsi' || m.status===activeChip;
+      return matchesText && matchesFilter;
+    });
+    document.getElementById('sicil-count').textContent = rows.length + ' kayıt (142 toplam kalıptan)';
+    document.getElementById('sicil-table').innerHTML = rows.map(m=>`
+      <tr>
+        <td class="mono">${m.code}</td>
+        <td>${m.name}</td>
+        <td>${m.location}</td>
+        <td>${fmt(m.total)} ${m.unit}</td>
+        <td>${m.lastMaint}</td>
+        <td>${badge(m.status)}</td>
+      </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Sonuç bulunamadı.</td></tr>`;
+  }
+
+  /* ---------- RENDER: URETIM ---------- */
+  function renderUretim(){
+    const isEnj = uretimTab === 'enjeksiyon';
+    document.getElementById('uretim-title').textContent = 'Üretim Takibi — ' + (isEnj?'Enjeksiyon':'Pres');
+    document.getElementById('uretim-sub').textContent = isEnj
+      ? 'Aktif iş emirleri, başlangıç zamanı, operatör ve üretilen adet'
+      : 'Aktif iş emirleri, vuruş (darbe) sayımı, operatör ve hedef';
+    document.getElementById('uretim-col-h').textContent = isEnj ? 'Üretilen / Hedef' : 'Vuruş / Hedef';
+    document.getElementById('uretim-source').textContent = 'Sayım kaynağı: ' + (isEnj ? 'Makina sayacı (entegre)' : 'Vuruş (darbe) sayısı');
+    document.getElementById('tab-enjeksiyon').classList.toggle('tab-active', isEnj);
+    document.getElementById('tab-pres').classList.toggle('tab-active', !isEnj);
+
+    const rows = workOrders[uretimTab];
+    document.getElementById('uretim-table').innerHTML = rows.map(r=>{
+      if(r.idle){
+        return `<tr><td class="mono">${r.machine}</td><td colspan="4" style="color:var(--muted);">Boşta — iş emri bekleniyor</td></tr>`;
+      }
+      const pct = Math.min(100, Math.round((r.produced/r.target)*100));
+      return `<tr>
+        <td class="mono">${r.machine}</td>
+        <td>${r.code} — ${r.name}</td>
+        <td>${r.start}</td>
+        <td>${r.operator}</td>
+        <td>${fmt(r.produced)} / ${fmt(r.target)}</td>
+        <td><div class="progress"><div class="track"><div class="fill" style="width:${pct}%"></div></div><span class="pct">${pct}%</span></div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ---------- RENDER: BAKIM ---------- */
+  function renderBakim(){
+    const list = molds.filter(m=>m.status!=='normal');
+    document.getElementById('bakim-table').innerHTML = list.map(m=>{
+      let actionBtn;
+      if(m.status==='kritik') actionBtn = `<button class="btn btn-primary" data-action="bakima-al" data-code="${m.code}">Bakıma Al</button>`;
+      else if(m.status==='yaklasiyor') actionBtn = `<button class="btn btn-outline" data-action="planla" data-code="${m.code}">Planla</button>`;
+      else actionBtn = `<button class="btn btn-outline" data-action="tamamla" data-code="${m.code}">Tamamla</button>`;
+      const dateTxt = m.status==='kritik' ? 'Bugün' : (m.status==='bakimda' ? '—' : m.plannedDate || 'Planlanacak');
+      return `<tr data-row="${m.code}">
+        <td class="mono">${m.code} — ${m.name}</td>
+        <td>${lifeBar(m.life,m.status)}</td>
+        <td>${dateTxt}</td>
+        <td>Bakım Atölyesi</td>
+        <td>${badge(m.status)}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Bekleyen bakım kaydı yok.</td></tr>`;
+  }
+
+  document.getElementById('bakim-table').addEventListener('click', function(e){
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const code = btn.dataset.code;
+    const mold = molds.find(m=>m.code===code);
+    if(!mold) return;
+    if(btn.dataset.action==='bakima-al'){
+      mold.status='bakimda';
+      toast(`${code} bakıma alındı.`, 'warn');
+    } else if(btn.dataset.action==='planla'){
+      mold.plannedDate = '14.09.2026';
+      btn.textContent='Planlandı';
+      btn.disabled=true;
+      btn.classList.add('btn-gray');
+      toast(`${code} için bakım planlandı.`, 'ok');
+      return; // status unchanged, just re-render label state minimal
+    } else if(btn.dataset.action==='tamamla'){
+      mold.status='normal';
+      mold.life=4;
+      const completed = parseInt(document.getElementById('bakim-stat-tamamlanan').textContent,10) || 0;
+      document.getElementById('bakim-stat-tamamlanan').textContent = completed+1;
+      toast(`${code} bakımı tamamlandı, kalıp ömrü sıfırlandı.`, 'ok');
+    }
+    renderAll();
+  });
+
+  /* ---------- RENDER: RAPORLAR ---------- */
+  function renderRaporlar(){
+    const data = [
+      {lbl:'Pzt', val:6250},{lbl:'Sal', val:6890},{lbl:'Çar', val:7320},
+      {lbl:'Per', val:7010},{lbl:'Cum', val:7960},{lbl:'Cmt', val:5230},
+      {lbl:'Bugün', val:8430}
+    ];
+    const max = Math.max(...data.map(d=>d.val));
+    document.getElementById('report-bars').innerHTML = data.map(d=>{
+      const h = Math.round((d.val/max)*130);
+      return `<div class="bar-col"><div class="bar-val">${fmt(d.val)}</div><div class="bar" style="height:${h}px;"></div><div class="bar-lbl">${d.lbl}</div></div>`;
+    }).join('');
+    document.getElementById('report-donut').style.background =
+      'conic-gradient(#22C55E 0% 55%, #F59E0B 55% 80%, #EF4444 80% 92%, #9CA3AF 92% 100%)';
+  }
+
+  function renderAll(){
+    renderDashboardTable();
+    renderDashboardMaint();
+    recomputeMaintCounts();
+    renderSicil();
+    renderUretim();
+    renderBakim();
+  }
+
+  /* ---------- NAV ---------- */
+  const subtitles = {
+    dashboard:'Kalıp • Makina • Operatör • Üretim — Tek Panelde',
+    sicil:'Kalıp Sicili — konum, üretim ve bakım geçmişi',
+    uretim:'Üretim Takibi — Enjeksiyon / Pres makinaları',
+    bakim:'Bakım Uyarıları — otomatik MES eşik takibi',
+    raporlar:'Raporlar — haftalık eğilim ve ömür dağılımı'
+  };
+  document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+      item.classList.add('active');
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const page = item.dataset.page;
+      document.getElementById('page-'+page).classList.add('active');
+      document.getElementById('page-subtitle').textContent = subtitles[page];
+    });
+  });
+
+  document.getElementById('sicil-search').addEventListener('input', renderSicil);
+  document.querySelectorAll('#page-sicil .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#page-sicil .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderSicil();
+    });
+  });
+  document.getElementById('tab-enjeksiyon').addEventListener('click', ()=>{ uretimTab='enjeksiyon'; renderUretim(); });
+  document.getElementById('tab-pres').addEventListener('click', ()=>{ uretimTab='pres'; renderUretim(); });
+
+  /* ---------- CLOCK ---------- */
+  function tickClock(){
+    const now = new Date();
+    const d = String(now.getDate()).padStart(2,'0')+'.'+String(now.getMonth()+1).padStart(2,'0')+'.'+now.getFullYear();
+    const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clock-val').textContent = d+' — '+t;
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* ---------- LIVE PRODUCTION SIMULATION ---------- */
+  setInterval(()=>{
+    // bump a random active work order
+    ['enjeksiyon','pres'].forEach(kind=>{
+      const active = workOrders[kind].filter(r=>!r.idle && r.produced < r.target);
+      if(active.length){
+        const r = active[Math.floor(Math.random()*active.length)];
+        r.produced = Math.min(r.target, r.produced + Math.floor(Math.random()*12)+3);
+        const mold = molds.find(m=>m.code===r.code);
+        if(mold) mold.todayProduced = r.produced;
+      }
+    });
+    // bump today's total stat
+    const totalEl = document.getElementById('stat-bugun-uretilen');
+    const cur = parseInt(totalEl.textContent.replace(/\D/g,''),10) || 0;
+    totalEl.textContent = fmt(cur + Math.floor(Math.random()*15)+5) + ' adet';
+
+    if(document.getElementById('page-uretim').classList.contains('active')) renderUretim();
+    if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboardTable();
+  }, 4000);
+
+  /* ---------- GATE SIMULATION ---------- */
+  const stage = document.getElementById('gate-stage');
+  const token = document.getElementById('mold-token');
+  const antLeft = document.getElementById('ant-left');
+  const antRight = document.getElementById('ant-right');
+  const eventLog = document.getElementById('event-log');
+  const alarmBanner = document.getElementById('alarm-banner');
+  let countdownTimer = null;
+
+  function addEvent(mold, dir, status){
+    if(eventLog.children.length===1 && eventLog.children[0].style.color==='var(--muted)') eventLog.innerHTML='';
+    const now = new Date();
+    const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const row = document.createElement('div');
+    row.className='event-row';
+    const statusTxt = status==='ok' ? 'Tamamlandı' : (status==='wait' ? 'Bekliyor' : 'Eksik Giriş');
+    row.innerHTML = `<span class="event-dir ${dir==='GİRİŞ'?'giris':'cikis'}">${dir}</span>
+      <span class="mono">${mold.code}</span>
+      <span class="event-time">${t}</span>
+      <span class="event-status ${status}">${statusTxt}</span>`;
+    eventLog.prepend(row);
+  }
+
+  document.getElementById('btn-simulate').addEventListener('click', ()=>{
+    if(gateBusy){ toast('Bir geçiş zaten işleniyor, lütfen bekleyin.', 'warn'); return; }
+    const mold = molds[Math.floor(Math.random()*molds.length)];
+    const cooldownMs = 15000;
+    const last = recentReads[mold.code];
+    if(last && (Date.now()-last) < cooldownMs){
+      toast(`${mold.code} için açık kayıt var — 1 dakika kuralı gereği yeni olay oluşturulmadı.`, 'warn');
+      return;
+    }
+
+    gateBusy = true;
+    const goingRight = Math.random() > 0.5; // true: soldan sağa => GİRİŞ, false: sağdan sola => ÇIKIŞ
+    const dir = goingRight ? 'GİRİŞ' : 'ÇIKIŞ';
+
+    token.style.display = 'block';
+    token.style.transition = 'none';
+    token.style.left = goingRight ? '4%' : '90%';
+    token.textContent = mold.code;
+    // force reflow
+    void token.offsetWidth;
+    token.style.transition = 'left 1.6s cubic-bezier(.4,.1,.3,1)';
+    token.style.left = goingRight ? '90%' : '4%';
+
+    antLeft.classList.remove('lit');
+    antRight.classList.remove('lit');
+
+    setTimeout(()=>{
+      if(goingRight){ antLeft.classList.add('lit'); }
+      else { antRight.classList.add('lit'); }
+      toast(`${mold.code} okundu — yön otomatik belirlendi: ${dir}`, 'ok');
+      recentReads[mold.code] = Date.now();
+      addEvent(mold, dir, 'wait');
+      openDataEntryModal(mold, dir);
+    }, 700);
+
+    setTimeout(()=>{
+      token.style.display='none';
+      antLeft.classList.remove('lit');
+      antRight.classList.remove('lit');
+      gateBusy = false;
+    }, 1800);
+  });
+
+  function openDataEntryModal(mold, dir){
+    const modal = document.getElementById('gate-modal');
+    const fields = document.getElementById('modal-fields');
+    document.getElementById('modal-title').textContent = `${dir} kaydı — ${mold.code}`;
+    document.getElementById('modal-sub').textContent = dir==='GİRİŞ'
+      ? 'Kalıp giriş bandından okundu. Geliş nedeni ve getiren kişiyi girin.'
+      : 'Kalıp çıkış bandından okundu. Yapılan işlemi / son durumu girin.';
+
+    if(dir==='GİRİŞ'){
+      fields.innerHTML = `
+        <label>Geliş Nedeni</label>
+        <select id="f-reason">
+          <option>Üretime hazırlık</option>
+          <option>Bakımdan dönüş</option>
+          <option>Depoya iade</option>
+          <option>Diğer</option>
+        </select>
+        <label>Getiren Kişi</label>
+        <select id="f-person">
+          <option>M. Şahin</option><option>A. Demir</option><option>S. Yıldız</option><option>C. Aydın</option>
+        </select>`;
+    } else {
+      fields.innerHTML = `
+        <label>Yapılan İşlem / Son Durum</label>
+        <select id="f-reason">
+          <option>Üretime gönderildi</option>
+          <option>Bakıma alındı</option>
+          <option>Depoya kaldırıldı</option>
+        </select>
+        <label>Teslim Eden</label>
+        <select id="f-person">
+          <option>M. Şahin</option><option>A. Demir</option><option>S. Yıldız</option><option>C. Aydın</option>
+        </select>`;
+    }
+
+    modal.classList.remove('hidden');
+
+    const fastDemo = document.getElementById('chk-fastdemo').checked;
+    let secondsLeft = fastDemo ? 10 : 60;
+    const totalSeconds = secondsLeft;
+    const fillEl = document.getElementById('countdown-fill');
+    const txtEl = document.getElementById('countdown-txt');
+    fillEl.style.background = 'var(--primary)';
+    updateCountdownUI();
+
+    function updateCountdownUI(){
+      const pct = Math.max(0,(secondsLeft/totalSeconds)*100);
+      fillEl.style.width = pct+'%';
+      txtEl.textContent = secondsLeft+' sn';
+      if(secondsLeft <= totalSeconds*0.3) fillEl.style.background = '#EF4444';
+      else if(secondsLeft <= totalSeconds*0.6) fillEl.style.background = '#F59E0B';
+    }
+
+    clearInterval(countdownTimer);
+    countdownTimer = setInterval(()=>{
+      secondsLeft--;
+      updateCountdownUI();
+      if(secondsLeft<=0){
+        clearInterval(countdownTimer);
+        closeModal();
+        triggerAlarm(mold, dir, totalSeconds);
+      }
+    }, 1000);
+
+    function closeModal(){
+      modal.classList.add('hidden');
+    }
+
+    document.getElementById('modal-cancel').onclick = ()=>{
+      clearInterval(countdownTimer);
+      closeModal();
+    };
+
+    document.getElementById('modal-submit').onclick = ()=>{
+      clearInterval(countdownTimer);
+      closeModal();
+      const reason = document.getElementById('f-reason').value;
+      const person = document.getElementById('f-person').value;
+      toast(`Kayıt tamamlandı — ${dir==='GİRİŞ'?'Neden':'İşlem'}: ${reason} (${person})`, 'ok');
+      updateEventStatus(mold.code, 'ok');
+    };
+  }
+
+  function updateEventStatus(code, status){
+    const rows = eventLog.querySelectorAll('.event-row');
+    for(const row of rows){
+      if(row.querySelector('.mono').textContent===code && row.querySelector('.event-status').textContent==='Bekliyor'){
+        const s = row.querySelector('.event-status');
+        s.className = 'event-status '+status;
+        s.textContent = status==='ok' ? 'Tamamlandı' : 'Eksik Giriş';
+        break;
+      }
+    }
+  }
+
+  function triggerAlarm(mold, dir, seconds){
+    alarmBanner.classList.add('show');
+    toast(`⚠ ${mold.code} için ${seconds} sn içinde veri girilmedi — tepe lambası ve siren tetiklendi.`, 'danger');
+    updateEventStatus(mold.code, 'missed');
+    setTimeout(()=>{ alarmBanner.classList.remove('show'); }, 6000);
+  }
+
+  /* ---------- INIT ---------- */
+  renderAll();
+  renderRaporlar();
+
+})();
+</script>
+</body>
+</html>
