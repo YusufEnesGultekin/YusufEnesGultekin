@@ -284,6 +284,104 @@
   .loc-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
   .loc-legend b{color:var(--text);font-weight:700;}
   .loc-legend .sw{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle;}
+
+  /* Accessibility */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+  .nav-item:focus-visible, .chip:focus-visible, th[data-field]:focus-visible,
+  .userchip:focus-visible, .notif-bell:focus-visible{
+    outline:2px solid #1E63C9;outline-offset:2px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+  }
+
+  /* Table horizontal scroll (prevents page-level overflow on narrow screens) */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .table-scroll table{min-width:640px;}
+
+  /* Notification bell */
+  .notif-bell{position:relative;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);color:#fff;cursor:pointer;flex-shrink:0;}
+  .notif-count{position:absolute;top:-5px;right:-5px;background:#C0231E;color:#fff;font-size:10px;font-weight:800;
+    min-width:17px;height:17px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 3px;
+    border:2px solid var(--primary-dark);}
+  .notif-menu{position:absolute;top:calc(100% + 8px);right:0;background:#fff;border-radius:12px;width:300px;max-width:80vw;
+    box-shadow:0 10px 30px rgba(0,0,0,0.22);display:none;z-index:60;overflow:hidden;color:var(--text);}
+  .notif-menu.show{display:block;}
+  .notif-menu-head{font-size:11px;font-weight:800;letter-spacing:.4px;color:var(--muted);padding:12px 14px 8px;}
+  .notif-item{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;border-top:1px solid #F1F1F3;font-size:12.5px;cursor:pointer;}
+  .notif-item:hover{background:#FAFAFA;}
+  .notif-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+  .notif-item.kritik .notif-dot{background:#EF4444;}
+  .notif-item.missed .notif-dot{background:#C0231E;}
+  .notif-item b{display:block;}
+  .notif-item span{color:var(--muted);font-size:11.5px;}
+  .notif-empty{padding:16px 14px;font-size:12.5px;color:var(--muted);}
+
+  /* Kalıp detay modal trigger rows */
+  tr.row-clickable{cursor:pointer;}
+  .code-link{cursor:pointer;}
+  .code-link:hover{text-decoration:underline;}
+
+  /* Hamburger (mobile only) */
+  .hamburger-btn{display:none;flex-direction:column;justify-content:center;gap:4px;width:36px;height:36px;
+    border-radius:9px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.35);cursor:pointer;flex-shrink:0;}
+  .hamburger-btn span{display:block;width:16px;height:2px;background:#fff;margin:0 auto;border-radius:2px;}
+  .sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(15,15,20,0.45);z-index:39;}
+  .sidebar-backdrop.show{display:block;}
+
+  @media (max-width:900px){
+    .hamburger-btn{display:flex;}
+    .topbar-title p{display:none;}
+    .topbar-title h1{font-size:15px;}
+    .clock{display:none;}
+    .userchip .who span{display:none;}
+    .topbar{padding:12px 14px;gap:10px;}
+    .sidebar{
+      position:fixed;top:0;bottom:0;left:0;width:250px;z-index:40;
+      transform:translateX(-100%);transition:transform .22s ease;
+      box-shadow:12px 0 30px rgba(0,0,0,0.18);overflow-y:auto;
+    }
+    .sidebar.open{transform:translateX(0);}
+    .content{padding:18px 14px;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .two-col{grid-template-columns:1fr;}
+    .gate-controls{align-items:flex-start;flex-direction:column;}
+  }
+  @media (max-width:480px){
+    .stat-grid{grid-template-columns:1fr;}
+    .notif-menu{right:-40px;}
+    .topbar-title{display:none;}
+    .topbar{justify-content:space-between;}
+  }
+
+  /* Kalıp Detay modal */
+  .detail-box{width:520px;position:relative;text-align:left;}
+  .detail-close{position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:8px;border:none;
+    background:#F1F1F3;color:#555;font-size:13px;cursor:pointer;}
+  .detail-close:hover{background:#E6E6E9;}
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;padding-right:34px;}
+  .detail-code{font-size:19px;font-weight:800;}
+  .detail-name{font-size:13px;color:var(--muted);margin-top:2px;}
+  .detail-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .detail-stats .d-stat{background:var(--bg);border-radius:10px;padding:10px 12px;}
+  .detail-stats .d-stat .lbl{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.3px;margin-bottom:4px;}
+  .detail-stats .d-stat .val{font-size:14.5px;font-weight:800;}
+  .detail-life-wrap{margin-bottom:18px;}
+  .detail-life-label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:6px;}
+  .detail-section-title{font-size:13px;font-weight:800;margin-bottom:10px;}
+  .detail-timeline{max-height:280px;overflow-y:auto;position:relative;padding-left:20px;}
+  .detail-timeline::before{content:"";position:absolute;left:5px;top:5px;bottom:5px;width:2px;background:#EAEAEC;}
+  .timeline-item{position:relative;padding-bottom:16px;}
+  .timeline-item:last-child{padding-bottom:0;}
+  .timeline-item::before{content:"";position:absolute;left:-20px;top:3px;width:9px;height:9px;border-radius:50%;
+    background:#9CA3AF;border:2px solid #fff;box-shadow:0 0 0 1px #E4E4E7;}
+  .timeline-item.giris::before{background:#22C55E;}
+  .timeline-item.cikis::before{background:#EF4444;}
+  .timeline-item .t-head{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:700;}
+  .timeline-item .t-meta{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.5;}
+  .detail-empty{font-size:12.5px;color:var(--muted);padding:6px 0;}
+  .stat-trend{font-size:11px;margin-top:6px;font-weight:600;}
 </style>
 </head>
 <body>
@@ -313,6 +411,9 @@
 
   <header class="topbar">
     <div class="topbar-left">
+      <button type="button" class="hamburger-btn" id="hamburger-btn" aria-label="Menüyü aç">
+        <span></span><span></span><span></span>
+      </button>
       <div class="logo-box">K</div>
       <div class="topbar-title">
         <h1>KLEMSAN KALIP VE ÜRETİM TAKİP SİSTEMİ</h1>
@@ -320,6 +421,14 @@
       </div>
     </div>
     <div class="topbar-right">
+      <div class="notif-bell" id="notif-bell" aria-label="Uyarılar">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-count" id="notif-count" hidden>0</span>
+        <div class="notif-menu" id="notif-menu">
+          <div class="notif-menu-head">Aktif Uyarılar</div>
+          <div id="notif-list"></div>
+        </div>
+      </div>
       <div class="clock">
         <div class="lbl">TARİH / SAAT</div>
         <div class="val" id="clock-val">—</div>
@@ -334,8 +443,9 @@
     </div>
   </header>
 
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <div class="layout">
-    <nav class="sidebar">
+    <nav class="sidebar" id="sidebar">
       <div class="nav-item active" data-page="dashboard"><span class="dot"></span>Dashboard</div>
       <div class="nav-item" data-page="sicil"><span class="dot"></span>Kalıp Sicili</div>
       <div class="nav-item" data-page="hareket"><span class="dot"></span>Kalıp Hareketleri</div>
@@ -362,7 +472,7 @@
 
         <div class="stat-grid">
           <div class="stat-card"><div class="lbl">TOPLAM KAYITLI KALIP</div><div class="val">~3.000</div><div class="sub">RFID etiketli, kalıphane + sahada</div></div>
-          <div class="stat-card"><div class="lbl">BUGÜN ÜRETİLEN</div><div class="val accent" id="stat-bugun-uretilen">8.430 adet</div><div class="sub">Enjeksiyon + pres toplamı</div></div>
+          <div class="stat-card"><div class="lbl">BUGÜN ÜRETİLEN</div><div class="val accent" id="stat-bugun-uretilen">8.430 adet</div><div class="sub">Enjeksiyon + pres toplamı</div><div class="stat-trend" id="stat-bugun-trend"></div></div>
           <div class="stat-card"><div class="lbl">BAKIM YAKLAŞAN</div><div class="val" id="stat-bakim-yaklasan">6</div><div class="sub">Vuruş ömrü eşiğine yakın</div></div>
           <div class="stat-card"><div class="lbl">TOPLAM OPERATÖR</div><div class="val">50</div><div class="sub">25 Enjeksiyon · 25 Pres</div></div>
         </div>
@@ -371,10 +481,10 @@
           <div>
             <div class="panel">
               <div class="panel-head"><h3>Kalıp Bazlı Üretim Özeti</h3><span class="badge-tag">Faz 3 — Üretim Takibi</span></div>
-              <table>
+              <div class="table-scroll"><table>
                 <thead><tr><th>Kalıp</th><th>Makina</th><th>Operatör</th><th>Üretilen Adet</th><th>Vuruş Ömrü</th><th>Durum</th></tr></thead>
                 <tbody id="dash-mold-table"></tbody>
-              </table>
+              </table></div>
             </div>
 
             <div class="panel">
@@ -439,8 +549,14 @@
             <div class="chip" data-filter="kritik">Kritik</div>
             <div class="chip" data-filter="bakimda">Bakımda</div>
           </div>
-          <div class="panel-head"><h3>Kalıp Listesi</h3><span class="badge-tag" id="sicil-count">~3.000 kayıt — örnek görünüm</span></div>
-          <table>
+          <div class="panel-head">
+            <h3>Kalıp Listesi</h3>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn btn-outline" id="sicil-export" type="button">⬇ CSV</button>
+              <span class="badge-tag" id="sicil-count">~3.000 kayıt — örnek görünüm</span>
+            </div>
+          </div>
+          <div class="table-scroll"><table>
             <thead id="sicil-thead"><tr>
               <th data-field="code">Kalıp Kodu <span class="sort-ind"></span></th>
               <th data-field="name">Adı <span class="sort-ind"></span></th>
@@ -450,8 +566,9 @@
               <th data-field="status">Durum <span class="sort-ind"></span></th>
             </tr></thead>
             <tbody id="sicil-table"></tbody>
-          </table>
+          </table></div>
           <p id="sicil-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
+          <p style="font-size:11px;color:var(--muted);margin:2px 2px 0;">Bir kalıba tıklayarak tüm geçmişini görebilirsiniz.</p>
         </div>
       </section>
 
@@ -488,8 +605,14 @@
             <div class="chip" data-filter="giris">Giriş</div>
             <div class="chip" data-filter="cikis">Çıkış</div>
           </div>
-          <div class="panel-head"><h3>Hareket Geçmişi</h3><span class="badge-tag" id="hareket-count">0 kayıt</span></div>
-          <table>
+          <div class="panel-head">
+            <h3>Hareket Geçmişi</h3>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn btn-outline" id="hareket-export" type="button">⬇ CSV</button>
+              <span class="badge-tag" id="hareket-count">0 kayıt</span>
+            </div>
+          </div>
+          <div class="table-scroll"><table>
             <thead id="hareket-thead"><tr>
               <th data-field="code">Kalıp <span class="sort-ind"></span></th>
               <th data-field="dir">Yön <span class="sort-ind"></span></th>
@@ -501,7 +624,7 @@
               <th data-field="status">Durum <span class="sort-ind"></span></th>
             </tr></thead>
             <tbody id="hareket-table"></tbody>
-          </table>
+          </table></div>
         </div>
       </section>
 
@@ -520,7 +643,7 @@
         </div>
         <div class="panel">
           <div class="panel-head"><h3>Aktif İş Emirleri</h3><span class="badge-tag" id="uretim-source">22 makina · Sayım kaynağı: Makina sayacı (entegre)</span></div>
-          <table>
+          <div class="table-scroll"><table>
             <thead id="uretim-thead"><tr>
               <th data-field="machine">Makina <span class="sort-ind"></span></th>
               <th data-field="name">Aktif İş / Kalıp <span class="sort-ind"></span></th>
@@ -530,7 +653,7 @@
               <th data-field="pct">İlerleme <span class="sort-ind"></span></th>
             </tr></thead>
             <tbody id="uretim-table"></tbody>
-          </table>
+          </table></div>
           <p id="uretim-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
         </div>
       </section>
@@ -549,7 +672,7 @@
         </div>
         <div class="panel">
           <div class="panel-head"><h3>Bakım Listesi</h3></div>
-          <table>
+          <div class="table-scroll"><table>
             <thead id="bakim-thead"><tr>
               <th data-field="code">Kalıp <span class="sort-ind"></span></th>
               <th data-field="life">Ömür Durumu <span class="sort-ind"></span></th>
@@ -559,7 +682,7 @@
               <th></th>
             </tr></thead>
             <tbody id="bakim-table"></tbody>
-          </table>
+          </table></div>
         </div>
       </section>
 
@@ -621,6 +744,26 @@
       <button class="btn btn-outline" id="modal-cancel">Kapat</button>
       <button class="btn btn-primary" id="modal-submit">Kaydı Tamamla</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="detail-modal">
+  <div class="modal-box detail-box">
+    <button type="button" class="detail-close" id="detail-close" aria-label="Kapat">✕</button>
+    <div class="detail-head">
+      <div>
+        <div class="detail-code" id="detail-code">KLP-0000</div>
+        <div class="detail-name" id="detail-name">Kalıp adı</div>
+      </div>
+      <span id="detail-status-badge"></span>
+    </div>
+    <div class="detail-stats" id="detail-stats"></div>
+    <div class="detail-life-wrap">
+      <div class="detail-life-label">Vuruş / Üretim Ömrü</div>
+      <div id="detail-life-bar"></div>
+    </div>
+    <div class="detail-section-title">Hareket Geçmişi</div>
+    <div class="detail-timeline" id="detail-timeline"></div>
   </div>
 </div>
 
@@ -803,7 +946,7 @@
   function renderDashboardTable(){
     const tbody = document.getElementById('dash-mold-table');
     tbody.innerHTML = molds.slice(0,4).map(m=>`
-      <tr>
+      <tr class="row-clickable" data-code="${m.code}">
         <td class="mono">${m.code} — ${m.name}</td>
         <td>${m.location}</td>
         <td>${m.operator}</td>
@@ -843,7 +986,7 @@
       ? rows.length + ' sonuç'
       : '~' + fmt(TOTAL_MOLDS) + ' kayıt — örnek görünüm';
     document.getElementById('sicil-table').innerHTML = rows.map(m=>`
-      <tr>
+      <tr class="row-clickable" data-code="${m.code}">
         <td class="mono">${m.code}</td>
         <td>${m.name}</td>
         <td>${m.location}</td>
@@ -920,7 +1063,7 @@
       else actionBtn = `<button class="btn btn-outline" data-action="tamamla" data-code="${m.code}">Tamamla</button>`;
       const dateTxt = m.status==='kritik' ? 'Bugün' : (m.status==='bakimda' ? '—' : m.plannedDate || 'Planlanacak');
       return `<tr data-row="${m.code}">
-        <td class="mono">${m.code} — ${m.name}</td>
+        <td class="mono"><span class="code-link" data-code="${m.code}">${m.code} — ${m.name}</span></td>
         <td>${lifeBar(m.life,m.status)}</td>
         <td>${dateTxt}</td>
         <td>Bakım Atölyesi</td>
@@ -931,6 +1074,8 @@
   }
 
   document.getElementById('bakim-table').addEventListener('click', function(e){
+    const link = e.target.closest('.code-link');
+    if(link){ openDetailModal(link.dataset.code); return; }
     const btn = e.target.closest('button[data-action]');
     if(!btn) return;
     const code = btn.dataset.code;
@@ -993,7 +1138,7 @@
     document.getElementById('hareket-count').textContent = fmt(rows.length) + ' kayıt';
     document.getElementById('hareket-table').innerHTML = rows.map(r=>`
       <tr>
-        <td class="mono">${r.code} — ${r.name}</td>
+        <td class="mono"><span class="code-link" data-code="${r.code}">${r.code} — ${r.name}</span></td>
         <td>${dirBadge(r.dir)}</td>
         <td>${r.from}</td>
         <td>${r.to}</td>
@@ -1070,6 +1215,8 @@
     renderBakim();
     renderMovementPage();
     renderDashboardEvents();
+    renderNotifBell();
+    updateProductionTrend();
   }
 
   /* ---------- NAV ---------- */
@@ -1081,16 +1228,29 @@
     bakim:'Bakım Uyarıları — otomatik MES eşik takibi',
     raporlar:'Raporlar — haftalık eğilim ve ömür dağılımı'
   };
+  function goToPage(page){
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    const navItem = document.querySelector('.nav-item[data-page="'+page+'"]');
+    if(navItem) navItem.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    document.getElementById('page-subtitle').textContent = subtitles[page];
+    closeSidebar();
+  }
   document.querySelectorAll('.nav-item').forEach(item=>{
-    item.addEventListener('click', ()=>{
-      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-      item.classList.add('active');
-      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-      const page = item.dataset.page;
-      document.getElementById('page-'+page).classList.add('active');
-      document.getElementById('page-subtitle').textContent = subtitles[page];
-    });
+    item.addEventListener('click', ()=> goToPage(item.dataset.page));
   });
+
+  function openSidebar(){
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebar-backdrop').classList.add('show');
+  }
+  function closeSidebar(){
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-backdrop').classList.remove('show');
+  }
+  document.getElementById('hamburger-btn').addEventListener('click', openSidebar);
+  document.getElementById('sidebar-backdrop').addEventListener('click', closeSidebar);
 
   document.getElementById('sicil-search').addEventListener('input', renderSicil);
   document.querySelectorAll('#page-sicil .chip').forEach(chip=>{
@@ -1118,6 +1278,132 @@
   attachSort('bakim-thead', bakimSort, renderBakim);
   attachSort('hareket-thead', hareketSort, renderMovementPage);
 
+  /* ---------- KALIP DETAY MODALI ---------- */
+  function openDetailModal(code){
+    const mold = molds.find(m=>m.code===code);
+    if(!mold) return;
+    document.getElementById('detail-code').textContent = mold.code;
+    document.getElementById('detail-name').textContent = mold.name;
+    document.getElementById('detail-status-badge').innerHTML = badge(mold.status);
+    document.getElementById('detail-stats').innerHTML = `
+      <div class="d-stat"><div class="lbl">KONUM</div><div class="val">${mold.location}</div></div>
+      <div class="d-stat"><div class="lbl">TOPLAM ÜRETİM</div><div class="val">${fmt(mold.total)} ${mold.unit}</div></div>
+      <div class="d-stat"><div class="lbl">SON BAKIM</div><div class="val">${mold.lastMaint}</div></div>`;
+    document.getElementById('detail-life-bar').innerHTML = lifeBar(mold.life, mold.status);
+    const history = movementLog.filter(r=>r.code===code).slice().sort((a,b)=>b.ts-a.ts);
+    document.getElementById('detail-timeline').innerHTML = history.length
+      ? history.map(r=>`
+        <div class="timeline-item ${r.dir==='GİRİŞ'?'giris':'cikis'}">
+          <div class="t-head"><span>${r.dir} — ${r.from} → ${r.to}</span><span>${formatDateTime(r.ts)}</span></div>
+          <div class="t-meta">${r.reason}${r.person!=='—' ? ' · '+r.person : ''}${r.status!=='ok' ? ' · '+movementStatusLabel(r.status) : ''}</div>
+        </div>`).join('')
+      : `<div class="detail-empty">Bu kalıp için henüz hareket kaydı yok.</div>`;
+    document.getElementById('detail-modal').classList.remove('hidden');
+  }
+  function closeDetailModal(){ document.getElementById('detail-modal').classList.add('hidden'); }
+  document.getElementById('detail-close').addEventListener('click', closeDetailModal);
+  document.getElementById('detail-modal').addEventListener('click', function(e){
+    if(e.target.id==='detail-modal') closeDetailModal();
+  });
+  document.getElementById('dash-mold-table').addEventListener('click', function(e){
+    const row = e.target.closest('tr.row-clickable');
+    if(row) openDetailModal(row.dataset.code);
+  });
+  document.getElementById('sicil-table').addEventListener('click', function(e){
+    const row = e.target.closest('tr.row-clickable');
+    if(row) openDetailModal(row.dataset.code);
+  });
+  document.getElementById('hareket-table').addEventListener('click', function(e){
+    const link = e.target.closest('.code-link');
+    if(link) openDetailModal(link.dataset.code);
+  });
+
+  /* ---------- BİLDİRİM ZİLİ ---------- */
+  function computeAlerts(){
+    const alerts = [];
+    molds.filter(m=>m.status==='kritik').forEach(m=>{
+      alerts.push({type:'kritik', code:m.code, name:m.name, text:`Vuruş ömrü %${m.life} — bakıma alınmalı`, page:'bakim'});
+    });
+    movementLog.filter(r=>r.status==='missed').forEach(r=>{
+      alerts.push({type:'missed', code:r.code, name:r.name, text:`Eksik giriş — veri girilmedi (${formatDateTime(r.ts)})`, page:'hareket'});
+    });
+    return alerts;
+  }
+  function renderNotifBell(){
+    const alerts = computeAlerts();
+    const countEl = document.getElementById('notif-count');
+    if(alerts.length){ countEl.hidden = false; countEl.textContent = alerts.length; }
+    else { countEl.hidden = true; }
+    document.getElementById('notif-list').innerHTML = alerts.length
+      ? alerts.map(a=>`<div class="notif-item ${a.type}" data-page="${a.page}"><span class="notif-dot"></span><div><b>${a.code} — ${a.name}</b><span>${a.text}</span></div></div>`).join('')
+      : `<div class="notif-empty">Aktif uyarı yok — her şey yolunda.</div>`;
+  }
+  document.getElementById('notif-bell').addEventListener('click', function(e){
+    document.getElementById('notif-menu').classList.toggle('show');
+    e.stopPropagation();
+  });
+  document.getElementById('notif-list').addEventListener('click', function(e){
+    const item = e.target.closest('.notif-item');
+    if(!item) return;
+    document.getElementById('notif-menu').classList.remove('show');
+    goToPage(item.dataset.page);
+  });
+  document.addEventListener('click', function(){
+    document.getElementById('notif-menu').classList.remove('show');
+  });
+
+  /* ---------- CSV DIŞA AKTARMA ---------- */
+  // Artifact ortamında (claude.ai içinde) window.claude.downloads üzerinden,
+  // düz HTML dosyası olarak açıldığında ise klasik indirme bağlantısıyla çalışır.
+  async function downloadCsv(filename, rows){
+    const csv = rows.map(r=>r.map(v=>{
+      const s = String(v==null?'':v);
+      return /[",;\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+    }).join(';')).join('\n');
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    if(typeof window.claude !== 'undefined' && window.claude && window.claude.use){
+      try{
+        const dl = await window.claude.use('downloads');
+        if(dl){
+          await dl.save({filename, data:blob});
+          return true;
+        }
+      }catch(err){
+        if(err && err.code==='declined') return false;
+        // diğer hata kodlarında (unavailable vb.) aşağıdaki klasik yönteme düş
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    return true;
+  }
+  document.getElementById('sicil-export').addEventListener('click', async function(){
+    const header = ['Kalıp Kodu','Adı','Konum','Toplam Üretim','Birim','Son Bakım','Durum'];
+    const rows = molds.map(m=>[m.code,m.name,m.location,m.total,m.unit,m.lastMaint,statusLabel[m.status]]);
+    const ok = await downloadCsv('kalip-sicili.csv', [header, ...rows]);
+    if(ok) toast('Kalıp sicili CSV olarak indirildi.', 'ok');
+  });
+  document.getElementById('hareket-export').addEventListener('click', async function(){
+    const header = ['Kalıp Kodu','Adı','Yön','Nereden','Nereye','Kim','Tarih/Saat','Amaç','Durum'];
+    const rows = movementLog.map(r=>[r.code,r.name,r.dir,r.from,r.to,r.person,formatDateTime(r.ts),r.reason,movementStatusLabel(r.status)]);
+    const ok = await downloadCsv('kalip-hareketleri.csv', [header, ...rows]);
+    if(ok) toast('Hareket geçmişi CSV olarak indirildi.', 'ok');
+  });
+
+  /* ---------- ÜRETİM TRENDİ ---------- */
+  const weeklyBaseline = [6250,6890,7320,7010,7960,5230];
+  const weeklyAvg = weeklyBaseline.reduce((a,b)=>a+b,0)/weeklyBaseline.length;
+  function updateProductionTrend(){
+    const cur = parseInt(document.getElementById('stat-bugun-uretilen').textContent.replace(/\D/g,''),10) || 0;
+    const diffPct = Math.round(((cur-weeklyAvg)/weeklyAvg)*100);
+    const up = diffPct >= 0;
+    document.getElementById('stat-bugun-trend').innerHTML =
+      `<span style="color:${up?'#15803D':'#C0231E'};">${up?'▲':'▼'} %${Math.abs(diffPct)}</span> — günlük ortalamaya göre`;
+  }
+
   /* ---------- CLOCK ---------- */
   function tickClock(){
     const now = new Date();
@@ -1144,13 +1430,13 @@
     const totalEl = document.getElementById('stat-bugun-uretilen');
     const cur = parseInt(totalEl.textContent.replace(/\D/g,''),10) || 0;
     totalEl.textContent = fmt(cur + Math.floor(Math.random()*15)+5) + ' adet';
+    updateProductionTrend();
 
     if(document.getElementById('page-uretim').classList.contains('active')) renderUretim();
     if(document.getElementById('page-dashboard').classList.contains('active')) renderDashboardTable();
   }, 4000);
 
   /* ---------- GATE SIMULATION ---------- */
-  const stage = document.getElementById('gate-stage');
   const token = document.getElementById('mold-token');
   const antLeft = document.getElementById('ant-left');
   const antRight = document.getElementById('ant-right');
@@ -1285,6 +1571,7 @@
       toast(`Kayıt tamamlandı — ${dir==='GİRİŞ'?'Sorun':'İşlem'}: ${reason} (${person})`, 'ok');
       renderDashboardEvents();
       renderMovementPage();
+      renderNotifBell();
     };
   }
 
@@ -1292,6 +1579,7 @@
     alarmBanner.classList.add('show');
     toast(`⚠ ${mold.code} için ${seconds} sn içinde veri girilmedi — tepe lambası ve siren tetiklendi.`, 'danger');
     record.status = 'missed';
+    renderNotifBell();
     renderDashboardEvents();
     renderMovementPage();
     setTimeout(()=>{ alarmBanner.classList.remove('show'); }, 6000);
