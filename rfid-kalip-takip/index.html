@@ -152,7 +152,7 @@
   .search-box{flex:1;min-width:220px;position:relative;}
   .search-box input{width:100%;padding:10px 14px 10px 34px;border:1px solid #D8D8DC;border-radius:10px;font-size:13.5px;}
   .search-box::before{content:"🔍";position:absolute;left:11px;top:9px;font-size:13px;opacity:.55;}
-  .chip{padding:8px 14px;border-radius:999px;border:1px solid #D8D8DC;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .chip{padding:8px 14px;border-radius:999px;border:1px solid #D8D8DC;background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);}
   .chip.active{background:var(--text);color:#fff;border-color:var(--text);}
 
   .tab-row{display:flex;gap:8px;}
@@ -667,6 +667,33 @@
           </table></div>
           <p id="uretim-more-note" style="font-size:12px;color:var(--muted);font-style:italic;margin:14px 2px 0;"></p>
         </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Üretim Verisini Excel'e Aktar</h3><span class="badge-tag">Sistemin kullanıma başladığı günden bu yana</span></div>
+          <p style="font-size:12.5px;color:var(--muted);margin:0 0 14px;">
+            Makina bazlı günlük üretim kayıtları — kategori ve tarih aralığını siz seçersiniz.
+            İsterseniz sadece Enjeksiyon, sadece Otomatik Pres ya da sadece Eksantrik Pres verisini ayrı ayrı,
+            isterseniz üçünü birden (ayrı sayfalar halinde) indirebilirsiniz.
+          </p>
+          <div class="report-range-row" id="uretim-export-cats">
+            <label class="range-opt"><input type="radio" name="uretim-export-cat" value="all" checked><span>Tümü (3 kategori)</span></label>
+            <label class="range-opt"><input type="radio" name="uretim-export-cat" value="enjeksiyon"><span>Sadece Enjeksiyon</span></label>
+            <label class="range-opt"><input type="radio" name="uretim-export-cat" value="otomatikpres"><span>Sadece Otomatik Pres</span></label>
+            <label class="range-opt"><input type="radio" name="uretim-export-cat" value="eksantrikpres"><span>Sadece Eksantrik Pres</span></label>
+          </div>
+          <div class="report-custom-dates" style="margin-bottom:12px;">
+            <input type="date" id="uretim-export-from">
+            <span>—</span>
+            <input type="date" id="uretim-export-to">
+          </div>
+          <div class="report-range-row" style="margin-bottom:16px;">
+            <button class="chip" type="button" id="uretim-preset-7">Son 7 Gün</button>
+            <button class="chip" type="button" id="uretim-preset-30">Son 30 Gün</button>
+            <button class="chip" type="button" id="uretim-preset-all">Tüm Kayıtlı Veri (30 gün)</button>
+          </div>
+          <button class="btn btn-primary" id="btn-uretim-export" type="button">📊 Üretim Verisini Excel'e Aktar</button>
+          <span id="uretim-export-status" class="report-status"></span>
+        </div>
       </section>
 
       <!-- BAKIM UYARILARI -->
@@ -868,10 +895,51 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
     }
   };
   const uretimLabels = {
-    enjeksiyon:{title:'Enjeksiyon', sub:'aktif iş, başlangıç tarihi, operatör ve üretilen adet', colH:'Üretilen / Hedef', source:'Makina sayacı (entegre)'},
-    otomatikpres:{title:'Otomatik Pres', sub:'vuruş (darbe) sayımı, operatör ve hedef', colH:'Vuruş / Hedef', source:'Vuruş (darbe) sayısı'},
-    eksantrikpres:{title:'Eksantrik Pres', sub:'vuruş (darbe) sayımı, operatör ve hedef', colH:'Vuruş / Hedef', source:'Vuruş (darbe) sayısı'}
+    enjeksiyon:{title:'Enjeksiyon', sub:'aktif iş, başlangıç tarihi, operatör ve üretilen adet', colH:'Üretilen / Hedef', source:'Makina sayacı (entegre)', unit:'adet'},
+    otomatikpres:{title:'Otomatik Pres', sub:'vuruş (darbe) sayımı, operatör ve hedef', colH:'Vuruş / Hedef', source:'Vuruş (darbe) sayısı', unit:'vuruş'},
+    eksantrikpres:{title:'Eksantrik Pres', sub:'vuruş (darbe) sayımı, operatör ve hedef', colH:'Vuruş / Hedef', source:'Vuruş (darbe) sayısı', unit:'vuruş'}
   };
+
+  /* ---------- GÜNLÜK ÜRETİM GEÇMİŞİ (sistemin kullanılmaya başladığından itibaren) ---------- */
+  // Sistem devreye alındığından bu yana ~1 aylık (30 gün) makina bazlı günlük üretim kaydı.
+  // Deterministik (tohumlu) rastgele sayı üretimiyle oluşturulur — sayfa her açıldığında aynı veri gelir.
+  const SYSTEM_START_DAYS_AGO = 30;
+  function seededRandomFactory(seed){
+    let s = seed % 2147483647;
+    if(s <= 0) s += 2147483646;
+    return function(){ s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+  }
+  const dailyProduction = [];
+  function buildDailyProductionHistory(){
+    const rand = seededRandomFactory(19260907);
+    const machines = [];
+    ['enjeksiyon','otomatikpres','eksantrikpres'].forEach(kind=>{
+      const label = uretimLabels[kind].title;
+      const prefix = label;
+      const count = workOrders[kind].total;
+      for(let i=1;i<=count;i++){
+        machines.push({
+          kind, category:label, unit:uretimLabels[kind].unit,
+          machine: prefix+'-'+String(i).padStart(2,'0'),
+          baseline: 180 + Math.floor(rand()*260)
+        });
+      }
+    });
+    const today = new Date();
+    for(let d=SYSTEM_START_DAYS_AGO-1; d>=0; d--){
+      const day = new Date(today.getFullYear(), today.getMonth(), today.getDate()-d);
+      const dateStr = day.getFullYear()+'-'+String(day.getMonth()+1).padStart(2,'0')+'-'+String(day.getDate()).padStart(2,'0');
+      const isSunday = day.getDay()===0;
+      machines.forEach(m=>{
+        const down = rand() < 0.035;
+        const produced = down ? 0 : Math.round(m.baseline * (0.75+rand()*0.5) * (isSunday?0.35:1));
+        dailyProduction.push({
+          date:dateStr, ts:day.getTime(), kind:m.kind, category:m.category,
+          machine:m.machine, produced, unit:m.unit, status: down?'Durdu':(isSunday?'Hafta Sonu':'Normal')
+        });
+      });
+    }
+  }
 
   let uretimTab = 'enjeksiyon';
   let gateBusy = false;
@@ -1417,27 +1485,43 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
   });
 
   /* ---------- DOSYA İNDİRME (CSV / XLSX ortak) ---------- */
-  // Artifact ortamında (claude.ai içinde) window.claude.downloads üzerinden,
-  // düz HTML dosyası olarak açıldığında ise klasik indirme bağlantısıyla çalışır.
+  // Artifact ortamında (claude.ai içinde) window.claude varlığı, o ortamda
+  // çalıştığımızın kesin işaretidir — orada klasik <a download> HİÇBİR ŞEY
+  // YAPMAZ (sandbox engelliyor), o yüzden asla sessizce o yönteme düşülmez:
+  // ya gerçek downloads API'siyle başarır ya da açıkça hata gösterir.
+  // Düz .html dosyası olarak açıldığında (window.claude yok) klasik indirme kullanılır.
   async function saveBlob(filename, blob){
-    if(typeof window.claude !== 'undefined' && window.claude && window.claude.use){
+    if(!blob || blob.size === 0){
+      toast('Rapor oluşturulamadı: veri boş çıktı.', 'danger');
+      return false;
+    }
+    const inArtifact = typeof window.claude !== 'undefined' && window.claude && typeof window.claude.use === 'function';
+    if(inArtifact){
       try{
         const dl = await window.claude.use('downloads');
         if(dl){
           await dl.save({filename, data:blob});
           return true;
         }
+        toast('Bu görünümde dosya indirme özelliği kullanılamıyor.', 'danger');
+        return false;
       }catch(err){
         if(err && err.code==='declined') return false;
-        // diğer hata kodlarında (unavailable vb.) aşağıdaki klasik yönteme düş
+        toast('Dosya indirilemedi (' + (err && err.code ? err.code : 'hata') + '). Lütfen tekrar deneyin.', 'danger');
+        return false;
       }
     }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    return true;
+    try{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      return true;
+    }catch(err){
+      toast('Dosya indirilemedi: ' + err.message, 'danger');
+      return false;
+    }
   }
   function rowsToCsvBlob(rows){
     const csv = rows.map(r=>r.map(v=>{
@@ -1594,6 +1678,76 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
     }
   }
   document.getElementById('btn-generate-report').addEventListener('click', generateExcelReport);
+
+  /* ---------- ÜRETİM TAKİBİ — GÜNLÜK ÜRETİM VERİSİ EXCEL DIŞA AKTARIMI ---------- */
+  function setUretimExportRange(daysAgo){
+    const to = new Date();
+    const from = new Date(); from.setDate(to.getDate() - (daysAgo - 1));
+    const fmtDate = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    document.getElementById('uretim-export-from').value = fmtDate(from);
+    document.getElementById('uretim-export-to').value = fmtDate(to);
+  }
+  setUretimExportRange(SYSTEM_START_DAYS_AGO);
+  document.getElementById('uretim-preset-7').addEventListener('click', ()=> setUretimExportRange(7));
+  document.getElementById('uretim-preset-30').addEventListener('click', ()=> setUretimExportRange(30));
+  document.getElementById('uretim-preset-all').addEventListener('click', ()=> setUretimExportRange(SYSTEM_START_DAYS_AGO));
+
+  async function generateUretimExcel(){
+    const catMode = document.querySelector('input[name="uretim-export-cat"]:checked').value;
+    const fromVal = document.getElementById('uretim-export-from').value;
+    const toVal = document.getElementById('uretim-export-to').value;
+    const from = fromVal ? new Date(fromVal+'T00:00:00').getTime() : 0;
+    const to = toVal ? new Date(toVal+'T23:59:59').getTime() : Date.now();
+    if(from > to){
+      toast('Başlangıç tarihi, bitiş tarihinden sonra olamaz.', 'danger');
+      return;
+    }
+    const statusEl = document.getElementById('uretim-export-status');
+    statusEl.textContent = 'Hazırlanıyor…';
+
+    const kinds = catMode==='all' ? ['enjeksiyon','otomatikpres','eksantrikpres'] : [catMode];
+    const wb = XLSX.utils.book_new();
+    const summaryRows = [
+      ['ÜRETİM VERİSİ RAPORU'],
+      ['Oluşturulma Tarihi', formatDateTime(Date.now())],
+      ['Tarih Aralığı', (fromVal||'…') + ' – ' + (toVal||'…')],
+      ['Kapsam', catMode==='all' ? 'Tüm Kategoriler' : uretimLabels[catMode].title],
+      []
+    ];
+
+    kinds.forEach(kind=>{
+      const label = uretimLabels[kind].title;
+      const rows = dailyProduction.filter(r=>r.kind===kind && r.ts>=from && r.ts<=to);
+      const sheetRows = [
+        [label + ' — Günlük Üretim'],
+        ['Tarih','Makina','Üretilen/Vuruş','Birim','Durum'],
+        ...rows.map(r=>[r.date, r.machine, r.produced, r.unit, r.status])
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(sheetRows);
+      ws['!cols'] = [{wch:12},{wch:16},{wch:14},{wch:9},{wch:12}];
+      XLSX.utils.book_append_sheet(wb, ws, label);
+
+      const totalForKind = rows.reduce((s,r)=>s+r.produced, 0);
+      const dayCount = new Set(rows.map(r=>r.date)).size;
+      summaryRows.push([label + ' toplam', fmt(totalForKind) + ' ' + uretimLabels[kind].unit, dayCount + ' gün']);
+    });
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+    wsSummary['!cols'] = [{wch:26},{wch:20},{wch:12}];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Özet');
+
+    try{
+      const buf = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+      const fname = 'Uretim-Verisi-' + (catMode==='all' ? 'tum-kategoriler' : catMode) + '-' + todayStamp() + '.xlsx';
+      const ok = await saveBlob(fname, blob);
+      statusEl.textContent = '';
+      if(ok) toast('Üretim verisi Excel olarak indirildi.', 'ok');
+    }catch(err){
+      statusEl.textContent = '';
+      toast('Rapor oluşturulurken bir hata oluştu: ' + err.message, 'danger');
+    }
+  }
+  document.getElementById('btn-uretim-export').addEventListener('click', generateUretimExcel);
 
   /* ---------- ÜRETİM TRENDİ ---------- */
   const weeklyAvg = weeklyHistory.reduce((s,d)=>s+d.val,0)/weeklyHistory.length;
@@ -1843,6 +1997,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
   });
 
   /* ---------- INIT ---------- */
+  buildDailyProductionHistory();
   renderAll();
   renderRaporlar();
 
