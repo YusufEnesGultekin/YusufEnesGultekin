@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFID Kalıp Sistemi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12151A;
+    --ink-2:#1B212B;
+    --ink-3:#242C38;
+    --line-dark:rgba(255,255,255,0.10);
+    --text-hi:#F5F6F8;
+    --text-lo:#AEB6C2;
+    --paper:#F3F4F7;
+    --paper-2:#FFFFFF;
+    --ink-on-paper:#14171C;
+    --muted-on-paper:#5B6472;
+    --line-light:#E3E5EA;
+    --accent:#E8791E;
+    --accent-deep:#B85410;
+    --accent-glow:#FFB067;
+    --good:#2FBF83;
+    --bad:#E5484D;
+    --font-display:'Archivo',Arial,sans-serif;
+    --font-body:'IBM Plex Sans',-apple-system,Segoe UI,Arial,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:var(--ink);
+    color:var(--text-hi);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;}
+  p{margin:0;}
+  a{color:inherit;}
+  ::selection{background:var(--accent);color:#fff;}
+  ::-webkit-scrollbar{width:9px;}
+  ::-webkit-scrollbar-thumb{background:#3A414D;border-radius:99px;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;} }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px;}
+  .eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:2.2px;text-transform:uppercase;font-weight:600;}
+  .eyebrow.on-dark{color:var(--accent-glow);}
+  .eyebrow.on-light{color:var(--accent-deep);}
+  .num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+
+  /* ---------- NAV ---------- */
+  .nav{position:sticky;top:0;z-index:50;background:rgba(18,21,26,0.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-dark);}
+  .nav-inner{max-width:1180px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .nav-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:800;font-size:15px;letter-spacing:.3px;}
+  .nav-brand .mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-deep));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .nav-links{display:flex;gap:22px;font-size:13px;color:var(--text-lo);font-weight:500;}
+  .nav-links a{text-decoration:none;transition:color .15s;}
+  .nav-links a:hover{color:var(--text-hi);}
+  .nav-cta{background:var(--accent);color:#fff;font-size:12.5px;font-weight:700;padding:9px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;transition:filter .15s;}
+  .nav-cta:hover{filter:brightness(1.08);}
+  @media(max-width:820px){ .nav-links{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;background:
+      radial-gradient(1100px 520px at 82% -10%, rgba(232,121,30,0.20), transparent 60%),
+      radial-gradient(700px 400px at 10% 110%, rgba(232,121,30,0.10), transparent 60%),
+      var(--ink);
+    padding:78px 0 64px;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:52px;align-items:center;}
+  @media(max-width:960px){ .hero-grid{grid-template-columns:1fr;gap:40px;} }
+  .hero h1{font-size:clamp(32px,4.6vw,54px);font-weight:900;line-height:1.05;letter-spacing:-0.5px;margin:14px 0 18px;color:var(--text-hi);}
+  .hero h1 em{font-style:normal;color:var(--accent-glow);}
+  .hero-sub{font-size:16.5px;line-height:1.65;color:var(--text-lo);max-width:52ch;margin-bottom:28px;}
+  .hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px;}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-body);font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;border:none;cursor:pointer;text-decoration:none;transition:filter .15s,transform .15s;}
+  .btn:hover{filter:brightness(1.07);transform:translateY(-1px);}
+  .btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff;box-shadow:0 10px 30px -8px rgba(232,121,30,0.55);}
+  .btn-ghost-dark{background:rgba(255,255,255,0.06);color:var(--text-hi);border:1px solid var(--line-dark);}
+  .btn-ghost-light{background:#fff;color:var(--ink-on-paper);border:1px solid var(--line-light);}
+  .btn-dark{background:var(--ink);color:#fff;}
+
+  .hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line-dark);padding-top:24px;}
+  .hero-stat{padding-right:14px;border-right:1px solid var(--line-dark);}
+  .hero-stat:last-child{border-right:none;}
+  .hero-stat .v{font-family:var(--font-mono);font-size:clamp(20px,2.6vw,28px);font-weight:600;color:var(--text-hi);}
+  .hero-stat .l{font-size:11px;color:var(--text-lo);margin-top:4px;line-height:1.4;}
+  @media(max-width:640px){ .hero-stats{grid-template-columns:repeat(2,1fr);gap:18px;} .hero-stat{border-right:none;padding-right:0;} }
+
+  /* Hero gate visual */
+  .gate-visual{position:relative;background:var(--ink-2);border:1px solid var(--line-dark);border-radius:20px;padding:26px 20px 20px;}
+  .gate-visual .cap{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .gate-visual .cap b{font-size:12px;color:var(--text-hi);font-weight:700;}
+  .live-dot{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;color:var(--good);letter-spacing:.5px;}
+  .live-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse-dot 1.4s infinite;}
+  @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .gate-stage-hero{position:relative;height:150px;background:#0E1116;border-radius:14px;overflow:hidden;border:1px solid var(--line-dark);}
+  .gv-col{position:absolute;top:0;bottom:0;width:7px;background:#3A414D;}
+  .gv-col.l{left:4%;} .gv-col.r{right:4%;}
+  .gv-beam{position:absolute;top:10px;left:4%;right:4%;height:5px;background:#3A414D;border-radius:3px;}
+  .gv-ant{position:absolute;top:20px;width:12px;height:30px;background:#5A6272;border-radius:3px;transform:rotate(22deg);transition:background .2s,box-shadow .2s;}
+  .gv-ant.l{left:26%;} .gv-ant.r{right:26%;transform:rotate(-22deg);}
+  .gv-ant.lit-in{background:var(--good);box-shadow:0 0 16px var(--good);}
+  .gv-ant.lit-out{background:var(--accent);box-shadow:0 0 16px var(--accent);}
+  .gv-zone-lbl{position:absolute;bottom:10px;font-family:var(--font-mono);font-size:9px;letter-spacing:.5px;color:#5A6272;}
+  .gv-zone-lbl.l{left:14%;} .gv-zone-lbl.c{left:50%;transform:translateX(-50%);} .gv-zone-lbl.r{right:14%;}
+  .gv-token{position:absolute;bottom:44px;left:8%;background:var(--text-hi);color:#12151A;font-family:var(--font-mono);font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.4);}
+  .gv-flag{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(47,191,131,0.15);color:var(--good);border:1px solid rgba(47,191,131,0.4);font-family:var(--font-mono);font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;opacity:0;transition:opacity .25s;}
+  .gv-flag.show{opacity:1;}
+  .gate-visual .foot{display:flex;justify-content:space-between;margin-top:14px;font-family:var(--font-mono);font-size:10.5px;color:var(--text-lo);}
+
+  /* ---------- SECTION shells ---------- */
+  section{padding:86px 0;}
+  .on-light{background:var(--paper);color:var(--ink-on-paper);}
+  .on-dark{background:var(--ink);color:var(--text-hi);}
+  .on-dark-2{background:var(--ink-2);color:var(--text-hi);}
+  .sec-head{max-width:640px;margin-bottom:44px;}
+  .sec-head h2{font-size:clamp(24px,3.2vw,36px);font-weight:800;letter-spacing:-0.3px;margin:12px 0 14px;}
+  .on-light .sec-head h2{color:var(--ink-on-paper);}
+  .sec-head p{font-size:15px;line-height:1.65;}
+  .on-light .sec-head p{color:var(--muted-on-paper);}
+  .on-dark .sec-head p, .on-dark-2 .sec-head p{color:var(--text-lo);}
+
+  /* Kicker quote (Sorun section) */
+  .kicker-quote{font-family:var(--font-display);font-weight:700;font-size:clamp(20px,2.6vw,27px);line-height:1.35;max-width:16ch;}
+
+  .before-after{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px;}
+  @media(max-width:720px){ .before-after{grid-template-columns:1fr;} }
+  .ba-card{border-radius:16px;padding:24px 26px;}
+  .ba-card.before{background:#FCECEA;border:1px solid #F3D0CB;}
+  .ba-card.after{background:#EAF7F1;border:1px solid #C9EBDA;}
+  .ba-card .tag{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:12px;display:inline-block;}
+  .ba-card.before .tag{color:#C0332C;} .ba-card.after .tag{color:#1D8A5B;}
+  .ba-card ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px;}
+  .ba-card li{font-size:13.5px;line-height:1.5;padding-left:20px;position:relative;color:var(--ink-on-paper);}
+  .ba-card.before li::before{content:"✕";position:absolute;left:0;color:#C0332C;font-weight:700;font-size:12px;}
+  .ba-card.after li::before{content:"✓";position:absolute;left:0;color:#1D8A5B;font-weight:700;font-size:12px;}
+
+  /* ---------- Workflow stepper demo ---------- */
+  .stepper-shell{display:grid;grid-template-columns:230px 1fr;gap:32px;}
+  @media(max-width:820px){ .stepper-shell{grid-template-columns:1fr;} }
+  .step-nav{display:flex;flex-direction:column;gap:4px;}
+  .step-item{display:flex;align-items:flex-start;gap:12px;padding:13px 12px;border-radius:12px;cursor:pointer;transition:background .15s;border:1px solid transparent;}
+  .step-item:hover{background:rgba(255,255,255,0.04);}
+  .step-item.active{background:rgba(232,121,30,0.12);border-color:rgba(232,121,30,0.3);}
+  .step-num{width:26px;height:26px;border-radius:50%;background:#2A313D;color:var(--text-lo);font-family:var(--font-mono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s,color .15s;}
+  .step-item.active .step-num{background:var(--accent);color:#fff;}
+  .step-item.done .step-num{background:var(--good);color:#fff;}
+  .step-label{font-size:13.5px;font-weight:600;color:var(--text-hi);padding-top:3px;}
+  .step-item .step-label small{display:block;font-weight:400;color:var(--text-lo);font-size:11.5px;margin-top:2px;}
+
+  .step-stage{background:var(--ink-3);border:1px solid var(--line-dark);border-radius:18px;padding:30px 28px;min-height:300px;display:flex;flex-direction:column;}
+  .step-stage h3{font-size:19px;font-weight:700;margin-bottom:10px;}
+  .step-stage p.desc{font-size:14px;color:var(--text-lo);line-height:1.6;margin-bottom:22px;max-width:52ch;}
+  .step-demo-area{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;}
+  .step-controls{display:flex;gap:10px;margin-top:22px;}
+
+  .demo-countdown-box{background:#0E1116;border:1px solid var(--line-dark);border-radius:14px;padding:18px 20px;}
+  .demo-countdown-box select{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--line-dark);background:#171B22;color:var(--text-hi);font-size:13px;margin-bottom:12px;font-family:var(--font-body);}
+  .cd-bar{height:8px;border-radius:99px;background:#252C37;overflow:hidden;margin-bottom:6px;}
+  .cd-bar .fill{height:100%;background:var(--accent);width:100%;transition:width 1s linear,background .3s;}
+  .cd-txt{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--text-lo);}
+  .demo-result{font-family:var(--font-mono);font-size:12.5px;padding:10px 14px;border-radius:9px;margin-top:14px;display:none;}
+  .demo-result.ok{display:block;background:rgba(47,191,131,0.12);color:var(--good);border:1px solid rgba(47,191,131,0.3);}
+  .demo-result.bad{display:block;background:rgba(229,72,77,0.12);color:var(--bad);border:1px solid rgba(229,72,77,0.35);}
+
+  /* ---------- Comparison simulator ---------- */
+  .cmp-tabs{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap;}
+  .cmp-tab{font-family:var(--font-body);font-size:13px;font-weight:700;padding:11px 18px;border-radius:10px;border:1px solid var(--line-light);background:#fff;color:var(--muted-on-paper);cursor:pointer;transition:all .15s;}
+  .cmp-tab.active{background:var(--ink-on-paper);color:#fff;border-color:var(--ink-on-paper);}
+  .cmp-tab.active.winner{background:linear-gradient(135deg,var(--accent),var(--accent-deep));border-color:transparent;}
+  .cmp-panel{background:#fff;border:1px solid var(--line-light);border-radius:18px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:30px;}
+  @media(max-width:760px){ .cmp-panel{grid-template-columns:1fr;} }
+  .cmp-panel h3{font-size:20px;font-weight:800;margin-bottom:6px;color:var(--ink-on-paper);}
+  .cmp-verdict{display:inline-block;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.5px;padding:4px 11px;border-radius:99px;margin-bottom:16px;}
+  .cmp-verdict.no{background:#FCECEA;color:#C0332C;}
+  .cmp-verdict.yes{background:#EAF7F1;color:#1D8A5B;}
+  .cmp-body{font-size:14px;line-height:1.7;color:var(--muted-on-paper);}
+  .cmp-specs{display:flex;flex-direction:column;gap:12px;justify-content:center;}
+  .cmp-spec-row{display:flex;justify-content:space-between;padding:12px 16px;background:var(--paper);border-radius:10px;font-size:13px;}
+  .cmp-spec-row b{font-family:var(--font-mono);}
+
+  /* ---------- Live gate mini demo (light section) ---------- */
+  .demo-card{background:var(--ink);border-radius:22px;padding:36px;color:var(--text-hi);}
+  .demo-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+  .demo-card-head h3{font-size:19px;font-weight:700;}
+  .demo-log{margin-top:20px;display:flex;flex-direction:column;gap:8px;max-height:160px;overflow-y:auto;}
+  .demo-log-row{display:flex;align-items:center;gap:10px;font-size:12.5px;padding:8px 4px;border-bottom:1px solid var(--line-dark);}
+  .demo-log-row .dir{font-family:var(--font-mono);font-weight:700;font-size:10.5px;padding:3px 8px;border-radius:5px;}
+  .demo-log-row .dir.in{background:rgba(47,191,131,0.15);color:var(--good);}
+  .demo-log-row .dir.out{background:rgba(232,121,30,0.15);color:var(--accent-glow);}
+  .demo-log-row .t{margin-left:auto;font-family:var(--font-mono);color:var(--text-lo);font-size:11px;}
+
+  /* ---------- Spec grid ---------- */
+  .spec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  @media(max-width:820px){ .spec-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:520px){ .spec-grid{grid-template-columns:1fr;} }
+  .spec-card{background:#fff;border:1px solid var(--line-light);border-radius:16px;padding:22px;}
+  .spec-card .ic{width:38px;height:38px;border-radius:10px;background:rgba(232,121,30,0.12);color:var(--accent-deep);display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px;}
+  .spec-card h4{font-size:14.5px;font-weight:700;color:var(--ink-on-paper);margin-bottom:8px;}
+  .spec-card .spec-val{font-family:var(--font-mono);font-size:20px;font-weight:600;color:var(--accent-deep);margin-bottom:4px;}
+  .spec-card p{font-size:12.5px;color:var(--muted-on-paper);line-height:1.5;}
+
+  /* ---------- Module cards ---------- */
+  .module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:36px;}
+  @media(max-width:900px){ .module-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:560px){ .module-grid{grid-template-columns:1fr;} }
+  .module-card{background:var(--ink-2);border:1px solid var(--line-dark);border-radius:16px;padding:22px;}
+  .module-card .ic{font-size:20px;margin-bottom:12px;}
+  .module-card h4{font-size:14.5px;font-weight:700;color:var(--text-hi);margin-bottom:8px;}
+  .module-card p{font-size:12.5px;color:var(--text-lo);line-height:1.55;}
+
+  /* ---------- Test checklist ---------- */
+  .test-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media(max-width:820px){ .test-grid{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:560px){ .test-grid{grid-template-columns:1fr;} }
+  .test-item{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--line-light);border-radius:12px;padding:14px 16px;}
+  .test-item .chk{width:20px;height:20px;border-radius:50%;background:var(--good);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-weight:700;}
+  .test-item span{font-size:12.5px;line-height:1.5;color:var(--ink-on-paper);}
+
+  /* ---------- Roadmap ---------- */
+  .roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:900px){ .roadmap{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:560px){ .roadmap{grid-template-columns:1fr;} }
+  .phase-card{border-radius:16px;padding:22px 20px;position:relative;border:1px solid var(--line-dark);}
+  .phase-card.now{background:linear-gradient(160deg,rgba(232,121,30,0.18),rgba(232,121,30,0.04));border-color:rgba(232,121,30,0.4);}
+  .phase-card.future{background:var(--ink-2);}
+  .phase-card.done{background:linear-gradient(160deg,rgba(47,191,131,0.16),rgba(47,191,131,0.03));border-color:rgba(47,191,131,0.35);}
+  .phase-tag{font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.8px;padding:3px 9px;border-radius:99px;display:inline-block;margin-bottom:12px;}
+  .phase-card.now .phase-tag{background:var(--accent);color:#fff;}
+  .phase-card.future .phase-tag{background:#2A313D;color:var(--text-lo);}
+  .phase-card.done .phase-tag{background:var(--good);color:#fff;}
+  .phase-card h4{font-size:14.5px;font-weight:700;margin-bottom:8px;color:var(--text-hi);}
+  .phase-card p{font-size:12px;color:var(--text-lo);line-height:1.55;}
+
+  /* ---------- Footer CTA ---------- */
+  .cta-final{background:linear-gradient(135deg,var(--accent-deep),var(--accent));text-align:center;padding:92px 0;}
+  .cta-final h2{font-size:clamp(26px,4vw,42px);font-weight:900;color:#fff;margin-bottom:16px;letter-spacing:-0.5px;}
+  .cta-final p{color:rgba(255,255,255,0.9);font-size:15.5px;max-width:52ch;margin:0 auto 30px;line-height:1.6;}
+  .cta-final .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+  footer{background:var(--ink);padding:40px 0;border-top:1px solid var(--line-dark);}
+  .foot-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--text-lo);}
+  .foot-row a{color:var(--text-lo);text-decoration:underline;text-underline-offset:2px;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand"><span class="mark">📡</span>RFID KALIP SİSTEMİ</div>
+    <div class="nav-links">
+      <a href="#sorun">Neden Gerekli</a>
+      <a href="#nasil-calisir">Nasıl Çalışır</a>
+      <a href="#karsilastirma">Neden RFID</a>
+      <a href="#modüller">Yazılım</a>
+      <a href="#yol-haritasi">Yol Haritası</a>
+    </div>
+    <a class="nav-cta" href="https://claude.ai/code/artifact/be6fd6c9-30c0-44b9-ace1-ac20a2bbe7b5" target="_blank" rel="noopener">Canlı Demo →</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow on-dark">KLEMSAN A.Ş. — ÜRETİM BİRİMİ · MÜHENDİSLİK TEKLİFİ</span>
+      <h1>Kalıp Takibinde<br><em>Belirsizlik Dönemi</em> Bitiyor.</h1>
+      <p class="hero-sub">Pasif UHF RFID ile kalıphane giriş-çıkışı artık otomatik, kesin ve kayıt altında. Operatör onayı beklemeden, tahmine yer bırakmadan — kalıbın yönünü geçit kendisi belirler.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-accent" href="https://claude.ai/code/artifact/be6fd6c9-30c0-44b9-ace1-ac20a2bbe7b5" target="_blank" rel="noopener">▶ Çalışan Yazılımı Deneyin</a>
+        <a class="btn btn-ghost-dark" href="#nasil-calisir">Nasıl Çalıştığını Gör ↓</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="v">3.496<span style="font-size:13px;">mm</span></div><div class="l">Kapsanan açıklık — TAMAMI</div></div>
+        <div class="hero-stat"><div class="v">~6,5<span style="font-size:13px;">m</span></div><div class="l">Metal üzeri okuma menzili</div></div>
+        <div class="hero-stat"><div class="v">%100</div><div class="l">Yön tespiti — artık tahmin değil</div></div>
+        <div class="hero-stat"><div class="v">60<span style="font-size:13px;">sn</span></div><div class="l">Operatör veri girişi süresi</div></div>
+      </div>
+    </div>
+
+    <div class="gate-visual">
+      <div class="cap"><b>CANLI ÖNİZLEME — RFID GEÇİDİ</b><span class="live-dot">OTOMATİK ÇALIŞIYOR</span></div>
+      <div class="gate-stage-hero" id="hero-gate">
+        <div class="gv-col l"></div><div class="gv-col r"></div>
+        <div class="gv-beam"></div>
+        <div class="gv-ant l" id="hg-ant-l"></div>
+        <div class="gv-ant r" id="hg-ant-r"></div>
+        <div class="gv-zone-lbl l">GİRİŞ</div>
+        <div class="gv-zone-lbl c">ARA BÖLGE</div>
+        <div class="gv-zone-lbl r">ÇIKIŞ</div>
+        <div class="gv-flag" id="hg-flag">YÖN: GİRİŞ</div>
+        <div class="gv-token" id="hg-token">KLP-0210</div>
+      </div>
+      <div class="foot"><span>ANTEN: TIMES-7 A6034</span><span>22° EĞİM</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="on-light" id="sorun">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-light">NEDEN ŞİMDİ</span>
+      <h2>Sabri Bey'in pantolonunda bile RFID var.</h2>
+      <p>Perakende zincirleri stok takibi için yıllardır bu teknolojiyi kullanıyor. Milyonluk fabrikanın en kritik parçaları olan kalıplarda neden olmasın? Dijitalleşme artık tercih değil, gereklilik — rakipler süreçlerini otomatikleştirirken elle takip modeli verimlilik farkını her geçen gün açıyor.</p>
+    </div>
+    <div class="before-after">
+      <div class="ba-card before">
+        <span class="tag">ŞU AN — ELLE TAKİP</span>
+        <ul>
+          <li>Kalıphaneye giren/çıkan kalıplar defter veya hafızayla takip ediliyor</li>
+          <li>Kayıp veya karışıklık ancak günler sonra fark ediliyor</li>
+          <li>Yön (giriş mi çıkış mı) operatör beyanına bağlı</li>
+          <li>Kalıp bazlı üretim ve bakım geçmişi dağınık</li>
+        </ul>
+      </div>
+      <div class="ba-card after">
+        <span class="tag">RFID İLE — OTOMATİK TAKİP</span>
+        <ul>
+          <li>Her geçiş otomatik okunur, kalıp numarası ve saat kendiliğinden kaydedilir</li>
+          <li>Yön iki antenden hangisinin okuduğuna göre kesin belirlenir</li>
+          <li>Veri girilmezse 60 sn içinde alarm — kayıp kaydı asla açık kalmaz</li>
+          <li>Tüm geçmiş tek panelde, aranabilir ve Excel'e aktarılabilir</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="on-dark" id="nasil-calisir">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-dark">DENEYİN — İNTERAKTİF DEMO</span>
+      <h2>Etiket okumadan kayda: dört adım.</h2>
+      <p>Operatörün gerçekte yaşayacağı akışı aşağıda kendiniz deneyimleyin. Her adıma tıklayın, 3. adımda gerçek geri sayımı test edin.</p>
+    </div>
+    <div class="stepper-shell">
+      <div class="step-nav" id="step-nav">
+        <div class="step-item active" data-step="1"><div class="step-num">1</div><div class="step-label">Etiket okunur<small>Operatör hiçbir işlem yapmaz</small></div></div>
+        <div class="step-item" data-step="2"><div class="step-num">2</div><div class="step-label">Yön otomatik belirlenir<small>Tahmin ya da onay yok</small></div></div>
+        <div class="step-item" data-step="3"><div class="step-num">3</div><div class="step-label">60 sn'de veri girişi<small>Kendiniz deneyin →</small></div></div>
+        <div class="step-item" data-step="4"><div class="step-num">4</div><div class="step-label">Kayıt kapanır<small>Ya da alarm tetiklenir</small></div></div>
+      </div>
+      <div class="step-stage" id="step-stage">
+        <!-- filled by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="on-light" id="karsilastirma">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-light">DENEYİN — KARŞILAŞTIRMA SİMÜLATÖRÜ</span>
+      <h2>QR kod mu, aktif IoT mu, pasif RFID mi?</h2>
+      <p>Üç teknolojiyi karşılaştırın. Sekmelere tıklayarak her birinin bu uygulamada neden yeterli ya da yetersiz kaldığını görün.</p>
+    </div>
+    <div class="cmp-tabs" id="cmp-tabs">
+      <button class="cmp-tab" data-cmp="qr">QR Kod</button>
+      <button class="cmp-tab" data-cmp="iot">Aktif IoT (Pilli)</button>
+      <button class="cmp-tab active winner" data-cmp="rfid">Pasif UHF RFID</button>
+    </div>
+    <div class="cmp-panel" id="cmp-panel"><!-- filled by JS --></div>
+  </div>
+</section>
+
+<section class="on-dark-2">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-dark">DENEYİN — CANLI SİMÜLASYON</span>
+      <h2>Bir kalıp geçişini kendiniz tetikleyin.</h2>
+      <p>Aşağıdaki butona basın — sistem kalıbı rastgele bir yönden geçirir, hangi antenin okuduğuna göre yönü kendisi belirler ve kaydı düşer.</p>
+    </div>
+    <div class="demo-card">
+      <div class="demo-card-head">
+        <h3>RFID Geçidi — Faz 1</h3>
+        <button class="btn btn-accent" id="btn-live-sim" type="button">▶ Kalıp Geçişini Simüle Et</button>
+      </div>
+      <div class="gate-stage-hero" id="live-gate" style="height:130px;">
+        <div class="gv-col l"></div><div class="gv-col r"></div>
+        <div class="gv-beam"></div>
+        <div class="gv-ant l" id="lg-ant-l"></div>
+        <div class="gv-ant r" id="lg-ant-r"></div>
+        <div class="gv-zone-lbl l">GİRİŞ</div>
+        <div class="gv-zone-lbl c">ARA BÖLGE</div>
+        <div class="gv-zone-lbl r">ÇIKIŞ</div>
+        <div class="gv-token" id="lg-token" style="display:none;"></div>
+      </div>
+      <div class="demo-log" id="live-log">
+        <div style="color:var(--text-lo);font-size:12.5px;padding:8px 4px;">Henüz geçiş yok — yukarıdaki butona basın.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="on-light">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-light">DONANIM</span>
+      <h2>Mühendislik seviyesinde doğrulanmış teknik özellikler.</h2>
+      <p>Saha ölçümleri ve gerçek 3D vektör hesabıyla doğrulanmış, tedarikçi verilerine dayanan seçim kriterleri.</p>
+    </div>
+    <div class="spec-grid">
+      <div class="spec-card"><div class="ic">📶</div><h4>Anten</h4><div class="spec-val">Times-7 A6034</div><p>9 dBiC dairesel polarizasyon, 81°/25° azimuth/elevation huzme — açıklığın tamamını tek antenle kapsar.</p></div>
+      <div class="spec-card"><div class="ic">🏷️</div><h4>Etiket</h4><div class="spec-val">SCIVAS HTR3813-1</div><p>38×13×7,7 mm, on-metal gövde, IP68 — Impinj R6-P çip, EPC Gen2 / ISO18000-6C.</p></div>
+      <div class="spec-card"><div class="ic">📡</div><h4>Okuyucu</h4><div class="spec-val">Zebra FX9600</div><p>4-8 harici anten portu, izoleli GPIO — tepe lambası ve siren tetikleme, IP53.</p></div>
+      <div class="spec-card"><div class="ic">📐</div><h4>Montaj Açısı</h4><div class="spec-val">22°</div><p>Kirişe eğimli montaj, giriş ve çıkış için ayrı anten (2 adet) — gantry tasarımı bulonlu ve sökülebilir.</p></div>
+      <div class="spec-card"><div class="ic">📏</div><h4>Kapsanan Açıklık</h4><div class="spec-val">3.496 mm</div><p>Geçit açıklığının tamamı — ölçümle ve 3D simülasyonla doğrulandı, yön hiçbir zaman belirsiz kalmaz.</p></div>
+      <div class="spec-card"><div class="ic">🎯</div><h4>Okuma Menzili</h4><div class="spec-val">~6,5 m</div><p>Metal üzeri kalıp etiketinde, üretici beyanına göre — geçit genişliğinin çok üzerinde güvenlik payı.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="on-dark" id="modüller">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-dark">YAZILIM</span>
+      <h2>Donanım kadar hazır bir yazılım: yönetici paneli çalışır durumda.</h2>
+      <p>Bu bir konsept değil — aşağıdaki modüllerin tamamı şu anda canlı ve kullanılabilir durumda. Butona tıklayıp doğrudan deneyebilirsiniz.</p>
+    </div>
+    <div class="module-grid">
+      <div class="module-card"><div class="ic">📊</div><h4>Genel Bakış</h4><p>Kalıp bazlı üretim özeti, canlı bakım uyarıları ve tek ekranda RFID geçit simülasyonu.</p></div>
+      <div class="module-card"><div class="ic">🗂️</div><h4>Kalıp Sicili</h4><p>Her kalıbın konumu, toplam üretimi ve bakım geçmişi — aranabilir, filtrelenebilir, CSV'ye aktarılabilir.</p></div>
+      <div class="module-card"><div class="ic">🔀</div><h4>Kalıp Hareketleri</h4><p>Kalıphane/üretimhane konum dağılımı ve nereden-nereye-kim-ne zaman detaylı giriş/çıkış geçmişi.</p></div>
+      <div class="module-card"><div class="ic">⚙️</div><h4>Üretim Takibi</h4><p>Enjeksiyon, Otomatik Pres ve Eksantrik Pres — 49 makinanın aktif iş emirleri ve ilerlemesi.</p></div>
+      <div class="module-card"><div class="ic">🛠️</div><h4>Bakım Uyarıları</h4><p>Vuruş/üretim ömrü eşiğine göre otomatik MES bakım kaydı ve tek tıkla bakıma alma.</p></div>
+      <div class="module-card"><div class="ic">📈</div><h4>Raporlar &amp; Excel</h4><p>Haftalık üretim eğilimi, kategori bazlı toplamlar ve tarih aralığı seçilebilir çok sayfalı Excel raporu.</p></div>
+    </div>
+    <div style="text-align:center;">
+      <a class="btn btn-accent" href="https://claude.ai/code/artifact/be6fd6c9-30c0-44b9-ace1-ac20a2bbe7b5" target="_blank" rel="noopener">▶ Canlı Yazılım Panelini Şimdi Deneyin</a>
+    </div>
+  </div>
+</section>
+
+<section class="on-light">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-light">KABUL KRİTERLERİ</span>
+      <h2>Devralınmadan önce 9 test — hepsi tanımlı, hepsi ölçülebilir.</h2>
+      <p>Dar azimuth payı (0,5°–1,2°) nedeniyle sahada okuma testi zorunlu tutuldu; bu, kabul kriterlerine bilinçli olarak eklendi.</p>
+    </div>
+    <div class="test-grid">
+      <div class="test-item"><span class="chk">✓</span><span><b>Tekil okuma</b> — 50/50 başarı, açıklık ortasından</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Yön doğruluğu</b> — 50/50 doğru, operatör müdahalesi yok</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Çoklu geçiş</b> — iki kalıp yan yana, her ikisi de okunur</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Açıklık ucu okuma</b> — her iki uçta güvenilir okuma</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Çift okuma engeli</b> — ara bölgede tek kayıt açılır</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Hayalet okuma</b> — 10 dk beklemede yeni kayıt açılmaz</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Alarm testi</b> — 60 sn sonunda siren ve lamba devrede</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Uzak kalıp</b> — depodaki kalıp okunmaz (yanlış pozitif yok)</span></div>
+      <div class="test-item"><span class="chk">✓</span><span><b>Etiket dayanımı</b> — 3 ay pilot izleme, düşme/kayıp yok</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="on-dark" id="yol-haritasi">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow on-dark">GENİŞLEME POTANSİYELİ</span>
+      <h2>Bu sadece Faz 1. Mimari, büyümeye açık tasarlandı.</h2>
+      <p>Fazlar birbirinin verisini kullanır. Faz 4'ün önizlemesi zaten hazır — yukarıdaki "Canlı Demo" tam olarak bu.</p>
+    </div>
+    <div class="roadmap">
+      <div class="phase-card now">
+        <span class="phase-tag">FAZ 1 — BU TEKLİF</span>
+        <h4>RFID Geçit Sistemi</h4>
+        <p>Kalıphane giriş-çıkışının otomatik, kesin yönlü RFID takibi. Teslim edilecek olan budur.</p>
+      </div>
+      <div class="phase-card future">
+        <span class="phase-tag">FAZ 2</span>
+        <h4>Kalıp–Makina Eşleştirme</h4>
+        <p>Yeni geçit gerekmez — el terminaliyle kalıp ve makine etiketi okutulur, eşleşme otomatik kaydedilir.</p>
+      </div>
+      <div class="phase-card future">
+        <span class="phase-tag">FAZ 3</span>
+        <h4>Üretim Takibi (MES)</h4>
+        <p>Üretilen adet, fire/hurda ve nedeni, kullanılan hammadde kaydedilir; kalıp vuruş ömrü güncellenir.</p>
+      </div>
+      <div class="phase-card done">
+        <span class="phase-tag">FAZ 4 — HAZIR</span>
+        <h4>Dashboard / Kalıp Sicili</h4>
+        <p>Kalıp bazlı geçmiş dökümü ve öngörülü bakım paneli — canlı demo olarak şu anda kullanılabilir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-final">
+  <div class="wrap">
+    <h2>Tedarik sürecini başlatmaya hazırız.</h2>
+    <p>A6034 anten, harici okuyucu ve adaptör/braket siparişinin onaylanmasıyla süreç başlatılabilir. Yazılım tarafı zaten hazır ve canlı olarak denenebilir durumda.</p>
+    <div class="btns">
+      <a class="btn btn-dark" href="https://claude.ai/code/artifact/be6fd6c9-30c0-44b9-ace1-ac20a2bbe7b5" target="_blank" rel="noopener">▶ Canlı Demoyu Deneyin</a>
+      <a class="btn btn-ghost-light" href="mailto:yusufenesgultekin@gmail.com">✉ Yusuf Enes Gültekin'e Yazın</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap foot-row">
+    <div>© 2026 Klemsan A.Ş. — Üretim Birimi · RFID Kalıp Takip Sistemi, Faz 1 Teklifi</div>
+    <div>Hazırlayan: Yusuf Enes Gültekin · <a href="mailto:yusufenesgultekin@gmail.com">yusufenesgultekin@gmail.com</a></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- HERO AMBIENT GATE LOOP ---------- */
+  function runHeroLoop(){
+    const token = document.getElementById('hg-token');
+    const antL = document.getElementById('hg-ant-l');
+    const antR = document.getElementById('hg-ant-r');
+    const flag = document.getElementById('hg-flag');
+    let goingRight = true;
+
+    function cycle(){
+      const dir = goingRight ? 'GİRİŞ' : 'ÇIKIŞ';
+      token.style.transition = 'none';
+      token.style.left = goingRight ? '6%' : '86%';
+      token.textContent = ['KLP-0210','KLP-0087','KLP-0301','KLP-0044'][Math.floor(Math.random()*4)];
+      void token.offsetWidth;
+      token.style.transition = 'left 2.2s cubic-bezier(.4,.1,.3,1)';
+      token.style.left = goingRight ? '86%' : '6%';
+      antL.classList.remove('lit-in','lit-out');
+      antR.classList.remove('lit-in','lit-out');
+      flag.classList.remove('show');
+
+      setTimeout(()=>{
+        if(goingRight){ antL.classList.add('lit-in'); } else { antR.classList.add('lit-out'); }
+        flag.textContent = 'YÖN: ' + dir;
+        flag.classList.add('show');
+      }, 900);
+
+      setTimeout(()=>{
+        antL.classList.remove('lit-in','lit-out');
+        antR.classList.remove('lit-in','lit-out');
+        flag.classList.remove('show');
+        goingRight = !goingRight;
+        cycle();
+      }, 2600);
+    }
+    cycle();
+  }
+  runHeroLoop();
+
+  /* ---------- WORKFLOW STEPPER DEMO ---------- */
+  const stepContent = {
+    1: {
+      title:'Etiket otomatik okunur',
+      desc:'Kalıp geçitten geçerken üzerindeki pasif UHF RFID etiketi otomatik olarak okunur. Operatör herhangi bir işlem yapmaz, durmaz, hiçbir şey okutmaz.',
+      body:`<div style="display:flex;align-items:center;gap:18px;">
+              <div style="font-size:40px;">🏷️ → 📡</div>
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-lo);">EPC: E200-3412-...<br>Okuma mesafesi: ~4,2 m<br>Süre: &lt; 0,3 sn</div>
+            </div>`
+    },
+    2: {
+      title:'Yön kesin olarak belirlenir',
+      desc:'Hangi antenin (giriş bandı ya da çıkış bandı) okuduğuna göre yön otomatik ve kesin olarak belirlenir. Tahmin ya da operatör onayı yok.',
+      body:`<div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:160px;background:rgba(47,191,131,0.1);border:1px solid rgba(47,191,131,0.3);border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:11px;color:var(--good);font-family:'IBM Plex Mono',monospace;font-weight:700;">ANTEN 1 OKUDU</div>
+                <div style="font-size:22px;font-weight:800;margin-top:8px;">GİRİŞ</div>
+              </div>
+              <div style="flex:1;min-width:160px;background:rgba(232,121,30,0.1);border:1px solid rgba(232,121,30,0.3);border-radius:12px;padding:16px;text-align:center;">
+                <div style="font-size:11px;color:var(--accent-glow);font-family:'IBM Plex Mono',monospace;font-weight:700;">ANTEN 2 OKUDU</div>
+                <div style="font-size:22px;font-weight:800;margin-top:8px;">ÇIKIŞ</div>
+              </div>
+            </div>`
+    },
+    3: {
+      title:'Operatör 60 sn içinde veri girer — deneyin',
+      desc:'Ekranda kalıbın neden geldiğini / yapılan işlemi seçmesi istenir. Aşağıdaki demo gerçek geri sayımı kullanır — süre dolmadan bir seçenek seçip "Kaydet"e basın, ya da hiçbir şey yapmadan bekleyip alarmı görün.',
+      body:`<div class="demo-countdown-box">
+              <select id="demo-reason"><option>Periyodik bakım zamanı geldi</option><option>Üretime gönderildi</option><option>Arıza var - tamir gerekiyor</option></select>
+              <div class="cd-bar"><div class="fill" id="demo-cd-fill"></div></div>
+              <div class="cd-txt"><span>Kalan süre</span><span id="demo-cd-txt">10 sn</span></div>
+              <div style="display:flex;gap:10px;margin-top:14px;">
+                <button class="btn btn-accent" id="demo-cd-save" type="button" style="flex:1;justify-content:center;">Kaydı Tamamla</button>
+                <button class="btn btn-ghost-dark" id="demo-cd-restart" type="button">↻ Yeniden Başlat</button>
+              </div>
+              <div class="demo-result" id="demo-cd-result"></div>
+            </div>`
+    },
+    4: {
+      title:'Kayıt kapanır — ya da açık kalır',
+      desc:'Veri süresi içinde girilirse kayıt normal şekilde kapanır ve günlük rapora işlenir. Girilmezse GPIO çıkışı tepe lambasını ve sireni tetikler; kayıt silinmez, "eksik giriş" olarak açık kalır.',
+      body:`<div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <div style="flex:1;min-width:180px;background:rgba(47,191,131,0.1);border:1px solid rgba(47,191,131,0.3);border-radius:12px;padding:16px;">
+                <div style="font-weight:700;color:var(--good);margin-bottom:6px;">✓ Veri girildi</div>
+                <div style="font-size:12.5px;color:var(--text-lo);">Kayıt kapanır, günlük rapora işlenir.</div>
+              </div>
+              <div style="flex:1;min-width:180px;background:rgba(229,72,77,0.1);border:1px solid rgba(229,72,77,0.3);border-radius:12px;padding:16px;">
+                <div style="font-weight:700;color:var(--bad);margin-bottom:6px;">⚠ Veri girilmedi</div>
+                <div style="font-size:12.5px;color:var(--text-lo);">Tepe lambası + siren tetiklenir, "eksik giriş" olarak açık kalır.</div>
+              </div>
+            </div>`
+    }
+  };
+
+  let demoTimer = null;
+  function renderStep(n){
+    const c = stepContent[n];
+    const stage = document.getElementById('step-stage');
+    stage.innerHTML = `<h3>${n}. ${c.title}</h3><p class="desc">${c.desc}</p><div class="step-demo-area">${c.body}</div>`;
+    document.querySelectorAll('.step-item').forEach(it=>{
+      it.classList.toggle('active', Number(it.dataset.step)===n);
+    });
+    if(n===3){ wireCountdownDemo(); }
+  }
+  function wireCountdownDemo(){
+    clearInterval(demoTimer);
+    let secondsLeft = 10;
+    const total = 10;
+    const fill = document.getElementById('demo-cd-fill');
+    const txt = document.getElementById('demo-cd-txt');
+    const result = document.getElementById('demo-cd-result');
+    result.className = 'demo-result';
+    result.textContent = '';
+    function update(){
+      const pct = Math.max(0,(secondsLeft/total)*100);
+      fill.style.width = pct + '%';
+      txt.textContent = secondsLeft + ' sn';
+      fill.style.background = secondsLeft <= 3 ? '#E5484D' : (secondsLeft <= 6 ? '#E8791E' : '#E8791E');
+    }
+    update();
+    demoTimer = setInterval(()=>{
+      secondsLeft--;
+      if(secondsLeft < 0){
+        clearInterval(demoTimer);
+        result.className = 'demo-result bad';
+        result.textContent = '⚠ Süre doldu — tepe lambası ve siren tetiklendi. Kayıt "eksik giriş" olarak açık kaldı.';
+        return;
+      }
+      update();
+    }, 1000);
+    document.getElementById('demo-cd-save').onclick = ()=>{
+      clearInterval(demoTimer);
+      const reason = document.getElementById('demo-reason').value;
+      result.className = 'demo-result ok';
+      result.textContent = '✓ Kayıt tamamlandı — Seçim: ' + reason;
+    };
+    document.getElementById('demo-cd-restart').onclick = ()=> wireCountdownDemo();
+  }
+  document.querySelectorAll('.step-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      clearInterval(demoTimer);
+      renderStep(Number(item.dataset.step));
+    });
+  });
+  renderStep(1);
+
+  /* ---------- COMPARISON SIMULATOR ---------- */
+  const cmpContent = {
+    qr:{
+      title:'QR Kod', verdict:'no', verdictLabel:'NEDEN YETERSİZ',
+      body:'Temas/görüş hattı gerekir: operatör her kalıpta durup kod okutmalı. Yağ, toz, boya kodun üzerini kapatırsa okunamaz. Otomatik, temassız geçit mantığına uymaz.',
+      specs:[['Temas gerekir mi','Evet — durup okutma'],['Kirlenmeye dayanıklılık','Düşük'],['Otomatik geçit uyumu','Uygun değil']]
+    },
+    iot:{
+      title:'Aktif IoT (Pilli Sensör)', verdict:'no', verdictLabel:'NEDEN YETERSİZ',
+      body:'Pil bakımı gerektirir; ~3.000 kalıpta sürdürülemez bir yük. 120°C sürekli sıcaklığa dayanan pilli ürün pratikte yok. İhtiyaç canlı sensör verisi değil, sadece kimlik.',
+      specs:[['Bakım ihtiyacı','Pil değişimi — 3.000 kalıpta pratik değil'],['Sıcaklık dayanımı','Sınırlı (pil kısıtı)'],['Gereken veri','Sadece kimlik — fazlası gereksiz']]
+    },
+    rfid:{
+      title:'Pasif UHF RFID', verdict:'yes', verdictLabel:'SEÇİLEN ÇÖZÜM',
+      body:'Temassız, pilsiz ve bakımsız. Metrelerce mesafeden otomatik okunur. On-metal, 120°C\'ye uygun etiket seçenekleri mevcut. Tek başına hem temassız otomatik okumayı hem bakımsız/dayanıklı çalışmayı karşılar.',
+      specs:[['Bakım ihtiyacı','Yok — pilsiz, ömür boyu'],['Sıcaklık dayanımı','120°C sürekli (SCIVAS HTR3813-1)'],['Otomatik geçit uyumu','Tam uyumlu — metrelerce menzil']]
+    }
+  };
+  function renderCmp(key){
+    const c = cmpContent[key];
+    document.getElementById('cmp-panel').innerHTML = `
+      <div>
+        <span class="cmp-verdict ${c.verdict}">${c.verdictLabel}</span>
+        <h3>${c.title}</h3>
+        <div class="cmp-body">${c.body}</div>
+      </div>
+      <div class="cmp-specs">
+        ${c.specs.map(s=>`<div class="cmp-spec-row"><span>${s[0]}</span><b>${s[1]}</b></div>`).join('')}
+      </div>`;
+    document.querySelectorAll('.cmp-tab').forEach(t=>{
+      t.classList.toggle('active', t.dataset.cmp===key);
+    });
+  }
+  document.querySelectorAll('.cmp-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=> renderCmp(tab.dataset.cmp));
+  });
+  renderCmp('rfid');
+
+  /* ---------- LIVE GATE DEMO (standalone section) ---------- */
+  let liveBusy = false;
+  const liveCodes = ['KLP-0142','KLP-0087','KLP-0210','KLP-0044','KLP-0301','KLP-0119'];
+  document.getElementById('btn-live-sim').addEventListener('click', function(){
+    if(liveBusy) return;
+    liveBusy = true;
+    const token = document.getElementById('lg-token');
+    const antL = document.getElementById('lg-ant-l');
+    const antR = document.getElementById('lg-ant-r');
+    const goingRight = Math.random() > 0.5;
+    const dir = goingRight ? 'GİRİŞ' : 'ÇIKIŞ';
+    const code = liveCodes[Math.floor(Math.random()*liveCodes.length)];
+
+    token.style.display = 'block';
+    token.style.transition = 'none';
+    token.style.left = goingRight ? '5%' : '88%';
+    token.textContent = code;
+    void token.offsetWidth;
+    token.style.transition = 'left 1.6s cubic-bezier(.4,.1,.3,1)';
+    token.style.left = goingRight ? '88%' : '5%';
+    antL.classList.remove('lit-in','lit-out');
+    antR.classList.remove('lit-in','lit-out');
+
+    setTimeout(()=>{
+      if(goingRight) antL.classList.add('lit-in'); else antR.classList.add('lit-out');
+      const log = document.getElementById('live-log');
+      if(log.children.length===1 && log.children[0].style.color) log.innerHTML='';
+      const now = new Date();
+      const t = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+      const row = document.createElement('div');
+      row.className = 'demo-log-row';
+      row.innerHTML = `<span class="dir ${goingRight?'in':'out'}">${dir}</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:600;">${code}</span><span class="t">${t}</span>`;
+      log.prepend(row);
+    }, 700);
+
+    setTimeout(()=>{
+      token.style.display = 'none';
+      antL.classList.remove('lit-in','lit-out');
+      antR.classList.remove('lit-in','lit-out');
+      liveBusy = false;
+    }, 1700);
+  });
+
+})();
+</script>
+</body>
+</html>
