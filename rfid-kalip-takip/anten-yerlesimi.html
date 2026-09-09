@@ -45,7 +45,8 @@
   a{ color:var(--blue); }
 
   .topnav{ position:sticky; top:0; z-index:30; background:var(--ink); border-bottom:1px solid var(--line); }
-  .topnav-inner{ max-width:1180px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; gap:18px; overflow-x:auto; }
+  .topnav-inner{ max-width:1180px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; gap:14px; }
+  .topnav-scroll{ display:flex; align-items:center; gap:18px; overflow-x:auto; flex:1 1 auto; min-width:0; }
   .topnav-brand{ font-family:var(--font-display); font-weight:800; font-size:15px; letter-spacing:.02em; color:var(--accent); flex:none; white-space:nowrap; }
   .topnav-steps{ display:flex; gap:4px; flex:none; }
   .topnav-steps a{
@@ -54,7 +55,7 @@
   }
   .topnav-steps a.current{ color:var(--paper); border-color:var(--line); background:var(--panel-2); }
   .topnav-steps a[data-hidden]{ display:none; }
-  .lang-switch{ display:flex; gap:2px; flex:none; margin-left:auto; border:1px solid var(--line); border-radius:999px; padding:2px; }
+  .lang-switch{ display:flex; gap:2px; flex:none; border:1px solid var(--line); border-radius:999px; padding:2px; }
   .lang-switch button{
     font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; background:none; border:none; color:var(--dim);
     padding:5px 11px; border-radius:999px; cursor:pointer;
@@ -102,7 +103,7 @@
   .opt-card .lbl{ font-size:12.5px; font-weight:600; line-height:1.3; }
   .opt-card .desc{ font-size:10.5px; color:var(--dim); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.03em; }
   .opt-card:hover{ border-color:var(--accent-2); }
-  .opt-card.active{ border-color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
+  .opt-card.active{ border-color:var(--accent); border-left:4px solid var(--accent); padding-left:10px; background:color-mix(in srgb, var(--accent) 12%, var(--panel-2)); }
   .opt-card.active svg.icon{ color:var(--accent); }
   .opt-card.active .lbl{ color:var(--accent-2); }
   .opt-card:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
@@ -208,7 +209,8 @@
   details.disclosure .disclosure-body{ padding:0 18px 18px; border-top:1px solid var(--line); }
 
   table.bom{ width:100%; border-collapse:collapse; font-size:13px; }
-  table.bom th, table.bom td{ text-align:left; padding:10px 11px; border-bottom:1px solid var(--line); }
+  table.bom th, table.bom td{ text-align:left; padding:10px 11px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  table.bom tbody tr:nth-child(even){ background:var(--panel-2); }
   table.bom th{ font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--dim); }
   table.bom td.qty{ font-family:var(--font-mono); color:var(--accent-2); font-weight:600; white-space:nowrap; }
   table.bom td.price{ font-family:var(--font-mono); font-size:12.5px; white-space:nowrap; }
@@ -224,16 +226,18 @@
 <body>
 <div class="topnav">
   <div class="topnav-inner">
-    <span class="topnav-brand" data-i18n="brand">RFID SİSTEM TASARIMI</span>
-    <nav class="topnav-steps" id="topnavSteps">
-      <a href="#step-product" data-target="step-product" data-i18n="navProduct">Ürün</a>
-      <a href="#step-tracking" data-target="step-tracking" data-i18n="navTracking">Takip</a>
-      <a href="#step-region" data-target="step-region" data-i18n="navRegion">Bölge</a>
-      <a href="#step-env" data-target="step-env" data-i18n="navEnv">Ortam</a>
-      <a href="#step-geom" data-target="step-geom" data-i18n="navGeom">Geometri</a>
-      <a href="#step-antenna" data-target="step-antenna" data-i18n="navAntenna">Anten</a>
-      <a href="#step-req" data-target="step-req" data-i18n="navReq">Gereksinim</a>
-    </nav>
+    <div class="topnav-scroll">
+      <span class="topnav-brand" data-i18n="brand">RFID SİSTEM TASARIMI</span>
+      <nav class="topnav-steps" id="topnavSteps">
+        <a href="#step-product" data-target="step-product" data-i18n="navProduct">Ürün</a>
+        <a href="#step-tracking" data-target="step-tracking" data-i18n="navTracking">Takip</a>
+        <a href="#step-region" data-target="step-region" data-i18n="navRegion">Bölge</a>
+        <a href="#step-env" data-target="step-env" data-i18n="navEnv">Ortam</a>
+        <a href="#step-geom" data-target="step-geom" data-i18n="navGeom">Geometri</a>
+        <a href="#step-antenna" data-target="step-antenna" data-i18n="navAntenna">Anten</a>
+        <a href="#step-req" data-target="step-req" data-i18n="navReq">Gereksinim</a>
+      </nav>
+    </div>
     <div class="lang-switch">
       <button type="button" data-lang="tr" class="active">TR</button>
       <button type="button" data-lang="en">EN</button>
@@ -286,19 +290,19 @@
     <div class="ctl-grid">
       <div class="ctl">
         <label data-i18n="lblAntCount">Anten Sayısı</label>
-        <input type="number" id="inN" min="1" max="12" step="1" value="4">
+        <input type="number" id="inN" min="1" step="1" value="4">
       </div>
       <div class="ctl">
         <label data-i18n="lblGateWidth">Geçit/Alan Genişliği (mm)</label>
-        <input type="number" id="inGate" min="1000" max="8000" step="1" value="3496">
+        <input type="number" id="inGate" min="100" step="1" value="3496">
       </div>
       <div class="ctl">
         <label data-i18n="lblMountHeight">Montaj Yüksekliği (mm)</label>
-        <input type="number" id="inAY" min="1000" max="6000" step="1" value="3000">
+        <input type="number" id="inAY" min="100" step="1" value="3000">
       </div>
       <div class="ctl">
         <label data-i18n="lblVertDist">Anten–Etiket Dikey Mesafe h (mm)</label>
-        <input type="number" id="inH" min="200" max="6000" step="1" value="1500">
+        <input type="number" id="inH" min="50" step="1" value="1500">
         <div class="quickrow" id="hPresets">
           <button type="button" data-h="1500" data-i18n="presetMold">Kalıp üstü·1500</button>
           <button type="button" data-h="1000" data-i18n="presetCart">Araba üstü·1000</button>
@@ -316,26 +320,26 @@
     <div id="manualAntennaCtl" class="ctl-grid stacked" hidden>
       <div class="ctl">
         <label data-i18n="lblAzimuth">Azimuth Yarı Huzme Açısı (°)</label>
-        <input type="number" id="inAz" min="5" max="80" step="0.5" value="30">
+        <input type="number" id="inAz" min="1" max="89" step="0.5" value="30">
       </div>
       <div class="ctl">
         <label data-i18n="lblElevation">Elevation Yarı Huzme Açısı (°)</label>
-        <input type="number" id="inEl" min="3" max="70" step="0.5" value="15">
+        <input type="number" id="inEl" min="1" max="89" step="0.5" value="15">
       </div>
       <div class="ctl">
         <label data-i18n="lblGain">Anten Kazancı (dBiC)</label>
-        <input type="number" id="inGain" min="0" max="15" step="0.5" value="9">
+        <input type="number" id="inGain" min="0" step="0.5" value="9">
       </div>
     </div>
     <div class="ctl-grid stacked">
       <div class="ctl">
         <label data-i18n="lblTilt">Montaj Tilt Açısı (°, dikeyden)</label>
-        <input type="number" id="inTilt" min="0" max="60" step="1" value="0">
+        <input type="number" id="inTilt" min="0" max="89" step="1" value="0">
         <div class="quickrow"><button type="button" id="btnTilt22" data-i18n="presetTilt22">Klemsan referansı · 22°</button></div>
       </div>
       <div class="ctl">
         <label data-i18n="lblRefRange">Referans Menzil, kataloğa göre (m, 9 dBiC'de)</label>
-        <input type="number" id="inRefRange" min="1" max="20" step="0.1" value="6.5">
+        <input type="number" id="inRefRange" min="0.1" step="0.1" value="6.5">
       </div>
     </div>
   </section>
@@ -346,13 +350,16 @@
     <div class="ctl-grid" id="reqMarginCtls">
       <div class="ctl">
         <label data-i18n="lblReqAngle">Minimum Açısal Marj İhtiyacı (°)</label>
-        <input type="number" id="inReqAngle" min="0" max="45" step="0.5" value="0">
+        <input type="number" id="inReqAngle" min="0" max="89" step="0.5" value="0">
       </div>
       <div class="ctl">
         <label data-i18n="lblReqLinear">Minimum Doğrusal Marj İhtiyacı (mm)</label>
-        <input type="number" id="inReqLinear" min="0" max="2000" step="10" value="0">
+        <input type="number" id="inReqLinear" min="0" step="10" value="0">
       </div>
     </div>
+    <p class="step-note" data-i18n="budgetNote" style="margin:16px 0 10px;">Bütçe tercihiniz, "Otomatik" anten önerisini seçilen kategori içinde daha uygun fiyatlı veya daha üst segment bir modele yönlendirir.</p>
+    <div class="opt-grid sub-grid" id="gridBudget"></div>
+    <div class="ruler" style="margin:22px 0 14px;"><span data-i18n="reliabilityLabel">Güvenilirlik</span></div>
     <div class="opt-grid sub-grid" id="gridReliability"></div>
   </section>
 
@@ -896,7 +903,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     perUnit:{tr:'/ adet', en:'/ unit'}, byProject:{tr:'proje kapsamına göre', en:'per project scope'},
     totalEst:{tr:'Tahmini Toplam (USD)', en:'Estimated Total (USD)'},
     totalNote:{tr:'* Etiket adedi girilmezse toplam hesaplamaya dahil edilmez.', en:'* If tag quantity is left blank, tags are excluded from the total.'},
-    unit:{tr:'adet', en:'pcs'}
+    unit:{tr:'adet', en:'pcs'},
+    budgetNote:{tr:'Bütçe tercihiniz, "Otomatik" anten önerisini seçilen kategori içinde daha uygun fiyatlı veya daha üst segment bir modele yönlendirir.',
+                en:'Your budget preference steers the "Automatic" antenna recommendation toward a cheaper or higher-end model within the fitting category.'},
+    reliabilityLabel:{tr:'Güvenilirlik', en:'Reliability'}
   };
   function t(k){ return (STR[k] && STR[k][lang]) || k; }
   function applyI18n(){
@@ -933,7 +943,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2z"/>',
       checkSingle:'<circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/>',
       checkDouble:'<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/><path d="M8.5 12l2 2 4-4.5"/>',
-      globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'
+      globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+      chip:'<rect x="7" y="7" width="10" height="10" rx="1"/><rect x="10" y="10" width="4" height="4"/><path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/>',
+      glass:'<path d="M6 3h12l-1.4 12a4.6 4.6 0 0 1-9.2 0L6 3z"/><path d="M9 21h6M12 15v6"/>',
+      apple:'<path d="M12 8c-3-3-8-1-8 4 0 5 4 9 8 9s8-4 8-9c0-5-5-7-8-4z"/><path d="M12 8V5c0-1 .8-2 2-2"/>',
+      luggage:'<rect x="4" y="8" width="16" height="12" rx="1.5"/><path d="M9 8V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"/><path d="M4 13h16"/>',
+      badge:'<circle cx="12" cy="9" r="3.4"/><path d="M7 20c0-3 2.2-5 5-5s5 2 5 5"/><rect x="6" y="3" width="12" height="18" rx="2"/>',
+      snow:'<path d="M12 2v20M4.5 6l15 12M19.5 6l-15 12"/><path d="M12 2l2 2M12 2l-2 2M12 22l2-2M12 22l-2-2M4.5 6l2.6-.6M4.5 6l.6 2.6M19.5 6l-2.6-.6M19.5 6l-.6 2.6M4.5 18l2.6.6M4.5 18l.6-2.6M19.5 18l-2.6.6M19.5 18l-.6-2.6"/>',
+      interference:'<path d="M4 4l16 16"/><path d="M8.5 8.5a6.5 6.5 0 0 1 7 1M5.8 11.2a10.5 10.5 0 0 1 4-2.7M12 17.5h.01"/>',
+      coin:'<circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6"/><path d="M9 6.5v5M6.5 9h5" opacity=".0"/>',
+      wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14.5" r="1.2"/>',
+      crown:'<path d="M4 18h16M4 18l-1-9 5 4 4-7 4 7 5-4-1 9"/>'
     }[name] || '';
     return '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
   }
@@ -985,12 +1005,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   ];
 
   function pickTag(product){
-    var id = {metal:'metal', genel:'genel', sivi:'sivi', tekstil:'tekstil', agir:'agir'}[product] || 'genel';
+    var id = {metal:'metal', genel:'genel', sivi:'sivi', tekstil:'tekstil', agir:'agir',
+              gida:'genel', elektronik:'metal', cam:'genel', kargo:'genel', personel:'genel'}[product] || 'genel';
     return TAGS.filter(function(x){ return x.id===id; })[0];
   }
-  function recommendAntennaId(tracking){
-    var map = {gate:'a6034', konveyor:'genis', raf:'genis', mobil:null, arac:'kompakt'};
-    return (map[tracking]===undefined) ? 'a6034' : map[tracking];
+  var TRACKING_ANTENNA_CLASS = { gate:'gate', kargo:'gate', konveyor:'shelf', raf:'shelf', personel:'shelf', mobil:null, arac:'arac' };
+  function recommendAntennaId(tracking, budget){
+    var cls = TRACKING_ANTENNA_CLASS[tracking];
+    if(cls===undefined) cls='gate';
+    if(cls===null) return null;
+    if(cls==='arac') return 'kompakt';
+    var tiers = cls==='gate'
+      ? { eko:'genis', standart:'a6034', premium:'dar' }
+      : { eko:'kompakt', standart:'genis', premium:'a6034' };
+    return tiers[budget] || tiers.standart;
   }
   function pickReader(tracking, n){
     if(tracking==='mobil'){ return { reader:READERS.filter(function(r){return r.id==='rh';})[0], qty:1, antennaNeeded:false }; }
@@ -1006,25 +1034,37 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       {v:'metal', i:'bolt', def:true, l:{tr:'Metal kalıp / parça', en:'Metal mold / part'}, d:{tr:'On-metal', en:'On-metal'}},
       {v:'sivi', i:'drum', l:{tr:'Sıvı dolu kap / varil', en:'Liquid-filled container / drum'}, d:{tr:'Near-liquid', en:'Near-liquid'}},
       {v:'tekstil', i:'hanger', l:{tr:'Tekstil / askılı ürün', en:'Textile / hanging item'}, d:{tr:'Esnek yüzey', en:'Flexible surface'}},
-      {v:'agir', i:'pallet', l:{tr:'Palet / araç / ağır ekipman', en:'Pallet / vehicle / heavy equipment'}, d:{tr:'Zorlu ortam', en:'Harsh environment'}}
+      {v:'agir', i:'pallet', l:{tr:'Palet / araç / ağır ekipman', en:'Pallet / vehicle / heavy equipment'}, d:{tr:'Zorlu ortam', en:'Harsh environment'}},
+      {v:'elektronik', i:'chip', l:{tr:'Elektronik / hassas cihaz', en:'Electronics / sensitive device'}, d:{tr:'PCB/metal gövde', en:'PCB/metal housing'}},
+      {v:'cam', i:'glass', l:{tr:'Cam / seramik ürün', en:'Glass / ceramic product'}, d:{tr:'Kırılgan yüzey', en:'Fragile surface'}},
+      {v:'gida', i:'apple', l:{tr:'Gıda / tüketim ürünü', en:'Food / consumer product'}, d:{tr:'Ambalajlı ürün', en:'Packaged product'}}
     ],
     tracking:[
       {v:'gate', i:'gate', def:true, l:{tr:'Geçit / kapı giriş-çıkış', en:'Gate / doorway entry-exit'}, d:{tr:'Portal takip', en:'Portal tracking'}},
       {v:'konveyor', i:'conveyor', l:{tr:'Konveyör bant üzeri', en:'On conveyor belt'}, d:{tr:'Hat içi takip', en:'In-line tracking'}},
       {v:'raf', i:'rack', l:{tr:'Raf / depo envanteri', en:'Shelf / warehouse inventory'}, d:{tr:'Sabit anten', en:'Fixed antenna'}},
       {v:'mobil', i:'handheld', l:{tr:'El terminali ile sayım', en:'Handheld scanning'}, d:{tr:'Mobil okuma', en:'Mobile reading'}},
-      {v:'arac', i:'forklift', l:{tr:'Araç / forklift üzeri', en:'Vehicle / forklift mounted'}, d:{tr:'Hareketli platform', en:'Moving platform'}}
+      {v:'arac', i:'forklift', l:{tr:'Araç / forklift üzeri', en:'Vehicle / forklift mounted'}, d:{tr:'Hareketli platform', en:'Moving platform'}},
+      {v:'kargo', i:'luggage', l:{tr:'Bagaj / kargo takibi', en:'Baggage / cargo tracking'}, d:{tr:'Portal tipi', en:'Portal-type'}},
+      {v:'personel', i:'badge', l:{tr:'Personel / varlık yaka kartı', en:'Personnel / asset badge'}, d:{tr:'Alan bazlı takip', en:'Zone-based tracking'}}
     ],
     region:REGIONS.map(function(r){ return {v:r.id, i:'globe', def:r.def, l:r.l, d:{tr:r.band, en:r.band}}; }),
     env:[
       {v:'ic', i:'indoor', def:true, l:{tr:'İç mekan', en:'Indoor'}},
       {v:'dis', i:'outdoor', l:{tr:'Dış mekan', en:'Outdoor'}},
-      {v:'nemli', i:'droplet', l:{tr:'Yüksek nem / yıkamalı alan', en:'High humidity / wash-down area'}}
+      {v:'nemli', i:'droplet', l:{tr:'Yüksek nem / yıkamalı alan', en:'High humidity / wash-down area'}},
+      {v:'soguk', i:'snow', l:{tr:'Soğuk hava deposu / dondurucu', en:'Cold storage / freezer'}},
+      {v:'paraziti', i:'interference', l:{tr:'Yüksek RF girişimi olan alan', en:'High RF-interference area'}}
     ],
     metalprox:[
       {v:'dogrudan', i:'distNear', l:{tr:'Doğrudan metal üstü', en:'Directly on metal'}},
       {v:'yakin', i:'distMid', l:{tr:'Metale yakın', en:'Near metal'}},
       {v:'uzak', i:'distFar', def:true, l:{tr:'Metalden uzak', en:'Away from metal'}}
+    ],
+    budget:[
+      {v:'eko', i:'wallet', def:true, l:{tr:'Ekonomik', en:'Economy'}, d:{tr:'Düşük maliyet', en:'Lowest cost'}},
+      {v:'standart', i:'coin', l:{tr:'Standart', en:'Standard'}, d:{tr:'Dengeli', en:'Balanced'}},
+      {v:'premium', i:'crown', l:{tr:'Premium', en:'Premium'}, d:{tr:'En üst performans', en:'Top performance'}}
     ],
     antenna:[
       {v:'oto', i:'auto', def:true, l:{tr:'Otomatik öneri', en:'Automatic'}, d:{tr:'Takip türüne göre', en:'From tracking type'}},
@@ -1058,11 +1098,33 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         if(group==='antenna'){ document.getElementById('manualAntennaCtl').hidden = (wiz.antenna!=='manuel'); }
         if(group==='tracking'){ applyTrackingVisibility(); }
         if(group==='region'){ renderRegionInfo(); }
+        if(group==='product'){ applyMetalproxCompat(); }
       });
     });
   }
   function renderAllGrids(){
-    ['product','tracking','region','env','metalprox','antenna','reliability'].forEach(function(g){ renderGrid('grid'+g.charAt(0).toUpperCase()+g.slice(1), g); });
+    ['product','tracking','region','env','metalprox','antenna','budget','reliability'].forEach(function(g){ renderGrid('grid'+g.charAt(0).toUpperCase()+g.slice(1), g); });
+    applyMetalproxCompat();
+  }
+  var METALPROX_LOCK = { metal:'dogrudan' };
+  function applyMetalproxCompat(){
+    var lock = METALPROX_LOCK[wiz.product];
+    var grid = document.getElementById('gridMetalprox');
+    if(lock){
+      if(wiz.metalprox !== lock){ wiz.metalprox = lock; }
+      grid.querySelectorAll('.opt-card').forEach(function(btn){
+        var isLock = btn.getAttribute('data-value')===lock;
+        btn.hidden = !isLock;
+        btn.classList.toggle('active', isLock);
+      });
+    } else {
+      grid.querySelectorAll('.opt-card').forEach(function(btn){ btn.hidden = false; });
+      if(!grid.querySelector('.opt-card.active')){
+        wiz.metalprox = 'uzak';
+        var def = grid.querySelector('[data-value="uzak"]');
+        if(def) def.classList.add('active');
+      }
+    }
   }
   renderAllGrids();
 
@@ -1137,6 +1199,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function toDeg(r){ return r*180/Math.PI; }
   function coneHalfWidth(h, angleDeg){ return h*Math.tan(toRad(angleDeg)); }
   function offsetsFor(n, gate){ var seg=gate/(n+1), offs=[]; for(var i=0;i<n;i++){ offs.push(-gate/2+(i+1)*seg); } return offs; }
+  function shouldLabelAntenna(idx, n){
+    if(n<=10) return true;
+    var step = Math.ceil(n/8);
+    return idx===0 || idx===n-1 || idx%step===0;
+  }
 
   var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0, regionMult:1 };
 
@@ -1240,7 +1307,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       p.push('<rect x="'+x+'" y="'+(floorY-46)+'" width="'+w+'" height="46" fill="var(--accent)" opacity="0.16"></rect>');
       p.push('<line x1="'+X(o)+'" y1="'+(beamY+14)+'" x2="'+X(o)+'" y2="'+(floorY-46)+'" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"></line>');
       p.push('<circle cx="'+X(o)+'" cy="'+(beamY+14)+'" r="5" fill="var(--ink)" stroke="var(--accent)" stroke-width="1.6"></circle>');
-      p.push('<text x="'+X(o)+'" y="'+(beamY+30)+'" text-anchor="middle" font-size="9" fill="var(--dim)">20'+String.fromCharCode(97+idx)+'</text>');
+      if(shouldLabelAntenna(idx, m.offs.length)){
+        p.push('<text x="'+X(o)+'" y="'+(beamY+30)+'" text-anchor="middle" font-size="9" fill="var(--dim)">20'+(idx<26?String.fromCharCode(97+idx):idx+1)+'</text>');
+      }
     });
     p.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
     p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">'+(L?'floor':'zemin')+'</text>');
@@ -1349,8 +1418,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     parts.push('<polygon points="'+faceStr(beamBox,[1,2,6,5])+'" fill="color-mix(in srgb, var(--paper) 58%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
     parts.push('<polygon points="'+faceStr(beamBox,[0,1,5,4])+'" fill="color-mix(in srgb, var(--paper) 68%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
     parts.push('<polygon points="'+faceStr(beamBox,[4,5,6,7])+'" fill="color-mix(in srgb, var(--paper) 78%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
-    var beamLabelPt = S({x:0,y:ay+150,z:-90});
-    parts.push('<text x="'+beamLabelPt.x+'" y="'+(parseFloat(beamLabelPt.y)-8)+'" text-anchor="middle" font-size="11" fill="var(--dim)">(10) '+gate+'mm '+(L?'beam':'kiriş')+'</text>');
+    var beamLabelPt = S({x:gate/2+colW*0.9, y:ay+150, z:-colD/2});
+    parts.push('<text x="'+beamLabelPt.x+'" y="'+beamLabelPt.y+'" text-anchor="start" font-size="11" fill="var(--dim)">(10) '+gate+'mm '+(L?'beam':'kiriş')+'</text>');
 
     var order = m.offs.map(function(o,idx){return idx;}).sort(function(a,b){ return m.offs[a]-m.offs[b]; });
     order.forEach(function(idx){
@@ -1359,13 +1428,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       parts.push('<polygon points="'+poly(pathPts)+'" fill="var(--accent)" opacity="0.17"></polygon>');
       var ringClosed = ring.concat([ring[0]]);
       parts.push('<polyline points="'+poly(ringClosed)+'" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.55"></polyline>');
-      [0,5,10,15].forEach(function(ri){
-        parts.push('<line x1="'+S(apex).x+'" y1="'+S(apex).y+'" x2="'+S(ring[ri]).x+'" y2="'+S(ring[ri]).y+'" stroke="var(--accent)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"></line>');
-      });
+      if(m.offs.length<=10){
+        [0,5,10,15].forEach(function(ri){
+          parts.push('<line x1="'+S(apex).x+'" y1="'+S(apex).y+'" x2="'+S(ring[ri]).x+'" y2="'+S(ring[ri]).y+'" stroke="var(--accent)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"></line>');
+        });
+      }
       var antBox = boxCorners(apex.x, apex.z, 90, 70, apex.y-40, apex.y);
       parts.push('<polygon points="'+faceStr(antBox,[4,5,6,7])+'" fill="var(--panel-2)" stroke="var(--accent)" stroke-width="1"></polygon>');
-      var lab = S({x:apex.x,y:apex.y-46,z:apex.z});
-      parts.push('<text x="'+lab.x+'" y="'+lab.y+'" text-anchor="middle" font-size="10" fill="var(--accent-2)">20'+String.fromCharCode(97+idx)+'</text>');
+      if(shouldLabelAntenna(idx, m.offs.length)){
+        var lab = S({x:apex.x,y:apex.y-46,z:apex.z});
+        parts.push('<text x="'+lab.x+'" y="'+lab.y+'" text-anchor="middle" font-size="10" fill="var(--accent-2)">20'+(idx<26?String.fromCharCode(97+idx):idx+1)+'</text>');
+      }
     });
 
     parts.push('<polygon points="'+faceStr(moldBox,[1,2,6,5])+'" fill="color-mix(in srgb, var(--blue) 24%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
@@ -1445,7 +1518,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     parts.push('<rect x="'+XT(-gate/2)+'" y="'+beamYT+'" width="'+(XT(gate/2)-XT(-gate/2))+'" height="12" fill="#eee" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
     m.offs.forEach(function(o,idx){
       parts.push('<circle cx="'+XT(o)+'" cy="'+(beamYT+12)+'" r="5" fill="#fff" stroke="'+BLACK+'" stroke-width="1.4"></circle>');
-      parts.push('<text x="'+XT(o)+'" y="'+(beamYT+30)+'" text-anchor="middle" font-size="9" fill="'+GRAY+'">20'+String.fromCharCode(97+idx)+'</text>');
+      if(shouldLabelAntenna(idx, m.offs.length)){
+        parts.push('<text x="'+XT(o)+'" y="'+(beamYT+30)+'" text-anchor="middle" font-size="9" fill="'+GRAY+'">20'+(idx<26?String.fromCharCode(97+idx):idx+1)+'</text>');
+      }
     });
     parts.push('<line x1="'+(tvX0+20)+'" y1="'+floorYT+'" x2="'+(tvX0+tvW-20)+'" y2="'+floorYT+'" stroke="'+BLACK+'" stroke-width="1.2"></line>');
     var dimY = floorYT+18;
@@ -1536,8 +1611,30 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     saveBlob('rfid-urun-listesi.pdf', doc.output('blob'));
   }
 
+  // ================= SVG -> PNG (for embedding a drawing into the PDF) =================
+  function svgToPngDataUrl(svgStr, w, h){
+    return new Promise(function(resolve){
+      try{
+        var svg64 = btoa(unescape(encodeURIComponent(svgStr)));
+        var img = new Image();
+        img.onload = function(){
+          try{
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,w,h);
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.82));
+          }catch(e){ resolve(null); }
+        };
+        img.onerror = function(){ resolve(null); };
+        img.src = 'data:image/svg+xml;base64,' + svg64;
+      }catch(e){ resolve(null); }
+    });
+  }
+
   // ================= PDF: detailed narrative report =================
-  function buildDetailedReport(reportLang, dataset){
+  async function buildDetailedReport(reportLang, dataset){
     if(typeof window.jspdf === 'undefined'){ return; }
     var L = reportLang==='en';
     var doc = new window.jspdf.jsPDF({ unit:'pt', format:'a4' });
@@ -1563,6 +1660,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     kv(L?'Environment':'Ortam', dataset.envLabel);
     kv(L?'Metal proximity':'Metal yakınlığı', dataset.metalproxLabel);
     kv(L?'Reliability target':'Güvenilirlik hedefi', dataset.reliabilityLabel);
+    kv(L?'Budget preference':'Bütçe tercihi', dataset.budgetLabel);
+    if(dataset.tagQty){ kv(L?'Items to tag':'Etiketlenecek ürün adedi', dataset.tagQty); }
     if(dataset.geom){
       kv(L?'Antenna count':'Anten sayısı', dataset.geom.n);
       kv(L?'Gate/area width':'Geçit/alan genişliği', dataset.geom.gate+' mm');
@@ -1604,7 +1703,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     }
     spacer(4);
 
-    h2(L?'4. Recommended Products':'4. Önerilen Ürünler');
+    if(dataset.results){
+      h2(L?'4. Technical Drawing':'4. Teknik Resim');
+      para(L?'Dimensioned plan and elevation views of the current gate configuration, generated from the values above.':'Yukarıdaki değerlerden üretilen, mevcut geçit konfigürasyonunun ölçülendirilmiş üstten ve önden görünüşleri.');
+      try{
+        var drawingSvg = buildTechDrawingSvg(dataset.results, dataset.depth, dataset.range, dataset.tag, dataset.antLabel, dataset.readerPick);
+        var pngUrl = await svgToPngDataUrl(drawingSvg, 1200, 820);
+        if(pngUrl){
+          var imgW = pageW-2*margin, imgH = imgW*(820/1200);
+          ensure(imgH+20);
+          doc.addImage(pngUrl, 'JPEG', margin, y, imgW, imgH);
+          y += imgH+16;
+        }
+      }catch(e){ /* drawing embed is a bonus — report still completes without it */ }
+      spacer(4);
+    }
+
+    var secN = dataset.results ? 5 : 4;
+    h2(secN+'. '+(L?'Recommended Products':'Önerilen Ürünler'));
     dataset.rows.forEach(function(r){
       ensure(46);
       doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(20);
@@ -1613,14 +1729,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var lines = doc.splitTextToSize(r.desc+'  ('+(L?'Qty':'Miktar')+': '+r.qty+', '+(L?'Price':'Fiyat')+': '+r.price+')', pageW-2*margin);
       doc.text(lines, margin, y); y += lines.length*12+10;
     });
+    para(L?'Budget preference applied: '+dataset.budgetLabel+'. Within a suitable antenna category, this steers the automatic recommendation toward a lower-cost or higher-spec model — the coverage/range results above already reflect the chosen model\'s real gain and beamwidth.'
+          :'Uygulanan bütçe tercihi: '+dataset.budgetLabel+'. Uygun bir anten kategorisi içinde bu tercih, otomatik öneriyi daha düşük maliyetli ya da daha üst segment bir modele yönlendirir — yukarıdaki kapsama/menzil sonuçları, seçilen modelin gerçek kazanç ve huzme değerlerini zaten yansıtır.');
     spacer(4);
 
-    h2(L?'5. Regional Compliance':'5. Bölgesel Uyumluluk');
+    h2((secN+1)+'. '+(L?'Regional Compliance':'Bölgesel Uyumluluk'));
     para((L?'Selected region: ':'Seçilen bölge: ')+dataset.regionLabel+'. '+(L?'Frequency band: ':'Frekans bandı: ')+dataset.regionBand+'. '+(L?'Allowed power: ':'İzin verilen güç: ')+dataset.regionPower+'. '+
       (L?'Reader and antenna models are typically sold as region-specific SKUs to comply with local spectrum regulation — confirm the correct regional variant with the supplier before ordering.':'Okuyucu ve anten modelleri genellikle yerel spektrum düzenlemesine uymak için bölgeye özel SKU olarak satılır — sipariş öncesi doğru bölgesel varyantı tedarikçiyle teyit edin.'));
+    if(dataset.envLabel){
+      para((L?'Environment: ':'Ortam: ')+dataset.envLabel+'. '+
+        (L?'Cold-storage and high-RF-interference environments typically call for hardware explicitly rated for the temperature range or fitted with additional filtering — confirm this with the supplier for the selected models.':'Soğuk hava deposu ve yüksek RF girişimi olan ortamlar genellikle sıcaklık aralığına özel derecelendirilmiş veya ek filtrelemeli donanım gerektirir — seçilen modeller için bunu tedarikçiyle teyit edin.'));
+    }
     spacer(4);
 
-    h2(L?'6. Notes & Sources':'6. Notlar ve Kaynaklar');
+    h2((secN+2)+'. '+(L?'Notes & Sources':'Notlar ve Kaynaklar'));
     para(L?'This report is generated by an internal simplified engineering model (free-space cone coverage, no multipath/absorption modeling) and is not a substitute for an on-site RF survey. Product names, specifications and price ranges are compiled from public manufacturer and retailer information and are indicative only — confirm current specifications, regional variants and pricing with the supplier before purchase.':
       'Bu rapor, basitleştirilmiş dahili bir mühendislik modeliyle (serbest uzay koni kapsaması, çoklu yol/soğurma modellemesi içermez) üretilmiştir ve yerinde RF etüdünün yerini tutmaz. Ürün adları, teknik özellikler ve fiyat aralıkları kamuya açık üretici ve perakendeci bilgilerinden derlenmiştir ve yalnızca gösterge niteliğindedir — alım öncesi güncel teknik özellikleri, bölgesel varyantı ve fiyatı tedarikçiyle teyit edin.');
 
@@ -1662,7 +1784,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     state.h=parseInt(inH.value,10)||100; state.tilt=parseInt(inTilt.value,10)||0; state.refRange=parseFloat(inRefRange.value)||1;
     state.reqAngle=parseFloat(inReqAngle.value)||0; state.reqLinear=parseFloat(inReqLinear.value)||0;
     state.regionMult = currentRegion().mult;
-    var antId = wiz.antenna==='oto' ? recommendAntennaId(wiz.tracking) : wiz.antenna;
+    var antId = wiz.antenna==='oto' ? recommendAntennaId(wiz.tracking, wiz.budget) : wiz.antenna;
     var antSpec = (wiz.antenna==='manuel' || antId===null) ? null : ANTENNAS.filter(function(a){return a.id===antId;})[0];
     if(wiz.antenna==='manuel'){
       state.az=parseFloat(inAz.value)||30; state.el=parseFloat(inEl.value)||15; state.gain=parseFloat(inGain.value)||9;
@@ -1676,11 +1798,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
   function commonDatasetFields(){
     var region = currentRegion();
+    var qty = parseInt(inTagQty.value,10);
     return {
       productLabel: optLabel('product', wiz.product), trackingLabel: optLabel('tracking', wiz.tracking),
       regionLabel: region.l[lang], regionBand: region.band, regionPower: region.power[lang],
       envLabel: optLabel('env', wiz.env), metalproxLabel: optLabel('metalprox', wiz.metalprox),
-      reliabilityLabel: optLabel('reliability', wiz.reliability)
+      reliabilityLabel: optLabel('reliability', wiz.reliability), budgetLabel: optLabel('budget', wiz.budget),
+      tagQty: (qty && qty>0) ? qty : null
     };
   }
 
