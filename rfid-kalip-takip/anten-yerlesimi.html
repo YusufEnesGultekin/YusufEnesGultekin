@@ -44,9 +44,8 @@
   svg.icon{ width:22px; height:22px; flex:none; color:var(--accent); }
   a{ color:var(--blue); }
 
-  /* sticky index nav */
   .topnav{ position:sticky; top:0; z-index:30; background:var(--ink); border-bottom:1px solid var(--line); }
-  .topnav-inner{ max-width:1180px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; gap:22px; overflow-x:auto; }
+  .topnav-inner{ max-width:1180px; margin:0 auto; padding:12px 22px; display:flex; align-items:center; gap:18px; overflow-x:auto; }
   .topnav-brand{ font-family:var(--font-display); font-weight:800; font-size:15px; letter-spacing:.02em; color:var(--accent); flex:none; white-space:nowrap; }
   .topnav-steps{ display:flex; gap:4px; flex:none; }
   .topnav-steps a{
@@ -55,6 +54,13 @@
   }
   .topnav-steps a.current{ color:var(--paper); border-color:var(--line); background:var(--panel-2); }
   .topnav-steps a[data-hidden]{ display:none; }
+  .lang-switch{ display:flex; gap:2px; flex:none; margin-left:auto; border:1px solid var(--line); border-radius:999px; padding:2px; }
+  .lang-switch button{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; background:none; border:none; color:var(--dim);
+    padding:5px 11px; border-radius:999px; cursor:pointer;
+  }
+  .lang-switch button.active{ background:var(--accent); color:var(--accent-ink); font-weight:600; }
+  .lang-switch button:focus-visible{ outline:2px solid var(--blue); }
 
   .wrap{ max-width:1180px; margin:0 auto; padding:30px 22px 70px; }
 
@@ -101,14 +107,13 @@
   .opt-card.active .lbl{ color:var(--accent-2); }
   .opt-card:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
 
-  .ctl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px 24px; }
+  .ctl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px 24px; }
   .ctl-grid.stacked{ margin-top:18px; }
   .ctl label{ display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
-  .ctl .val{ color:var(--accent-2); font-weight:600; }
-  input[type=range]{ width:100%; accent-color:var(--accent); height:4px; background:transparent; }
+  .ctl .unit{ color:var(--dim); font-weight:400; }
   input[type=number]{
     width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--paper);
-    font-family:var(--font-mono); font-size:14px; padding:9px 11px; border-radius:3px;
+    font-family:var(--font-mono); font-size:15px; padding:10px 12px; border-radius:3px;
   }
   input[type=number]:focus-visible{ outline:2px solid var(--blue); }
   .quickrow{ display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
@@ -116,7 +121,7 @@
     background:var(--panel); color:var(--dim); border:1px solid var(--line);
     font-family:var(--font-mono); font-size:10.5px; padding:6px 9px; border-radius:3px; cursor:pointer;
   }
-  .quickrow button.active{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
+  .quickrow button:hover{ border-color:var(--accent-2); color:var(--paper); }
   .quickrow button:focus-visible{ outline:2px solid var(--blue); }
 
   .cta-row{ display:flex; justify-content:center; margin:28px 0 32px; }
@@ -135,6 +140,7 @@
   }
   .btn:hover{ border-color:var(--accent-2); }
   .btn:focus-visible{ outline:2px solid var(--blue); outline-offset:1px; }
+  .btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
 
   .ruler{ display:flex; align-items:center; gap:10px; margin:34px 0 18px; color:var(--dim); }
   .ruler::before, .ruler::after{ content:''; flex:1; height:1px; background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px); }
@@ -160,9 +166,7 @@
   .tabs button:focus-visible{ outline:2px solid var(--blue); }
   .panel{ display:none; } .panel.active{ display:block; }
 
-  .iso-stage{
-    position:relative; width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:4px; overflow:hidden; padding:6px;
-  }
+  .iso-stage{ position:relative; width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:4px; overflow:hidden; padding:6px; }
   .iso-stage svg{ width:100%; height:auto; display:block; }
   .iso-legend{ display:flex; flex-wrap:wrap; gap:14px; padding:10px 14px 4px; font-family:var(--font-mono); font-size:10.5px; color:var(--dim); }
   .iso-legend b{ color:var(--accent-2); }
@@ -203,12 +207,14 @@
   .chip.good{ color:var(--good); border-color:var(--good); } .chip.bad{ color:var(--bad); border-color:var(--bad); }
   details.disclosure .disclosure-body{ padding:0 18px 18px; border-top:1px solid var(--line); }
 
-  table.bom{ width:100%; border-collapse:collapse; font-size:13.5px; }
-  table.bom th, table.bom td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); }
-  table.bom th{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--dim); }
+  table.bom{ width:100%; border-collapse:collapse; font-size:13px; }
+  table.bom th, table.bom td{ text-align:left; padding:10px 11px; border-bottom:1px solid var(--line); }
+  table.bom th{ font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--dim); }
   table.bom td.qty{ font-family:var(--font-mono); color:var(--accent-2); font-weight:600; white-space:nowrap; }
-  table.bom td.desc{ color:var(--dim); font-size:12px; }
+  table.bom td.price{ font-family:var(--font-mono); font-size:12.5px; white-space:nowrap; }
+  table.bom td.desc{ color:var(--dim); font-size:11.5px; }
   table.bom td.model{ font-family:var(--font-mono); font-size:12.5px; }
+  table.bom tfoot td{ font-family:var(--font-mono); font-weight:600; border-bottom:none; border-top:2px solid var(--line); padding-top:12px; }
   .bom-note{ color:var(--dim); font-size:11.5px; margin-top:12px; line-height:1.5; }
   .bom-actions{ margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
 
@@ -218,120 +224,132 @@
 <body>
 <div class="topnav">
   <div class="topnav-inner">
-    <span class="topnav-brand">RFID SİSTEM TASARIMI</span>
+    <span class="topnav-brand" data-i18n="brand">RFID SİSTEM TASARIMI</span>
     <nav class="topnav-steps" id="topnavSteps">
-      <a href="#step-product" data-target="step-product">Ürün</a>
-      <a href="#step-tracking" data-target="step-tracking">Takip</a>
-      <a href="#step-env" data-target="step-env">Ortam</a>
-      <a href="#step-geom" data-target="step-geom">Geometri</a>
-      <a href="#step-antenna" data-target="step-antenna">Anten</a>
-      <a href="#step-req" data-target="step-req">Gereksinim</a>
+      <a href="#step-product" data-target="step-product" data-i18n="navProduct">Ürün</a>
+      <a href="#step-tracking" data-target="step-tracking" data-i18n="navTracking">Takip</a>
+      <a href="#step-region" data-target="step-region" data-i18n="navRegion">Bölge</a>
+      <a href="#step-env" data-target="step-env" data-i18n="navEnv">Ortam</a>
+      <a href="#step-geom" data-target="step-geom" data-i18n="navGeom">Geometri</a>
+      <a href="#step-antenna" data-target="step-antenna" data-i18n="navAntenna">Anten</a>
+      <a href="#step-req" data-target="step-req" data-i18n="navReq">Gereksinim</a>
     </nav>
+    <div class="lang-switch">
+      <button type="button" data-lang="tr" class="active">TR</button>
+      <button type="button" data-lang="en">EN</button>
+    </div>
   </div>
 </div>
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Klemsan A.Ş. — Üretim Birimi · RFID Sistem Tasarım Platformu</div>
-    <h1>RFID Sistem Tasarım ve Simülasyon Aracı</h1>
-    <p class="sub">Herhangi bir RFID sistemi kurmak için ürün türünü, takip yöntemini, ortam koşullarını ve performans gereksinimlerinizi seçin. Sistem yalnızca ihtiyacınıza uyan adımları gösterir — örneğin el terminaliyle sayım seçtiğinizde geçit geometrisi ve anten yerleşimi devre dışı kalır.</p>
+    <div class="eyebrow" data-i18n="eyebrow">Klemsan A.Ş. — Üretim Birimi · RFID Sistem Tasarım Platformu</div>
+    <h1 data-i18n="h1">RFID Sistem Tasarım ve Simülasyon Aracı</h1>
+    <p class="sub" data-i18n="sub">Herhangi bir RFID sistemi kurmak için ürün türünü, takip yöntemini, bölgenizi, ortam koşullarını ve performans gereksinimlerinizi seçin. Sistem yalnızca ihtiyacınıza uyan adımları gösterir.</p>
   </header>
 
   <section class="step" id="step-product">
-    <div class="step-head"><div class="step-num">1</div><h2>Ürün / Malzeme Türü</h2></div>
-    <p class="step-note">Takip edilecek ürünün yüzeyi/malzemesi — uygun etiket türü buna göre seçilir.</p>
+    <div class="step-head"><div class="step-num">1</div><h2 data-i18n="step1Title">Ürün / Malzeme Türü</h2></div>
+    <p class="step-note" data-i18n="step1Note">Takip edilecek ürünün yüzeyi/malzemesi — uygun etiket türü buna göre seçilir.</p>
     <div class="opt-grid" id="gridProduct"></div>
     <div class="ctl-grid stacked">
       <div class="ctl">
-        <label>Etiketlenecek Ürün Adedi (opsiyonel)</label>
-        <input type="number" id="inTagQty" min="0" step="1" placeholder="örn. 3000">
+        <label data-i18n="tagQtyLabel">Etiketlenecek Ürün Adedi (opsiyonel)</label>
+        <input type="number" id="inTagQty" min="0" step="1" data-i18n-placeholder="tagQtyPh">
       </div>
     </div>
   </section>
 
   <section class="step" id="step-tracking">
-    <div class="step-head"><div class="step-num">2</div><h2>Takip Türü</h2></div>
-    <p class="step-note">Bu, geometri/anten adımlarının gerekip gerekmediğini ve reader modelini belirler.</p>
+    <div class="step-head"><div class="step-num">2</div><h2 data-i18n="step2Title">Takip Türü</h2></div>
+    <p class="step-note" data-i18n="step2Note">Bu, geometri/anten adımlarının gerekip gerekmediğini ve reader modelini belirler.</p>
     <div class="opt-grid" id="gridTracking"></div>
   </section>
 
+  <section class="step" id="step-region">
+    <div class="step-head"><div class="step-num">3</div><h2 data-i18n="stepRegionTitle">Bölge / Frekans Bandı</h2></div>
+    <p class="step-note" data-i18n="stepRegionNote">UHF RFID frekans bandı ve izin verilen verici gücü bölgeye göre değişir; bu da tipik okuma menzilini doğrudan etkiler.</p>
+    <div class="opt-grid" id="gridRegion"></div>
+    <div class="formula" id="regionInfo" style="margin-top:14px;"></div>
+  </section>
+
   <section class="step" id="step-env">
-    <div class="step-head"><div class="step-num">3</div><h2>Ortam Koşulları</h2></div>
-    <p class="step-note">Metal yakınlığı ve ortam, etiket/donanım koruma sınıfı önerisini etkiler.</p>
+    <div class="step-head"><div class="step-num">4</div><h2 data-i18n="step3Title">Ortam Koşulları</h2></div>
+    <p class="step-note" data-i18n="step3Note">Metal yakınlığı ve ortam, etiket/donanım koruma sınıfı önerisini etkiler.</p>
     <div class="opt-grid" id="gridEnv"></div>
     <div class="opt-grid sub-grid" id="gridMetalprox"></div>
   </section>
 
   <section class="step" id="step-geom">
-    <div class="step-head"><div class="step-num">4</div><h2>Geçit / Montaj Geometrisi</h2></div>
-    <p class="step-note">Değerleri ayarlayın — sonuçlar yalnızca "Sistemi Kur" butonuna bastığınızda güncellenir.</p>
+    <div class="step-head"><div class="step-num">5</div><h2 data-i18n="step4Title">Geçit / Montaj Geometrisi</h2></div>
+    <p class="step-note" data-i18n="step4Note">Değerleri yazın — sonuçlar yalnızca "Sistemi Kur" butonuna bastığınızda güncellenir.</p>
     <div class="ctl-grid">
       <div class="ctl">
-        <label>Anten Sayısı — <span class="val" id="lblN">4</span></label>
-        <input type="range" id="inN" min="1" max="8" step="1" value="4">
+        <label data-i18n="lblAntCount">Anten Sayısı</label>
+        <input type="number" id="inN" min="1" max="12" step="1" value="4">
       </div>
       <div class="ctl">
-        <label>Geçit/Alan Genişliği (mm) — <span class="val" id="lblGate">3496</span></label>
-        <input type="range" id="inGate" min="2000" max="5000" step="4" value="3496">
+        <label data-i18n="lblGateWidth">Geçit/Alan Genişliği (mm)</label>
+        <input type="number" id="inGate" min="1000" max="8000" step="1" value="3496">
       </div>
       <div class="ctl">
-        <label>Montaj Yüksekliği (mm) — <span class="val" id="lblAY">3000</span></label>
-        <input type="range" id="inAY" min="2000" max="4000" step="10" value="3000">
+        <label data-i18n="lblMountHeight">Montaj Yüksekliği (mm)</label>
+        <input type="number" id="inAY" min="1000" max="6000" step="1" value="3000">
       </div>
       <div class="ctl">
-        <label>Anten–Etiket Dikey Mesafe h (mm) — <span class="val" id="lblH">1500</span></label>
-        <input type="range" id="inH" min="400" max="2400" step="10" value="1500">
+        <label data-i18n="lblVertDist">Anten–Etiket Dikey Mesafe h (mm)</label>
+        <input type="number" id="inH" min="200" max="6000" step="1" value="1500">
         <div class="quickrow" id="hPresets">
-          <button type="button" data-h="1500">Kalıp üstü·1500</button>
-          <button type="button" data-h="1000">Araba üstü·1000</button>
-          <button type="button" data-h="750">Kritik·750</button>
-          <button type="button" data-h="700">Kritik·700</button>
+          <button type="button" data-h="1500" data-i18n="presetMold">Kalıp üstü·1500</button>
+          <button type="button" data-h="1000" data-i18n="presetCart">Araba üstü·1000</button>
+          <button type="button" data-h="750" data-i18n="presetCrit1">Kritik·750</button>
+          <button type="button" data-h="700" data-i18n="presetCrit2">Kritik·700</button>
         </div>
       </div>
     </div>
   </section>
 
   <section class="step" id="step-antenna">
-    <div class="step-head"><div class="step-num">5</div><h2>Anten Modeli</h2></div>
-    <p class="step-note">"Otomatik" seçiliyken sistem, takip türünüze göre anten modelini kendisi önerir.</p>
+    <div class="step-head"><div class="step-num">6</div><h2 data-i18n="step5Title">Anten Modeli</h2></div>
+    <p class="step-note" data-i18n="step5Note">"Otomatik" seçiliyken sistem, takip türünüze göre anten modelini kendisi önerir.</p>
     <div class="opt-grid" id="gridAntenna"></div>
     <div id="manualAntennaCtl" class="ctl-grid stacked" hidden>
       <div class="ctl">
-        <label>Azimuth Yarı Huzme Açısı (°) — <span class="val" id="lblAz">30</span></label>
-        <input type="range" id="inAz" min="10" max="60" step="0.5" value="30">
+        <label data-i18n="lblAzimuth">Azimuth Yarı Huzme Açısı (°)</label>
+        <input type="number" id="inAz" min="5" max="80" step="0.5" value="30">
       </div>
       <div class="ctl">
-        <label>Elevation Yarı Huzme Açısı (°) — <span class="val" id="lblEl">15</span></label>
-        <input type="range" id="inEl" min="5" max="45" step="0.5" value="15">
+        <label data-i18n="lblElevation">Elevation Yarı Huzme Açısı (°)</label>
+        <input type="number" id="inEl" min="3" max="70" step="0.5" value="15">
       </div>
       <div class="ctl">
-        <label>Anten Kazancı (dBiC) — <span class="val" id="lblGain">9</span></label>
-        <input type="range" id="inGain" min="4" max="12" step="0.5" value="9">
+        <label data-i18n="lblGain">Anten Kazancı (dBiC)</label>
+        <input type="number" id="inGain" min="0" max="15" step="0.5" value="9">
       </div>
     </div>
     <div class="ctl-grid stacked">
       <div class="ctl">
-        <label>Montaj Tilt Açısı (°, dikeyden) — <span class="val" id="lblTilt">0</span></label>
-        <input type="range" id="inTilt" min="0" max="35" step="1" value="0">
-        <div class="quickrow"><button type="button" id="btnTilt22">Klemsan referansı · 22°</button></div>
+        <label data-i18n="lblTilt">Montaj Tilt Açısı (°, dikeyden)</label>
+        <input type="number" id="inTilt" min="0" max="60" step="1" value="0">
+        <div class="quickrow"><button type="button" id="btnTilt22" data-i18n="presetTilt22">Klemsan referansı · 22°</button></div>
       </div>
       <div class="ctl">
-        <label>Referans Menzil, kataloğa göre (m) — <span class="val" id="lblRefRange">6.5</span></label>
-        <input type="range" id="inRefRange" min="3" max="10" step="0.1" value="6.5">
+        <label data-i18n="lblRefRange">Referans Menzil, kataloğa göre (m, 9 dBiC'de)</label>
+        <input type="number" id="inRefRange" min="1" max="20" step="0.1" value="6.5">
       </div>
     </div>
   </section>
 
   <section class="step" id="step-req">
-    <div class="step-head"><div class="step-num">6</div><h2>Performans Gereksinimi</h2></div>
-    <p class="step-note">Kendi ihtiyacınızı girin — sistem karşılayıp karşılamadığını hesaplar.</p>
+    <div class="step-head"><div class="step-num">7</div><h2 data-i18n="step6Title">Performans Gereksinimi</h2></div>
+    <p class="step-note" data-i18n="step6Note">Kendi ihtiyacınızı girin — sistem karşılayıp karşılamadığını hesaplar.</p>
     <div class="ctl-grid" id="reqMarginCtls">
       <div class="ctl">
-        <label>Minimum Açısal Marj İhtiyacı (°)</label>
+        <label data-i18n="lblReqAngle">Minimum Açısal Marj İhtiyacı (°)</label>
         <input type="number" id="inReqAngle" min="0" max="45" step="0.5" value="0">
       </div>
       <div class="ctl">
-        <label>Minimum Doğrusal Marj İhtiyacı (mm)</label>
+        <label data-i18n="lblReqLinear">Minimum Doğrusal Marj İhtiyacı (mm)</label>
         <input type="number" id="inReqLinear" min="0" max="2000" step="10" value="0">
       </div>
     </div>
@@ -339,27 +357,27 @@
   </section>
 
   <div class="cta-row">
-    <button class="btn-build" id="btnBuild">SİSTEMİ KUR VE SİMÜLASYONU BAŞLAT</button>
+    <button class="btn-build" id="btnBuild" data-i18n="btnBuild">SİSTEMİ KUR VE SİMÜLASYONU BAŞLAT</button>
   </div>
 
   <section id="results" hidden>
-    <div class="ruler"><span>Sonuçlar</span></div>
+    <div class="ruler"><span data-i18n="resultsHeading">Sonuçlar</span></div>
     <div class="req-banner" id="reqResult"></div>
 
     <div id="fullResultTabs">
       <div class="tabs">
-        <button data-tab="sim" class="active">Simülasyon</button>
-        <button data-tab="bom">Ürün Listesi</button>
-        <button data-tab="detay">Hesap Detayları</button>
+        <button data-tab="sim" class="active" data-i18n="tabSim">Simülasyon</button>
+        <button data-tab="bom" data-i18n="tabBom">Ürün Listesi</button>
+        <button data-tab="detay" data-i18n="tabDetay">Hesap Detayları</button>
       </div>
 
       <section class="panel active" id="panel-sim">
         <div class="iso-stage">
           <svg id="isoSvg" class="diagram" viewBox="0 0 760 480"></svg>
           <div class="iso-legend">
-            <span><b>10</b> Taşıyıcı kiriş-kolon</span>
-            <span><b>20</b> Okuyucu/anten birimi</span>
-            <span><b>30</b> Takip edilen ürün + etiket</span>
+            <span><b>10</b> <span data-i18n="legend10">Taşıyıcı kiriş-kolon</span></span>
+            <span><b>20</b> <span data-i18n="legend20">Okuyucu/anten birimi</span></span>
+            <span><b>30</b> <span data-i18n="legend30">Takip edilen ürün + etiket</span></span>
           </div>
         </div>
         <div class="statrow" id="simStats"></div>
@@ -367,51 +385,49 @@
 
       <section class="panel" id="panel-bom">
         <div class="card tick">
-          <h3>Önerilen Ürün Listesi (BOM)</h3>
-          <p class="note">Girdiğiniz ürün türü, takip türü ve hesaplanan geometriye göre önerilen gerçek marka/model referansları. Fiyat ve stok bilgisi içermez; nihai tedarikte üretici teknik şartnameleriyle doğrulanmalıdır.</p>
+          <h3 data-i18n="bomTitle">Önerilen Ürün Listesi (BOM)</h3>
+          <p class="note" data-i18n="bomNote">Girdiğiniz ürün türü, takip türü ve hesaplanan geometriye göre önerilen gerçek marka/model referansları ve yaklaşık fiyat aralıkları. Nihai tedarikte üretici/tedarikçi teklifiyle doğrulanmalıdır.</p>
           <div style="overflow-x:auto;">
             <table class="bom" id="bomTable"></table>
           </div>
           <div class="bom-actions">
-            <button class="btn" id="btnDrawing">Teknik Resim İndir (SVG)</button>
-            <button class="btn" id="btnPdf">Ürün Listesini PDF İndir</button>
+            <button class="btn" id="btnDrawing" data-i18n="btnDrawing">Teknik Resim İndir (SVG)</button>
+            <button class="btn" id="btnPdf" data-i18n="btnPdf">Ürün Listesini PDF İndir</button>
+            <button class="btn primary" id="btnReportTr">Detaylı Rapor İndir (Türkçe)</button>
+            <button class="btn primary" id="btnReportEn">Download Detailed Report (English)</button>
           </div>
         </div>
       </section>
 
       <section class="panel" id="panel-detay">
         <details class="disclosure" open>
-          <summary>Kapsama Analizi (Üstten Görünüş) <span class="chips" id="chipsCalc"></span><span class="chevron">▸</span></summary>
+          <summary><span data-i18n="calcTitle">Kapsama Analizi (Üstten Görünüş)</span> <span class="chips" id="chipsCalc"></span><span class="chevron">▸</span></summary>
           <div class="disclosure-body">
             <div class="calc-grid">
-              <div class="card">
-                <svg class="diagram" id="topSvg" viewBox="0 0 720 300"></svg>
-              </div>
+              <div class="card"><svg class="diagram" id="topSvg" viewBox="0 0 720 300"></svg></div>
               <div class="card">
                 <div class="statrow" id="calcStats" style="margin-top:0;"></div>
                 <div class="formula">
-                  <b>kapsama_yarıçapı</b> = h · tan(azimuth_yarı_açı)<br>
-                  <b>açısal_marj</b> = azimuth_yarı_açı − atan(kritik_boşluk / h)<br>
-                  <b>doğrusal_marj</b> = kapsama_yarıçapı − kritik_boşluk
+                  <b>coverage_radius</b> = h · tan(azimuth_half_angle)<br>
+                  <b>angular_margin</b> = azimuth_half_angle − atan(critical_gap / h)<br>
+                  <b>linear_margin</b> = coverage_radius − critical_gap
                 </div>
               </div>
             </div>
           </div>
         </details>
         <details class="disclosure">
-          <summary>Derinlik &amp; Menzil (Yandan Görünüş) <span class="chips" id="chipsDepth"></span><span class="chevron">▸</span></summary>
+          <summary><span data-i18n="depthTitle">Derinlik &amp; Menzil (Yandan Görünüş)</span> <span class="chips" id="chipsDepth"></span><span class="chevron">▸</span></summary>
           <div class="disclosure-body">
             <div class="calc-grid">
-              <div class="card">
-                <svg class="diagram" id="sideSvg" viewBox="0 0 720 320"></svg>
-              </div>
+              <div class="card"><svg class="diagram" id="sideSvg" viewBox="0 0 720 320"></svg></div>
               <div class="card">
                 <div class="statrow" id="depthStats" style="margin-top:0;"></div>
                 <div class="formula">
-                  <b>yakın_sınır</b> = h · tan(tilt − elevation_yarı_açı)<br>
-                  <b>uzak_sınır</b> = h · tan(tilt + elevation_yarı_açı)<br>
-                  <b>etkin_menzil</b> = referans_menzil · 10^((kazanç−9)/20)<br>
-                  <b>en_kötü_mesafe</b> = max( √(kritik_boşluk²+h²), √(derinlik_uç²+h²) )
+                  <b>near_edge</b> = h · tan(tilt − elevation_half_angle)<br>
+                  <b>far_edge</b> = h · tan(tilt + elevation_half_angle)<br>
+                  <b>effective_range</b> = ref_range · region_mult · 10^((gain−9)/20)<br>
+                  <b>worst_case_dist</b> = max( √(critical_gap²+h²), √(depth_edge²+h²) )
                 </div>
               </div>
             </div>
@@ -422,19 +438,19 @@
 
     <section id="simpleResult" hidden>
       <div class="card tick">
-        <h3>Önerilen Ürün Listesi (BOM)</h3>
-        <p class="note">El terminali ile mobil sayımda sabit geçit geometrisi/anten yerleşimi gerekmez — okuyucunun anteni dahilidir.</p>
-        <div style="overflow-x:auto;">
-          <table class="bom" id="bomTableSimple"></table>
-        </div>
+        <h3 data-i18n="bomTitle">Önerilen Ürün Listesi (BOM)</h3>
+        <p class="note" data-i18n="simpleBomNote">El terminali ile mobil sayımda sabit geçit geometrisi/anten yerleşimi gerekmez — okuyucunun anteni dahilidir.</p>
+        <div style="overflow-x:auto;"><table class="bom" id="bomTableSimple"></table></div>
         <div class="bom-actions">
-          <button class="btn" id="btnPdfSimple">Ürün Listesini PDF İndir</button>
+          <button class="btn" id="btnPdfSimple" data-i18n="btnPdf">Ürün Listesini PDF İndir</button>
+          <button class="btn primary" id="btnReportTrSimple">Detaylı Rapor İndir (Türkçe)</button>
+          <button class="btn primary" id="btnReportEnSimple">Download Detailed Report (English)</button>
         </div>
       </div>
     </section>
   </section>
 
-  <footer>Kalıphane geçit geometrisi · dahili mühendislik modeli — Yusuf Enes Gültekin, Üretim Birimi (Stajyer). Ürün referansları, kamuya açık üretici bilgilerinden derlenen örnek bir katalogdur; alım öncesi güncel teknik şartname ile doğrulanmalıdır. Anten kazancı → menzil ilişkisi, UHF RFID geri-saçılım bağlantılarındaki "+6 dB kazanç ≈ 2× menzil" kuralına dayanan basitleştirilmiş bir yaklaşımdır.</footer>
+  <footer data-i18n="footer">Kalıphane geçit geometrisi · dahili mühendislik modeli — Yusuf Enes Gültekin, Üretim Birimi (Stajyer). Ürün ve fiyat referansları, kamuya açık üretici/perakendeci bilgilerinden derlenen yaklaşık bir kataloğu yansıtır; alım öncesi güncel teklif ile doğrulanmalıdır.</footer>
 </div>
 
 <script>/** @license
@@ -815,7 +831,82 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 (function(){
   "use strict";
 
-  // ---------- icon set (monoline, 24x24) ----------
+  // ================= i18n =================
+  var lang = 'tr';
+  var STR = {
+    brand:{tr:'RFID SİSTEM TASARIMI', en:'RFID SYSTEM DESIGN'},
+    navProduct:{tr:'Ürün', en:'Product'}, navTracking:{tr:'Takip', en:'Tracking'}, navRegion:{tr:'Bölge', en:'Region'},
+    navEnv:{tr:'Ortam', en:'Environment'}, navGeom:{tr:'Geometri', en:'Geometry'}, navAntenna:{tr:'Anten', en:'Antenna'}, navReq:{tr:'Gereksinim', en:'Requirement'},
+    eyebrow:{tr:'Klemsan A.Ş. — Üretim Birimi · RFID Sistem Tasarım Platformu', en:'Klemsan Inc. — Production Unit · RFID System Design Platform'},
+    h1:{tr:'RFID Sistem Tasarım ve Simülasyon Aracı', en:'RFID System Design & Simulation Tool'},
+    sub:{tr:'Herhangi bir RFID sistemi kurmak için ürün türünü, takip yöntemini, bölgenizi, ortam koşullarını ve performans gereksinimlerinizi seçin. Sistem yalnızca ihtiyacınıza uyan adımları gösterir.',
+         en:'Choose the product type, tracking method, region, environment and performance requirement for any RFID system you want to build. The tool only shows the steps that apply to your case.'},
+    step1Title:{tr:'Ürün / Malzeme Türü', en:'Product / Material Type'},
+    step1Note:{tr:'Takip edilecek ürünün yüzeyi/malzemesi — uygun etiket türü buna göre seçilir.', en:'The surface/material of the tracked item — the matching tag type is picked from this.'},
+    tagQtyLabel:{tr:'Etiketlenecek Ürün Adedi (opsiyonel)', en:'Number of items to tag (optional)'},
+    tagQtyPh:{tr:'örn. 3000', en:'e.g. 3000'},
+    step2Title:{tr:'Takip Türü', en:'Tracking Type'},
+    step2Note:{tr:'Bu, geometri/anten adımlarının gerekip gerekmediğini ve reader modelini belirler.', en:'This decides whether the geometry/antenna steps apply, and which reader model fits.'},
+    stepRegionTitle:{tr:'Bölge / Frekans Bandı', en:'Region / Frequency Band'},
+    stepRegionNote:{tr:'UHF RFID frekans bandı ve izin verilen verici gücü bölgeye göre değişir; bu da tipik okuma menzilini doğrudan etkiler.', en:'The UHF RFID frequency band and allowed transmit power vary by region, which directly affects typical read range.'},
+    step3Title:{tr:'Ortam Koşulları', en:'Environmental Conditions'},
+    step3Note:{tr:'Metal yakınlığı ve ortam, etiket/donanım koruma sınıfı önerisini etkiler.', en:'Metal proximity and environment affect the recommended tag/hardware protection class.'},
+    step4Title:{tr:'Geçit / Montaj Geometrisi', en:'Gate / Mounting Geometry'},
+    step4Note:{tr:'Değerleri yazın — sonuçlar yalnızca "Sistemi Kur" butonuna bastığınızda güncellenir.', en:'Type the values — results update only when you press "Build System".'},
+    lblAntCount:{tr:'Anten Sayısı', en:'Antenna Count'},
+    lblGateWidth:{tr:'Geçit/Alan Genişliği (mm)', en:'Gate/Area Width (mm)'},
+    lblMountHeight:{tr:'Montaj Yüksekliği (mm)', en:'Mounting Height (mm)'},
+    lblVertDist:{tr:'Anten–Etiket Dikey Mesafe h (mm)', en:'Antenna–Tag Vertical Distance h (mm)'},
+    presetMold:{tr:'Kalıp üstü·1500', en:'On mold·1500'}, presetCart:{tr:'Araba üstü·1000', en:'On cart·1000'},
+    presetCrit1:{tr:'Kritik·750', en:'Critical·750'}, presetCrit2:{tr:'Kritik·700', en:'Critical·700'},
+    step5Title:{tr:'Anten Modeli', en:'Antenna Model'},
+    step5Note:{tr:'"Otomatik" seçiliyken sistem, takip türünüze göre anten modelini kendisi önerir.', en:'With "Automatic" selected, the system recommends the antenna model from your tracking type.'},
+    lblAzimuth:{tr:'Azimuth Yarı Huzme Açısı (°)', en:'Azimuth Half-Beam Angle (°)'},
+    lblElevation:{tr:'Elevation Yarı Huzme Açısı (°)', en:'Elevation Half-Beam Angle (°)'},
+    lblGain:{tr:'Anten Kazancı (dBiC)', en:'Antenna Gain (dBiC)'},
+    lblTilt:{tr:'Montaj Tilt Açısı (°, dikeyden)', en:'Mounting Tilt Angle (° from vertical)'},
+    presetTilt22:{tr:'Klemsan referansı · 22°', en:'Klemsan reference · 22°'},
+    lblRefRange:{tr:'Referans Menzil, kataloğa göre (m, 9 dBiC\'de)', en:'Reference range per datasheet (m, at 9 dBiC)'},
+    step6Title:{tr:'Performans Gereksinimi', en:'Performance Requirement'},
+    step6Note:{tr:'Kendi ihtiyacınızı girin — sistem karşılayıp karşılamadığını hesaplar.', en:'Enter your own requirement — the system checks whether it is met.'},
+    lblReqAngle:{tr:'Minimum Açısal Marj İhtiyacı (°)', en:'Minimum Angular Margin Needed (°)'},
+    lblReqLinear:{tr:'Minimum Doğrusal Marj İhtiyacı (mm)', en:'Minimum Linear Margin Needed (mm)'},
+    btnBuild:{tr:'SİSTEMİ KUR VE SİMÜLASYONU BAŞLAT', en:'BUILD SYSTEM & START SIMULATION'},
+    resultsHeading:{tr:'Sonuçlar', en:'Results'},
+    tabSim:{tr:'Simülasyon', en:'Simulation'}, tabBom:{tr:'Ürün Listesi', en:'Product List'}, tabDetay:{tr:'Hesap Detayları', en:'Calculation Details'},
+    legend10:{tr:'Taşıyıcı kiriş-kolon', en:'Support beam/columns'}, legend20:{tr:'Okuyucu/anten birimi', en:'Reader/antenna unit'}, legend30:{tr:'Takip edilen ürün + etiket', en:'Tracked item + tag'},
+    bomTitle:{tr:'Önerilen Ürün Listesi (BOM)', en:'Recommended Bill of Materials (BOM)'},
+    bomNote:{tr:'Girdiğiniz ürün türü, takip türü ve hesaplanan geometriye göre önerilen gerçek marka/model referansları ve yaklaşık fiyat aralıkları. Nihai tedarikte üretici/tedarikçi teklifiyle doğrulanmalıdır.',
+             en:'Real brand/model references and approximate price ranges, recommended from your product type, tracking type and computed geometry. Verify with a supplier quote before purchasing.'},
+    simpleBomNote:{tr:'El terminali ile mobil sayımda sabit geçit geometrisi/anten yerleşimi gerekmez — okuyucunun anteni dahilidir.', en:'Handheld mobile scanning needs no fixed gate geometry/antenna placement — the reader\'s antenna is built in.'},
+    btnDrawing:{tr:'Teknik Resim İndir (SVG)', en:'Download Technical Drawing (SVG)'},
+    btnPdf:{tr:'Ürün Listesini PDF İndir', en:'Download Product List (PDF)'},
+    calcTitle:{tr:'Kapsama Analizi (Üstten Görünüş)', en:'Coverage Analysis (Top View)'},
+    depthTitle:{tr:'Derinlik & Menzil (Yandan Görünüş)', en:'Depth & Range (Side View)'},
+    footer:{tr:'Kalıphane geçit geometrisi · dahili mühendislik modeli — Yusuf Enes Gültekin, Üretim Birimi (Stajyer). Ürün ve fiyat referansları, kamuya açık üretici/perakendeci bilgilerinden derlenen yaklaşık bir kataloğu yansıtır; alım öncesi güncel teklif ile doğrulanmalıdır.',
+            en:'Mold-gate geometry · internal engineering model — Yusuf Enes Gültekin, Production Unit (Intern). Product and price references reflect an approximate catalog compiled from public manufacturer/retailer information; verify with a current quote before purchasing.'},
+    statCrit:{tr:'Kritik Nokta Boşluğu', en:'Critical Gap'}, statConeR:{tr:'Kapsama Yarıçapı (h)', en:'Coverage Radius (h)'},
+    statAngular:{tr:'Açısal Marj', en:'Angular Margin'}, statLinear:{tr:'Doğrusal Marj', en:'Linear Margin'},
+    statDepth:{tr:'Derinlik Kapsaması', en:'Depth Coverage'}, statRangeState:{tr:'Menzil Durumu', en:'Range Status'},
+    statNear:{tr:'Yakın Sınır', en:'Near Edge'}, statFar:{tr:'Uzak Sınır', en:'Far Edge'},
+    statEffRange:{tr:'Etkin Menzil', en:'Effective Range'}, statWorst:{tr:'En Kötü Mesafe', en:'Worst-Case Distance'},
+    rangeOk:{tr:'YETERLİ', en:'SUFFICIENT'}, rangeBad:{tr:'YETERSİZ', en:'INSUFFICIENT'},
+    thComponent:{tr:'Bileşen', en:'Component'}, thModel:{tr:'Marka / Model', en:'Brand / Model'}, thDesc:{tr:'Açıklama', en:'Description'},
+    thQty:{tr:'Miktar', en:'Qty'}, thPrice:{tr:'Fiyat Aralığı (USD)', en:'Price Range (USD)'},
+    perUnit:{tr:'/ adet', en:'/ unit'}, byProject:{tr:'proje kapsamına göre', en:'per project scope'},
+    totalEst:{tr:'Tahmini Toplam (USD)', en:'Estimated Total (USD)'},
+    totalNote:{tr:'* Etiket adedi girilmezse toplam hesaplamaya dahil edilmez.', en:'* If tag quantity is left blank, tags are excluded from the total.'},
+    unit:{tr:'adet', en:'pcs'}
+  };
+  function t(k){ return (STR[k] && STR[k][lang]) || k; }
+  function applyI18n(){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
+    document.documentElement.lang = lang;
+    document.title = lang==='en' ? 'RFID System Design & Simulation Tool' : 'RFID Sistem Tasarım ve Simülasyon Aracı';
+  }
+
+  // ================= icon set =================
   function icon(name){
     var d = {
       box:'<rect x="4" y="8" width="16" height="12" rx="1"/><path d="M4 8l8-4 8 4"/><path d="M12 4v16"/>',
@@ -841,34 +932,61 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       auto:'<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
       wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2-2z"/>',
       checkSingle:'<circle cx="12" cy="12" r="9"/><path d="M8 12l2.5 2.5L16 9"/>',
-      checkDouble:'<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/><path d="M8.5 12l2 2 4-4.5"/>'
+      checkDouble:'<path d="M12 3l7 3v6c0 5-3 8-7 9-4-1-7-4-7-9V6l7-3z"/><path d="M8.5 12l2 2 4-4.5"/>',
+      globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'
     }[name] || '';
     return '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
   }
 
-  // ---------- catalog (real, publicly documented reference models — verify before purchase) ----------
+  // ================= catalog (real, publicly documented reference models — verify before purchase) =================
   var TAGS = [
-    {id:'genel', name:'Avery Dennison AD-233r6 UHF Inlay Etiket', desc:'Genel amaçlı, paper-face UHF etiket — plastik, karton, ahşap yüzeyler için standart lojistik etiketi.'},
-    {id:'metal', name:'Xerafy Metal Skin Mercury 86 Max', desc:'On-metal etiket, doğrudan metal yüzeye montaj — 13 m\'ye kadar okuma mesafesi (üretici verisi).'},
-    {id:'sivi', name:'Confidex Survivor', desc:'IP68 gövde, yıkama/nem dayanımlı rugged etiket — sıvı dolu kap ve nemli ortamlar için.'},
-    {id:'tekstil', name:'Xerafy TEX TRAK (70×15mm)', desc:'Yıkanabilir tekstil/çamaşırhane etiketi — 200+ endüstriyel yıkama döngüsüne dayanıklı.'},
-    {id:'agir', name:'Xerafy Titanium 750U', desc:'Ağır hizmet tipi on-metal etiket — darbe ve zorlu ortam dayanımlı gövde.'}
+    {id:'genel', name:'Avery Dennison AD-233r6 UHF Inlay', price:[0.08,0.30],
+     desc:{tr:'Genel amaçlı, paper-face UHF etiket — plastik, karton, ahşap yüzeyler için standart lojistik etiketi.', en:'General-purpose paper-face UHF tag — standard logistics tag for plastic, cardboard, wood surfaces.'}},
+    {id:'metal', name:'Xerafy Metal Skin Mercury 86 Max', price:[1.5,5],
+     desc:{tr:'On-metal etiket, doğrudan metal yüzeye montaj — 13 m\'ye kadar okuma mesafesi (üretici verisi).', en:'On-metal tag for direct mounting on metal — up to 13 m read range per datasheet.'}},
+    {id:'sivi', name:'Confidex Survivor', price:[3,8],
+     desc:{tr:'IP68 gövde, yıkama/nem dayanımlı rugged etiket — sıvı dolu kap ve nemli ortamlar için.', en:'IP68, wash/moisture-resistant rugged tag — for liquid-filled containers and wet environments.'}},
+    {id:'tekstil', name:'Xerafy TEX TRAK (70×15mm)', price:[1.5,4],
+     desc:{tr:'Yıkanabilir tekstil/çamaşırhane etiketi — 200+ endüstriyel yıkama döngüsüne dayanıklı.', en:'Washable textile/laundry tag — rated for 200+ industrial wash cycles.'}},
+    {id:'agir', name:'Xerafy Titanium 750U', price:[3,7],
+     desc:{tr:'Ağır hizmet tipi on-metal etiket — darbe ve zorlu ortam dayanımlı gövde.', en:'Heavy-duty on-metal tag — impact- and harsh-environment-resistant housing.'}}
   ];
   var ANTENNAS = [
-    {id:'a6034', name:'Times-7 A6034', gain:9, az:40.5, el:12.5, desc:'Geçit tipi kurulumlarda referans alınan, dengeli azimuth/elevation kapsamalı panel anten.'},
-    {id:'dar', name:'Times-7 A7060 SlimLine', gain:9, az:32.5, el:15, desc:'9 dBi kazanç, dar dikey huzme — uzun menzil gereken geniş geçitlerde az antenle yüksek marj.'},
-    {id:'genis', name:'Times-7 A5020MR Ultra-Low-Profile', gain:6, az:57.5, el:52.5, desc:'115°×105° geniş huzme — raf, konveyör ve istasyon uygulamalarında kısa mesafede geniş kapsama.'},
-    {id:'kompakt', name:'Laird Mini UHF (S9028PCL benzeri)', gain:5.5, az:35, el:35, desc:'5.2" kompakt gövde, dairesel polarizasyon — araç/forklift üstü noktasal kapsama.'}
+    {id:'a6034', name:'Times-7 A6034', gain:9, az:40.5, el:12.5, price:[90,180],
+     desc:{tr:'Geçit tipi kurulumlarda referans alınan, dengeli azimuth/elevation kapsamalı panel anten.', en:'Reference panel antenna for gate installations, with balanced azimuth/elevation coverage.'}},
+    {id:'dar', name:'Times-7 A7060 SlimLine', gain:9, az:32.5, el:15, price:[100,200],
+     desc:{tr:'9 dBi kazanç, dar dikey huzme — uzun menzil gereken geniş geçitlerde az antenle yüksek marj.', en:'9 dBi gain, narrow vertical beam — high margin with fewer antennas on wide gates needing long range.'}},
+    {id:'genis', name:'Times-7 A5020MR Ultra-Low-Profile', gain:6, az:57.5, el:52.5, price:[60,140],
+     desc:{tr:'115°×105° geniş huzme — raf, konveyör ve istasyon uygulamalarında kısa mesafede geniş kapsama.', en:'115°×105° wide beam — broad short-range coverage for shelf, conveyor and station applications.'}},
+    {id:'kompakt', name:'Laird Mini UHF (S9028PCL benzeri / S9028PCL-class)', gain:5.5, az:35, el:35, price:[50,110],
+     desc:{tr:'5.2" kompakt gövde, dairesel polarizasyon — araç/forklift üstü noktasal kapsama.', en:'5.2" compact housing, circular polarization — spot coverage for vehicle/forklift mounting.'}}
   ];
   var READERS = [
-    {id:'r4', name:'Zebra FX9600 (4/8 Port)', ports:4, desc:'PoE+, IP53 gövde — çok antenli geçit/konveyör/raf kurulumları için yüksek hacimli sabit okuyucu.'},
-    {id:'r2', name:'Impinj R700 (2 Port)', ports:2, desc:'Enterprise sınıf, Linux tabanlı kompakt sabit okuyucu — küçük geçit veya tekli istasyon için.'},
-    {id:'rh', name:'Chainway C72 El Terminali', ports:1, desc:'Android, Impinj E-series çip, 30m+ okuma mesafesi — mobil sayım ve nokta kontrol, anteni dahili.'}
+    {id:'r4', name:'Zebra FX9600 (4/8 Port)', ports:4, price:[1800,3000],
+     desc:{tr:'PoE+, IP53 gövde — çok antenli geçit/konveyör/raf kurulumları için yüksek hacimli sabit okuyucu.', en:'PoE+, IP53 housing — high-volume fixed reader for multi-antenna gate/conveyor/shelf setups.'}},
+    {id:'r2', name:'Impinj R700 (2 Port)', ports:2, price:[1200,2000],
+     desc:{tr:'Enterprise sınıf, Linux tabanlı kompakt sabit okuyucu — küçük geçit veya tekli istasyon için.', en:'Enterprise-class, Linux-based compact fixed reader — for small gates or single stations.'}},
+    {id:'rh', name:'Chainway C72', ports:1, price:[900,2200],
+     desc:{tr:'Android el terminali, Impinj E-series çip, 30m+ okuma mesafesi — mobil sayım, anteni dahili.', en:'Android handheld, Impinj E-series chip, 30m+ read range — mobile counting, antenna built in.'}}
+  ];
+  var ACCESSORY_PRICE = { cable:[8,25], bracket:[10,30] };
+
+  var REGIONS = [
+    {id:'tr_eu', band:'865–868 MHz', power:{tr:'≤2 W ERP', en:'≤2 W ERP'}, mult:1.0,
+     l:{tr:'Türkiye / Avrupa (ETSI)', en:'Turkey / Europe (ETSI)'}, def:true},
+    {id:'us_na', band:'902–928 MHz', power:{tr:'≤4 W EIRP (frekans atlamalı)', en:'≤4 W EIRP (frequency-hopping)'}, mult:1.35,
+     l:{tr:'ABD / Kuzey Amerika (FCC)', en:'USA / North America (FCC)'}},
+    {id:'china', band:'920–925 MHz', power:{tr:'≤2 W ERP (bölgeye göre değişir)', en:'≤2 W ERP (varies by province)'}, mult:1.05,
+     l:{tr:'Çin', en:'China'}},
+    {id:'japan', band:'916.7–920.9 MHz', power:{tr:'≤4 W EIRP (bazı modlarda)', en:'≤4 W EIRP (in some modes)'}, mult:1.3,
+     l:{tr:'Japonya / Kore', en:'Japan / Korea'}},
+    {id:'other', band:'—', power:{tr:'Yerel düzenlemeye bakın', en:'Check local regulation'}, mult:1.0,
+     l:{tr:'Diğer / Genel (ETSI benzeri varsayım)', en:'Other / General (assumes ETSI-like limits)'}}
   ];
 
   function pickTag(product){
     var id = {metal:'metal', genel:'genel', sivi:'sivi', tekstil:'tekstil', agir:'agir'}[product] || 'genel';
-    return TAGS.filter(function(t){ return t.id===id; })[0];
+    return TAGS.filter(function(x){ return x.id===id; })[0];
   }
   function recommendAntennaId(tracking){
     var map = {gate:'a6034', konveyor:'genis', raf:'genis', mobil:null, arac:'kompakt'};
@@ -879,54 +997,57 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var r = n<=2 ? READERS.filter(function(x){return x.id==='r2';})[0] : READERS.filter(function(x){return x.id==='r4';})[0];
     return { reader:r, qty:Math.ceil(n/r.ports), antennaNeeded:true };
   }
+  function currentRegion(){ return REGIONS.filter(function(r){ return r.id===wiz.region; })[0] || REGIONS[0]; }
 
-  // ---------- option data + card rendering ----------
+  // ================= option data + rendering =================
   var OPTS = {
     product:[
-      {v:'genel', l:'Plastik / ahşap / karton', d:'Genel yüzey', i:'box'},
-      {v:'metal', l:'Metal kalıp / parça', d:'On-metal', i:'bolt', def:true},
-      {v:'sivi', l:'Sıvı dolu kap / varil', d:'Near-liquid', i:'drum'},
-      {v:'tekstil', l:'Tekstil / askılı ürün', d:'Esnek yüzey', i:'hanger'},
-      {v:'agir', l:'Palet / araç / ağır ekipman', d:'Zorlu ortam', i:'pallet'}
+      {v:'genel', i:'box', def:false, l:{tr:'Plastik / ahşap / karton', en:'Plastic / wood / cardboard'}, d:{tr:'Genel yüzey', en:'General surface'}},
+      {v:'metal', i:'bolt', def:true, l:{tr:'Metal kalıp / parça', en:'Metal mold / part'}, d:{tr:'On-metal', en:'On-metal'}},
+      {v:'sivi', i:'drum', l:{tr:'Sıvı dolu kap / varil', en:'Liquid-filled container / drum'}, d:{tr:'Near-liquid', en:'Near-liquid'}},
+      {v:'tekstil', i:'hanger', l:{tr:'Tekstil / askılı ürün', en:'Textile / hanging item'}, d:{tr:'Esnek yüzey', en:'Flexible surface'}},
+      {v:'agir', i:'pallet', l:{tr:'Palet / araç / ağır ekipman', en:'Pallet / vehicle / heavy equipment'}, d:{tr:'Zorlu ortam', en:'Harsh environment'}}
     ],
     tracking:[
-      {v:'gate', l:'Geçit / kapı giriş-çıkış', d:'Portal takip', i:'gate', def:true},
-      {v:'konveyor', l:'Konveyör bant üzeri', d:'Hat içi takip', i:'conveyor'},
-      {v:'raf', l:'Raf / depo envanteri', d:'Sabit anten', i:'rack'},
-      {v:'mobil', l:'El terminali ile sayım', d:'Mobil okuma', i:'handheld'},
-      {v:'arac', l:'Araç / forklift üzeri', d:'Hareketli platform', i:'forklift'}
+      {v:'gate', i:'gate', def:true, l:{tr:'Geçit / kapı giriş-çıkış', en:'Gate / doorway entry-exit'}, d:{tr:'Portal takip', en:'Portal tracking'}},
+      {v:'konveyor', i:'conveyor', l:{tr:'Konveyör bant üzeri', en:'On conveyor belt'}, d:{tr:'Hat içi takip', en:'In-line tracking'}},
+      {v:'raf', i:'rack', l:{tr:'Raf / depo envanteri', en:'Shelf / warehouse inventory'}, d:{tr:'Sabit anten', en:'Fixed antenna'}},
+      {v:'mobil', i:'handheld', l:{tr:'El terminali ile sayım', en:'Handheld scanning'}, d:{tr:'Mobil okuma', en:'Mobile reading'}},
+      {v:'arac', i:'forklift', l:{tr:'Araç / forklift üzeri', en:'Vehicle / forklift mounted'}, d:{tr:'Hareketli platform', en:'Moving platform'}}
     ],
+    region:REGIONS.map(function(r){ return {v:r.id, i:'globe', def:r.def, l:r.l, d:{tr:r.band, en:r.band}}; }),
     env:[
-      {v:'ic', l:'İç mekan', i:'indoor', def:true},
-      {v:'dis', l:'Dış mekan', i:'outdoor'},
-      {v:'nemli', l:'Yüksek nem / yıkamalı alan', i:'droplet'}
+      {v:'ic', i:'indoor', def:true, l:{tr:'İç mekan', en:'Indoor'}},
+      {v:'dis', i:'outdoor', l:{tr:'Dış mekan', en:'Outdoor'}},
+      {v:'nemli', i:'droplet', l:{tr:'Yüksek nem / yıkamalı alan', en:'High humidity / wash-down area'}}
     ],
     metalprox:[
-      {v:'dogrudan', l:'Doğrudan metal üstü', i:'distNear'},
-      {v:'yakin', l:'Metale yakın', i:'distMid'},
-      {v:'uzak', l:'Metalden uzak', i:'distFar', def:true}
+      {v:'dogrudan', i:'distNear', l:{tr:'Doğrudan metal üstü', en:'Directly on metal'}},
+      {v:'yakin', i:'distMid', l:{tr:'Metale yakın', en:'Near metal'}},
+      {v:'uzak', i:'distFar', def:true, l:{tr:'Metalden uzak', en:'Away from metal'}}
     ],
     antenna:[
-      {v:'oto', l:'Otomatik öneri', d:'Takip türüne göre', i:'auto', def:true},
-      {v:'a6034', l:'Times-7 A6034', d:'9 dBiC · 81°/25°', i:'beamBalanced'},
-      {v:'dar', l:'A7060 SlimLine', d:'9 dBi · dar açı', i:'beamNarrow'},
-      {v:'genis', l:'A5020MR geniş huzme', d:'6 dBiC · kısa mesafe', i:'beamWide'},
-      {v:'kompakt', l:'Laird Mini kompakt', d:'Araç/nokta montaj', i:'beamCompact'},
-      {v:'manuel', l:'Manuel (özel değer)', d:'Kendi açı/kazancım', i:'wrench'}
+      {v:'oto', i:'auto', def:true, l:{tr:'Otomatik öneri', en:'Automatic'}, d:{tr:'Takip türüne göre', en:'From tracking type'}},
+      {v:'a6034', i:'beamBalanced', l:{tr:'Times-7 A6034', en:'Times-7 A6034'}, d:{tr:'9 dBiC · 81°/25°', en:'9 dBiC · 81°/25°'}},
+      {v:'dar', i:'beamNarrow', l:{tr:'A7060 SlimLine', en:'A7060 SlimLine'}, d:{tr:'9 dBi · dar açı', en:'9 dBi · narrow'}},
+      {v:'genis', i:'beamWide', l:{tr:'A5020MR geniş huzme', en:'A5020MR wide beam'}, d:{tr:'6 dBiC · kısa mesafe', en:'6 dBiC · short range'}},
+      {v:'kompakt', i:'beamCompact', l:{tr:'Laird Mini kompakt', en:'Laird Mini compact'}, d:{tr:'Araç/nokta montaj', en:'Vehicle/spot mount'}},
+      {v:'manuel', i:'wrench', l:{tr:'Manuel (özel değer)', en:'Manual (custom)'}, d:{tr:'Kendi açı/kazancım', en:'My own angle/gain'}}
     ],
     reliability:[
-      {v:'standart', l:'Standart güvenilirlik', i:'checkSingle', def:true},
-      {v:'yuksek', l:'Yüksek güvenilirlik', d:'Çift okuma teyidi', i:'checkDouble'}
+      {v:'standart', i:'checkSingle', def:true, l:{tr:'Standart güvenilirlik', en:'Standard reliability'}},
+      {v:'yuksek', i:'checkDouble', l:{tr:'Yüksek güvenilirlik', en:'High reliability'}, d:{tr:'Çift okuma teyidi', en:'Dual-read confirmation'}}
     ]
   };
 
-  var wiz = {};
+  var wiz = { region:'tr_eu' };
   function renderGrid(containerId, group){
     var el = document.getElementById(containerId);
     var html = OPTS[group].map(function(o){
       if(o.def) wiz[group] = o.v;
-      return '<button type="button" class="opt-card'+(o.def?' active':'')+'" data-value="'+o.v+'">'+icon(o.i)+
-        '<span class="txt"><span class="lbl">'+o.l+'</span>'+(o.d?'<span class="desc">'+o.d+'</span>':'')+'</span></button>';
+      var isActive = wiz[group]===o.v || (o.def && wiz[group]===undefined);
+      return '<button type="button" class="opt-card'+(isActive?' active':'')+'" data-value="'+o.v+'">'+icon(o.i)+
+        '<span class="txt"><span class="lbl">'+o.l[lang]+'</span>'+(o.d?'<span class="desc">'+o.d[lang]+'</span>':'')+'</span></button>';
     }).join('');
     el.innerHTML = html;
     el.querySelectorAll('.opt-card').forEach(function(btn){
@@ -936,17 +1057,24 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         wiz[group] = btn.getAttribute('data-value');
         if(group==='antenna'){ document.getElementById('manualAntennaCtl').hidden = (wiz.antenna!=='manuel'); }
         if(group==='tracking'){ applyTrackingVisibility(); }
+        if(group==='region'){ renderRegionInfo(); }
       });
     });
   }
-  renderGrid('gridProduct','product');
-  renderGrid('gridTracking','tracking');
-  renderGrid('gridEnv','env');
-  renderGrid('gridMetalprox','metalprox');
-  renderGrid('gridAntenna','antenna');
-  renderGrid('gridReliability','reliability');
+  function renderAllGrids(){
+    ['product','tracking','region','env','metalprox','antenna','reliability'].forEach(function(g){ renderGrid('grid'+g.charAt(0).toUpperCase()+g.slice(1), g); });
+  }
+  renderAllGrids();
 
-  // ---------- conditional flow: handheld tracking needs no gate geometry ----------
+  function renderRegionInfo(){
+    var r = currentRegion();
+    document.getElementById('regionInfo').innerHTML =
+      '<b>'+ (lang==='en'?'Band':'Bant') +':</b> '+r.band+' &nbsp; <b>'+(lang==='en'?'Max power':'Maks. güç')+':</b> '+r.power[lang]+
+      ' &nbsp; <b>'+(lang==='en'?'Range factor':'Menzil çarpanı')+':</b> ×'+r.mult.toFixed(2);
+  }
+  renderRegionInfo();
+
+  // ================= conditional flow =================
   function applyTrackingVisibility(){
     var isMobile = wiz.tracking === 'mobil';
     document.getElementById('step-geom').hidden = isMobile;
@@ -964,49 +1092,53 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   applyTrackingVisibility();
 
-  // scroll-spy for topnav
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('#topnavSteps a'));
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting){
-        navLinks.forEach(function(a){ a.classList.toggle('current', a.getAttribute('data-target')===e.target.id); });
-      }
+      if(e.isIntersecting){ navLinks.forEach(function(a){ a.classList.toggle('current', a.getAttribute('data-target')===e.target.id); }); }
     });
   }, { rootMargin:'-30% 0px -60% 0px' });
   document.querySelectorAll('.step').forEach(function(s){ io.observe(s); });
+
+  // language switch
+  document.querySelectorAll('.lang-switch button').forEach(function(b){
+    b.addEventListener('click', function(){
+      lang = b.getAttribute('data-lang');
+      document.querySelectorAll('.lang-switch button').forEach(function(x){ x.classList.toggle('active', x===b); });
+      applyI18n();
+      renderAllGrids();
+      renderRegionInfo();
+      if(lastResult){ rebuildResultsUI(); }
+    });
+  });
+  applyI18n();
 
   var inN=document.getElementById('inN'), inGate=document.getElementById('inGate'), inAY=document.getElementById('inAY'),
       inH=document.getElementById('inH'), inAz=document.getElementById('inAz'), inEl=document.getElementById('inEl'),
       inTilt=document.getElementById('inTilt'), inGain=document.getElementById('inGain'), inRefRange=document.getElementById('inRefRange'),
       inReqAngle=document.getElementById('inReqAngle'), inReqLinear=document.getElementById('inReqLinear'), inTagQty=document.getElementById('inTagQty');
-  var lblN=document.getElementById('lblN'), lblGate=document.getElementById('lblGate'), lblAY=document.getElementById('lblAY'),
-      lblH=document.getElementById('lblH'), lblAz=document.getElementById('lblAz'), lblEl=document.getElementById('lblEl'),
-      lblTilt=document.getElementById('lblTilt'), lblGain=document.getElementById('lblGain'), lblRefRange=document.getElementById('lblRefRange');
   var hPresets = document.getElementById('hPresets');
-
-  function mirrorLabels(){
-    lblN.textContent = inN.value; lblGate.textContent = inGate.value; lblAY.textContent = inAY.value;
-    if(parseInt(inH.value,10) > parseInt(inAY.value,10)){ inH.value = inAY.value; }
-    lblH.textContent = inH.value; lblAz.textContent = inAz.value; lblEl.textContent = inEl.value;
-    lblTilt.textContent = inTilt.value; lblGain.textContent = inGain.value; lblRefRange.textContent = inRefRange.value;
-    hPresets.querySelectorAll('button').forEach(function(b){
-      b.classList.toggle('active', Math.abs(parseInt(b.getAttribute('data-h'),10)-parseInt(inH.value,10)) < 1);
-    });
-  }
-  [inN,inGate,inAY,inH,inAz,inEl,inTilt,inGain,inRefRange].forEach(function(el){ el.addEventListener('input', mirrorLabels); });
   hPresets.querySelectorAll('button').forEach(function(b){
-    b.addEventListener('click', function(){ inH.value = b.getAttribute('data-h'); mirrorLabels(); });
+    b.addEventListener('click', function(){ inH.value = b.getAttribute('data-h'); });
   });
-  document.getElementById('btnTilt22').addEventListener('click', function(){ inTilt.value = 22; mirrorLabels(); });
-  mirrorLabels();
+  document.getElementById('btnTilt22').addEventListener('click', function(){ inTilt.value = 22; });
+  function clampInputs(){
+    [inN,inGate,inAY,inH,inAz,inEl,inTilt,inGain,inRefRange].forEach(function(el){
+      if(el.value===''){ return; }
+      var v = parseFloat(el.value), min = parseFloat(el.min), max = parseFloat(el.max);
+      if(!isNaN(min) && v<min) el.value = min;
+      if(!isNaN(max) && v>max) el.value = max;
+    });
+    if(parseFloat(inH.value) > parseFloat(inAY.value)){ inH.value = inAY.value; }
+  }
 
-  // ---------- physics ----------
+  // ================= physics =================
   function toRad(d){ return d*Math.PI/180; }
   function toDeg(r){ return r*180/Math.PI; }
   function coneHalfWidth(h, angleDeg){ return h*Math.tan(toRad(angleDeg)); }
   function offsetsFor(n, gate){ var seg=gate/(n+1), offs=[]; for(var i=0;i<n;i++){ offs.push(-gate/2+(i+1)*seg); } return offs; }
 
-  var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0 };
+  var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0, regionMult:1 };
 
   function computeMargin(nOverride){
     var n = nOverride||state.n;
@@ -1027,7 +1159,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     return { nearDist:nearDist, farDist:farDist, depthLen:farDist-nearDist, centerOffset:(nearDist+farDist)/2 };
   }
   function computeRange(m,d){
-    var effM = state.refRange*Math.pow(10,(state.gain-9)/20), effMm = effM*1000;
+    var effM = state.refRange*state.regionMult*Math.pow(10,(state.gain-9)/20), effMm = effM*1000;
     var slantAz = Math.sqrt(m.crit*m.crit+state.h*state.h);
     var farDepthAbs = Math.max(Math.abs(d.nearDist), Math.abs(d.farDist));
     var slantDepth = Math.sqrt(farDepthAbs*farDepthAbs+state.h*state.h);
@@ -1040,68 +1172,69 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   function renderCalcStats(m){
     var ok = m.marginDeg>0;
     document.getElementById('calcStats').innerHTML =
-      statTile('Kritik Nokta Boşluğu', Math.round(m.crit)+' mm') +
-      statTile('Kapsama Yarıçapı (h)', Math.round(m.coneR)+' mm') +
-      statTile('Açısal Marj', (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', ok?'good':'bad') +
-      statTile('Doğrusal Marj', (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', ok?'good':'bad');
+      statTile(t('statCrit'), Math.round(m.crit)+' mm') + statTile(t('statConeR'), Math.round(m.coneR)+' mm') +
+      statTile(t('statAngular'), (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', ok?'good':'bad') +
+      statTile(t('statLinear'), (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', ok?'good':'bad');
     document.getElementById('chipsCalc').innerHTML = '<span class="chip '+(ok?'good':'bad')+'">'+(m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°</span>';
   }
   function renderSimStats(m,d,rg){
     var okA=m.marginDeg>0, okR=rg.rangeOk;
     document.getElementById('simStats').innerHTML =
-      statTile('Açısal Marj', (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', okA?'good':'bad') +
-      statTile('Doğrusal Marj', (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', okA?'good':'bad') +
-      statTile('Derinlik Kapsaması', Math.round(d.depthLen)+' mm') +
-      statTile('Menzil Durumu', okR?'YETERLİ':'YETERSİZ', okR?'good':'bad');
+      statTile(t('statAngular'), (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', okA?'good':'bad') +
+      statTile(t('statLinear'), (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', okA?'good':'bad') +
+      statTile(t('statDepth'), Math.round(d.depthLen)+' mm') +
+      statTile(t('statRangeState'), okR?t('rangeOk'):t('rangeBad'), okR?'good':'bad');
   }
   function renderDepthStats(m,d,rg){
     document.getElementById('depthStats').innerHTML =
-      statTile('Derinlik Kapsaması', Math.round(d.depthLen)+' mm') +
-      statTile('Yakın Sınır', Math.round(d.nearDist)+' mm') +
-      statTile('Uzak Sınır', Math.round(d.farDist)+' mm') +
-      statTile('Etkin Menzil', rg.effectiveRangeM.toFixed(2)+' m') +
-      statTile('En Kötü Mesafe', Math.round(rg.worstSlantMm)+' mm') +
-      statTile('Menzil Durumu', rg.rangeOk?'YETERLİ':'YETERSİZ', rg.rangeOk?'good':'bad');
-    document.getElementById('chipsDepth').innerHTML = '<span class="chip '+(rg.rangeOk?'good':'bad')+'">'+(rg.rangeOk?'YETERLİ':'YETERSİZ')+'</span>';
+      statTile(t('statDepth'), Math.round(d.depthLen)+' mm') + statTile(t('statNear'), Math.round(d.nearDist)+' mm') +
+      statTile(t('statFar'), Math.round(d.farDist)+' mm') + statTile(t('statEffRange'), rg.effectiveRangeM.toFixed(2)+' m') +
+      statTile(t('statWorst'), Math.round(rg.worstSlantMm)+' mm') + statTile(t('statRangeState'), rg.rangeOk?t('rangeOk'):t('rangeBad'), rg.rangeOk?'good':'bad');
+    document.getElementById('chipsDepth').innerHTML = '<span class="chip '+(rg.rangeOk?'good':'bad')+'">'+(rg.rangeOk?t('rangeOk'):t('rangeBad'))+'</span>';
   }
   function renderRequirement(m,d,rg){
     var passA=m.marginDeg>=state.reqAngle, passL=m.marginLin>=state.reqLinear, passR=rg.rangeOk;
     var overall = passA&&passL&&passR;
     var el = document.getElementById('reqResult');
     el.classList.remove('ok','bad'); el.classList.add(overall?'ok':'bad');
+    var L = lang==='en';
     var rows = '<div class="req-rows">'+
-      '<span>Açısal marj: '+m.marginDeg.toFixed(1)+'° / hedef ≥'+state.reqAngle+'° '+(passA?'✓':'✗')+'</span>'+
-      '<span>Doğrusal marj: '+Math.round(m.marginLin)+' mm / hedef ≥'+state.reqLinear+' mm '+(passL?'✓':'✗')+'</span>'+
-      '<span>Menzil: '+Math.round(rg.worstSlantMm)+' mm / etkin '+Math.round(rg.effectiveRangeMm)+' mm '+(passR?'✓':'✗')+'</span>'+
+      '<span>'+(L?'Angular margin':'Açısal marj')+': '+m.marginDeg.toFixed(1)+'° / '+(L?'target':'hedef')+' ≥'+state.reqAngle+'° '+(passA?'✓':'✗')+'</span>'+
+      '<span>'+(L?'Linear margin':'Doğrusal marj')+': '+Math.round(m.marginLin)+' mm / '+(L?'target':'hedef')+' ≥'+state.reqLinear+' mm '+(passL?'✓':'✗')+'</span>'+
+      '<span>'+(L?'Range':'Menzil')+': '+Math.round(rg.worstSlantMm)+' mm / '+(L?'effective':'etkin')+' '+Math.round(rg.effectiveRangeMm)+' mm '+(passR?'✓':'✗')+'</span>'+
     '</div>';
-    if(overall){ el.innerHTML = '<div class="headline">✓ Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.</div>'+rows; return; }
+    if(overall){ el.innerHTML = '<div class="headline">✓ '+(L?('Current settings ('+state.n+' antennas) meet your requirement.'):('Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.'))+'</div>'+rows; return; }
     var suggestedN=null;
     for(var n2=1;n2<=12;n2++){
       var m2=computeMargin(n2), rg2=computeRange(m2,d);
       if(m2.marginDeg>=state.reqAngle && m2.marginLin>=state.reqLinear && rg2.rangeOk){ suggestedN=n2; break; }
     }
-    var sug = suggestedN!==null ? ('Önerilen minimum anten sayısı: <b>'+suggestedN+'</b>.') : ('12 antene kadar denendi, hiçbiri karşılamıyor — geçit/montaj/açı değerlerini gözden geçirin.');
-    el.innerHTML = '<div class="headline">✗ Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.</div><div class="detail">'+sug+'</div>'+rows;
+    var sug = suggestedN!==null
+      ? (L?('Suggested minimum antenna count: <b>'+suggestedN+'</b>.'):('Önerilen minimum anten sayısı: <b>'+suggestedN+'</b>.'))
+      : (L?'Tried up to 12 antennas, none satisfy this — reconsider gate/mount/angle values.':'12 antene kadar denendi, hiçbiri karşılamıyor — geçit/montaj/açı değerlerini gözden geçirin.');
+    el.innerHTML = '<div class="headline">✗ '+(L?('Current settings ('+state.n+' antennas) do not meet the requirement.'):('Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.'))+'</div><div class="detail">'+sug+'</div>'+rows;
   }
   function renderSimpleRequirement(tag, readerPick){
     var el = document.getElementById('reqResult');
     el.classList.remove('bad'); el.classList.add('ok');
-    el.innerHTML = '<div class="headline">✓ El terminali konfigürasyonu hazır.</div>'+
-      '<div class="req-rows"><span>Etiket: '+tag.name+'</span><span>Okuyucu: '+readerPick.reader.name+'</span></div>';
+    var L = lang==='en';
+    el.innerHTML = '<div class="headline">✓ '+(L?'Handheld configuration ready.':'El terminali konfigürasyonu hazır.')+'</div>'+
+      '<div class="req-rows"><span>'+(L?'Tag':'Etiket')+': '+tag.name+'</span><span>'+(L?'Reader':'Okuyucu')+': '+readerPick.reader.name+'</span></div>';
   }
 
-  // ---------- top-down SVG ----------
+  // ================= top-down SVG =================
   function renderSvgTop(m){
     var svg=document.getElementById('topSvg'), W=720,H=300,pad=60;
     var scale=(W-2*pad)/(state.gate+800), cx=W/2, floorY=235, beamY=60;
     function X(mm){ return cx+mm*scale; }
+    var L = lang==='en';
     var p=[];
     p.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--panel)"></rect>');
     var colW=400*scale;
     p.push('<rect x="'+(X(-state.gate/2)-colW)+'" y="'+(beamY-10)+'" width="'+colW+'" height="150" fill="none" stroke="var(--line)" stroke-width="1.4"></rect>');
     p.push('<rect x="'+X(state.gate/2)+'" y="'+(beamY-10)+'" width="'+colW+'" height="150" fill="none" stroke="var(--line)" stroke-width="1.4"></rect>');
     p.push('<rect x="'+X(-state.gate/2)+'" y="'+beamY+'" width="'+(X(state.gate/2)-X(-state.gate/2))+'" height="14" fill="var(--panel-2)" stroke="var(--line)" stroke-width="1.2"></rect>');
-    p.push('<text x="'+cx+'" y="'+(beamY-16)+'" text-anchor="middle" font-size="10.5" fill="var(--dim)">(10) KİRİŞ · '+state.gate+' mm</text>');
+    p.push('<text x="'+cx+'" y="'+(beamY-16)+'" text-anchor="middle" font-size="10.5" fill="var(--dim)">(10) '+(L?'BEAM':'KİRİŞ')+' · '+state.gate+' mm</text>');
     m.offs.forEach(function(o,idx){
       var w=m.coneR*2*scale, x=X(o)-w/2;
       p.push('<rect x="'+x+'" y="'+(floorY-46)+'" width="'+w+'" height="46" fill="var(--accent)" opacity="0.16"></rect>');
@@ -1110,20 +1243,20 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       p.push('<text x="'+X(o)+'" y="'+(beamY+30)+'" text-anchor="middle" font-size="9" fill="var(--dim)">20'+String.fromCharCode(97+idx)+'</text>');
     });
     p.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
-    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">zemin</text>');
+    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">'+(L?'floor':'zemin')+'</text>');
     [-state.gate/2,state.gate/2].forEach(function(edge){
       p.push('<line x1="'+X(edge)+'" y1="'+beamY+'" x2="'+X(edge)+'" y2="'+floorY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
     });
     var edgeX=X(state.gate/2), nearestOffX=X(m.offs[m.offs.length-1]), midY=floorY-10;
     p.push('<line x1="'+nearestOffX+'" y1="'+midY+'" x2="'+edgeX+'" y2="'+midY+'" stroke="var(--blue)" stroke-width="1.4"></line>');
-    p.push('<text x="'+((nearestOffX+edgeX)/2)+'" y="'+(midY-6)+'" text-anchor="middle" font-size="9.5" fill="var(--blue)">kritik: '+Math.round(m.crit)+'mm</text>');
-    p.push('<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="9.5" fill="var(--dim)">'+state.n+' anten · azimuth '+state.az+'° · h='+state.h+'mm · marj '+(m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°</text>');
+    p.push('<text x="'+((nearestOffX+edgeX)/2)+'" y="'+(midY-6)+'" text-anchor="middle" font-size="9.5" fill="var(--blue)">'+(L?'critical':'kritik')+': '+Math.round(m.crit)+'mm</text>');
+    p.push('<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="9.5" fill="var(--dim)">'+state.n+' '+(L?'ant':'anten')+' · az '+state.az+'° · h='+state.h+'mm · '+(L?'margin':'marj')+' '+(m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°</text>');
     svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML = p.join('');
   }
 
-  // ---------- side-view SVG ----------
   function renderSvgSide(m,d,rg){
     var svg=document.getElementById('sideSvg'), W=720,H=320,floorY=H-40;
+    var L = lang==='en';
     var maxExtent=Math.max(Math.abs(d.nearDist),Math.abs(d.farDist),rg.effectiveRangeMm*0.65,800);
     var scale=Math.min((W-100)/(2*maxExtent),(floorY-24)/state.ay);
     var beamY=floorY-state.ay*scale, cx=W/2;
@@ -1137,25 +1270,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     p.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+nearX+'" y2="'+tagY+'" stroke="var(--accent)" stroke-width="1.3"></line>');
     p.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+farX+'" y2="'+tagY+'" stroke="var(--accent)" stroke-width="1.3"></line>');
     p.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
-    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">zemin</text>');
+    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">'+(L?'floor':'zemin')+'</text>');
     p.push('<line x1="20" y1="'+tagY+'" x2="'+(W-20)+'" y2="'+tagY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
-    p.push('<text x="'+(W-24)+'" y="'+(tagY-6)+'" text-anchor="end" font-size="9.5" fill="var(--dim)">h düzlemi ('+state.h+'mm)</text>');
+    p.push('<text x="'+(W-24)+'" y="'+(tagY-6)+'" text-anchor="end" font-size="9.5" fill="var(--dim)">h ('+state.h+'mm)</text>');
     p.push('<rect x="'+(antX-10)+'" y="'+(antY-8)+'" width="20" height="8" fill="var(--paper)"></rect>');
     p.push('<text x="'+antX+'" y="'+(antY-14)+'" text-anchor="middle" font-size="10" fill="var(--paper)">(20)</text>');
     var nearOk=Math.sqrt(d.nearDist*d.nearDist+state.h*state.h)<=rg.effectiveRangeMm;
     var farOk=Math.sqrt(d.farDist*d.farDist+state.h*state.h)<=rg.effectiveRangeMm;
     p.push('<circle cx="'+nearX+'" cy="'+tagY+'" r="4.5" fill="'+(nearOk?'var(--good)':'var(--bad)')+'"></circle>');
     p.push('<circle cx="'+farX+'" cy="'+tagY+'" r="4.5" fill="'+(farOk?'var(--good)':'var(--bad)')+'"></circle>');
-    p.push('<text x="'+nearX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">yakın</text>');
-    p.push('<text x="'+farX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">uzak</text>');
+    p.push('<text x="'+nearX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">'+(L?'near':'yakın')+'</text>');
+    p.push('<text x="'+farX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">'+(L?'far':'uzak')+'</text>');
     p.push('<line x1="'+(cx-70)+'" y1="'+(floorY+30)+'" x2="'+(cx+70)+'" y2="'+(floorY+30)+'" stroke="var(--blue)" stroke-width="1.3" marker-end="url(#arrowh)"></line>');
-    p.push('<text x="'+cx+'" y="'+(floorY+44)+'" text-anchor="middle" font-size="9.5" fill="var(--blue)">ürünün geçiş yönü</text>');
+    p.push('<text x="'+cx+'" y="'+(floorY+44)+'" text-anchor="middle" font-size="9.5" fill="var(--blue)">'+(L?'direction of travel':'ürünün geçiş yönü')+'</text>');
     p.push('<defs><marker id="arrowh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--blue)"></path></marker></defs>');
-    p.push('<text x="'+cx+'" y="18" text-anchor="middle" font-size="9.5" fill="var(--dim)">tilt '+state.tilt+'° · elevation '+state.el+'° · derinlik '+Math.round(d.depthLen)+'mm · etkin menzil '+rg.effectiveRangeM.toFixed(2)+'m</text>');
+    p.push('<text x="'+cx+'" y="18" text-anchor="middle" font-size="9.5" fill="var(--dim)">tilt '+state.tilt+'° · el '+state.el+'° · '+(L?'depth':'derinlik')+' '+Math.round(d.depthLen)+'mm · '+(L?'eff. range':'etkin menzil')+' '+rg.effectiveRangeM.toFixed(2)+'m</text>');
     svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML = p.join('');
   }
 
-  // ---------- dependency-free isometric coverage scene ----------
+  // ================= isometric coverage scene =================
   function isoRaw(x,y,z){ var r=Math.PI/6; return { px:(x-z)*Math.cos(r), py:(x+z)*Math.sin(r)-y }; }
   function boxCorners(cx,cz,w,d,y0,y1){
     var hw=w/2,hd=d/2;
@@ -1164,6 +1297,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
   function renderIsoScene(m,d,rg){
     var svg=document.getElementById('isoSvg'), W=760,H=480;
+    var L = lang==='en';
     var gate=state.gate, ay=state.ay, h=state.h;
     var elFactor = Math.tan(toRad(state.el))/Math.tan(toRad(state.az));
     var coneRx = m.coneR, coneRz = m.coneR*elFactor;
@@ -1216,7 +1350,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     parts.push('<polygon points="'+faceStr(beamBox,[0,1,5,4])+'" fill="color-mix(in srgb, var(--paper) 68%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
     parts.push('<polygon points="'+faceStr(beamBox,[4,5,6,7])+'" fill="color-mix(in srgb, var(--paper) 78%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
     var beamLabelPt = S({x:0,y:ay+150,z:-90});
-    parts.push('<text x="'+beamLabelPt.x+'" y="'+(parseFloat(beamLabelPt.y)-8)+'" text-anchor="middle" font-size="11" fill="var(--dim)">(10) '+gate+'mm kiriş</text>');
+    parts.push('<text x="'+beamLabelPt.x+'" y="'+(parseFloat(beamLabelPt.y)-8)+'" text-anchor="middle" font-size="11" fill="var(--dim)">(10) '+gate+'mm '+(L?'beam':'kiriş')+'</text>');
 
     var order = m.offs.map(function(o,idx){return idx;}).sort(function(a,b){ return m.offs[a]-m.offs[b]; });
     order.forEach(function(idx){
@@ -1241,37 +1375,55 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     var tagS = S(tagPt);
     parts.push('<circle cx="'+tagS.x+'" cy="'+tagS.y+'" r="7" fill="'+(overallOk?'var(--good)':'var(--bad)')+'" class="tag-pulse"></circle>');
     var tagLab = S({x:tagPt.x, y:tagPt.y+26, z:tagPt.z});
-    parts.push('<text x="'+tagLab.x+'" y="'+tagLab.y+'" text-anchor="middle" font-size="10" fill="var(--paper)">(30) etiket</text>');
+    parts.push('<text x="'+tagLab.x+'" y="'+tagLab.y+'" text-anchor="middle" font-size="10" fill="var(--paper)">(30) '+(L?'tag':'etiket')+'</text>');
     parts.push('<style>.tag-pulse{ animation:tagpulse 1.8s ease-in-out infinite; } @keyframes tagpulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }</style>');
 
     svg.setAttribute('viewBox','0 0 '+W+' '+H);
     svg.innerHTML = parts.join('');
   }
 
-  // ---------- BOM ----------
+  // ================= BOM =================
+  function priceStr(range, qty){
+    if(!range) return '—';
+    var lo = range[0]*qty, hi = range[1]*qty;
+    function fmt(v){ return v>=100 ? ('$'+Math.round(v).toLocaleString('en-US')) : ('$'+v.toFixed(2)); }
+    return fmt(lo)+' – '+fmt(hi);
+  }
   function bomRows(tag, antSpec, antLabel, readerPick, m){
     var qty = parseInt(inTagQty.value,10);
-    var qtyText = (qty && qty>0) ? (qty+' adet') : 'proje kapsamına göre';
+    var hasQty = qty && qty>0;
+    var qtyText = hasQty ? (qty+' '+t('unit')) : t('byProject');
     var rows = [];
-    rows.push(['Etiket', tag.name, tag.desc, qtyText]);
+    rows.push({label:lang==='en'?'Tag':'Etiket', model:tag.name, desc:tag.desc[lang], qty:qtyText, price:hasQty?priceStr(tag.price,qty):(tag.price[0].toFixed(2)+'–'+tag.price[1].toFixed(2)+' '+t('perUnit')), total: hasQty?[tag.price[0]*qty, tag.price[1]*qty]:null});
     if(readerPick.antennaNeeded){
-      rows.push(['Anten', antLabel, antSpec ? antSpec.desc : 'Manuel olarak girilen özel açı/kazanç değerleri.', m.n+' adet']);
-      rows.push(['Anten Kablosu', 'Standart RF kablo (LMR-195/240 sınıfı)', 'Anten–okuyucu bağlantısı.', m.n+' adet']);
-      rows.push(['Montaj Braketi', 'Ayarlanabilir montaj braketi', 'Kiriş üzerine anten sabitleme.', m.n+' adet']);
+      var aDesc = antSpec ? antSpec.desc[lang] : (lang==='en'?'Manually entered custom angle/gain values.':'Manuel olarak girilen özel açı/kazanç değerleri.');
+      var aPrice = antSpec ? antSpec.price : null;
+      rows.push({label:lang==='en'?'Antenna':'Anten', model:antLabel, desc:aDesc, qty:m.n+' '+t('unit'), price:aPrice?priceStr(aPrice,m.n):'—', total:aPrice?[aPrice[0]*m.n,aPrice[1]*m.n]:null});
+      rows.push({label:lang==='en'?'Antenna Cable':'Anten Kablosu', model: lang==='en'?'Standard RF cable (LMR-195/240 class)':'Standart RF kablo (LMR-195/240 sınıfı)', desc: lang==='en'?'Antenna-to-reader connection.':'Anten–okuyucu bağlantısı.', qty:m.n+' '+t('unit'), price:priceStr(ACCESSORY_PRICE.cable,m.n), total:[ACCESSORY_PRICE.cable[0]*m.n,ACCESSORY_PRICE.cable[1]*m.n]});
+      rows.push({label:lang==='en'?'Mounting Bracket':'Montaj Braketi', model: lang==='en'?'Adjustable mounting bracket':'Ayarlanabilir montaj braketi', desc: lang==='en'?'Fixing the antenna to the beam.':'Kiriş üzerine anten sabitleme.', qty:m.n+' '+t('unit'), price:priceStr(ACCESSORY_PRICE.bracket,m.n), total:[ACCESSORY_PRICE.bracket[0]*m.n,ACCESSORY_PRICE.bracket[1]*m.n]});
     }
-    rows.push(['Okuyucu', readerPick.reader.name, readerPick.reader.desc, readerPick.qty+' adet']);
+    rows.push({label:lang==='en'?'Reader':'Okuyucu', model:readerPick.reader.name, desc:readerPick.reader.desc[lang], qty:readerPick.qty+' '+t('unit'), price:priceStr(readerPick.reader.price,readerPick.qty), total:[readerPick.reader.price[0]*readerPick.qty, readerPick.reader.price[1]*readerPick.qty]});
     return rows;
   }
   function renderBomTable(tableId, rows){
-    var html = '<thead><tr><th>Bileşen</th><th>Marka / Model</th><th>Açıklama</th><th>Miktar</th></tr></thead><tbody>';
+    var totalLo=0, totalHi=0;
+    rows.forEach(function(r){ if(r.total){ totalLo+=r.total[0]; totalHi+=r.total[1]; } });
+    var html = '<thead><tr><th>'+t('thComponent')+'</th><th>'+t('thModel')+'</th><th>'+t('thDesc')+'</th><th>'+t('thQty')+'</th><th>'+t('thPrice')+'</th></tr></thead><tbody>';
     rows.forEach(function(r){
-      html += '<tr><td>'+r[0]+'</td><td class="model">'+r[1]+'</td><td class="desc">'+r[2]+'</td><td class="qty">'+r[3]+'</td></tr>';
+      html += '<tr><td>'+r.label+'</td><td class="model">'+r.model+'</td><td class="desc">'+r.desc+'</td><td class="qty">'+r.qty+'</td><td class="price">'+r.price+'</td></tr>';
     });
-    html += '</tbody>';
+    html += '</tbody><tfoot><tr><td colspan="4">'+t('totalEst')+'</td><td class="price">$'+Math.round(totalLo).toLocaleString('en-US')+' – $'+Math.round(totalHi).toLocaleString('en-US')+'</td></tr></tfoot>';
     document.getElementById(tableId).innerHTML = html;
+    var noteId = tableId+'Note';
+    var existing = document.getElementById(noteId);
+    if(!existing){
+      existing = document.createElement('p'); existing.id = noteId; existing.className='bom-note';
+      document.getElementById(tableId).parentElement.insertAdjacentElement('afterend', existing);
+    }
+    existing.textContent = t('totalNote');
   }
 
-  // ---------- technical drawing export (SVG) ----------
+  // ================= technical drawing (SVG) =================
   function buildTechDrawingSvg(m,d,rg,tag,antLabel,readerPick){
     var W=1200,H=820, BLACK='#111', GRAY='#555';
     var gate=state.gate, ay=state.ay;
@@ -1302,7 +1454,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
     var fvX0=660, fvY0=130, fvW=500, fvH=280;
     var scaleF=(fvH-60)/ay, cxF=fvX0+fvW/2, floorYF=fvY0+fvH-20, beamYF=floorYF-ay*scaleF;
-    function XF(mm){ return cxF+mm*scaleF; } function YF(mm){ return floorYF-mm*scaleF; }
+    function XF(mm){ return cxF+mm*scaleF; }
     parts.push('<text x="'+fvX0+'" y="'+(fvY0-14)+'" font-size="14" fill="'+BLACK+'" font-weight="bold">B — Önden Görünüş</text>');
     parts.push('<rect x="'+(XF(-gate/2)-30)+'" y="'+(beamYF-160)+'" width="30" height="'+(floorYF-(beamYF-160))+'" fill="none" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
     parts.push('<rect x="'+XF(gate/2)+'" y="'+(beamYF-160)+'" width="30" height="'+(floorYF-(beamYF-160))+'" fill="none" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
@@ -1317,24 +1469,25 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     parts.push('<line x1="'+XF(0)+'" y1="'+floorYF+'" x2="'+XF(0)+'" y2="'+beamYF+'" stroke="'+BLACK+'" stroke-width="1" marker-start="url(#dimA)" marker-end="url(#dimA)"></line>');
     parts.push('<text x="'+(XF(0)+8)+'" y="'+((floorYF+beamYF)/2)+'" font-size="11" fill="'+BLACK+'">h='+state.h+'mm</text>');
     parts.push('<text x="'+fvX0+'" y="'+(fvY0-30)+'" font-size="11" fill="'+GRAY+'">Montaj yüksekliği: '+ay+' mm · Tilt: '+state.tilt+'°</text>');
-
     parts.push('<defs><marker id="dimA" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,4 L8,1 L8,7 Z" fill="'+BLACK+'"></path></marker></defs>');
 
     var ty=460;
     parts.push('<line x1="40" y1="'+(ty-14)+'" x2="'+(W-40)+'" y2="'+(ty-14)+'" stroke="'+BLACK+'" stroke-width="1"></line>');
     parts.push('<text x="40" y="'+ty+'" font-size="13" fill="'+BLACK+'" font-weight="bold">Sistem Parametreleri</text>');
+    var region = currentRegion();
     var params = [
       ['Anten sayısı (n)', m.n], ['Geçit genişliği', gate+' mm'], ['Montaj yüksekliği', ay+' mm'],
       ['Anten-etiket dikey mesafe h', state.h+' mm'], ['Azimuth yarı huzme açısı', state.az+'°'],
       ['Elevation yarı huzme açısı', state.el+'°'], ['Montaj tilt açısı', state.tilt+'°'],
-      ['Anten kazancı', state.gain+' dBiC'], ['Açısal marj', m.marginDeg.toFixed(1)+'°'],
-      ['Doğrusal marj', Math.round(m.marginLin)+' mm'], ['Derinlik kapsaması', Math.round(d.depthLen)+' mm'],
-      ['Etkin menzil', rg.effectiveRangeM.toFixed(2)+' m'], ['Menzil durumu', rg.rangeOk?'YETERLİ':'YETERSİZ'],
-      ['Etiket', tag.name], ['Anten modeli', antLabel], ['Okuyucu', readerPick.reader.name+' × '+readerPick.qty]
+      ['Anten kazancı', state.gain+' dBiC'], ['Bölge / frekans bandı', region.l.tr+' · '+region.band],
+      ['Açısal marj', m.marginDeg.toFixed(1)+'°'], ['Doğrusal marj', Math.round(m.marginLin)+' mm'],
+      ['Derinlik kapsaması', Math.round(d.depthLen)+' mm'], ['Etkin menzil', rg.effectiveRangeM.toFixed(2)+' m'],
+      ['Menzil durumu', rg.rangeOk?'YETERLİ':'YETERSİZ'], ['Etiket', tag.name], ['Anten modeli', antLabel],
+      ['Okuyucu', readerPick.reader.name+' × '+readerPick.qty]
     ];
     var colX=[40,340,640,940], rowH=20;
     params.forEach(function(pr,i){
-      var col = Math.floor(i/4), row = i%4;
+      var col = Math.floor(i/5), row = i%5;
       var x = colX[col], y = ty+22+row*rowH;
       parts.push('<text x="'+x+'" y="'+y+'" font-size="11" fill="'+GRAY+'">'+esc(pr[0])+'</text>');
       parts.push('<text x="'+(x+180)+'" y="'+y+'" font-size="11" fill="'+BLACK+'" font-weight="bold">'+esc(pr[1])+'</text>');
@@ -1345,64 +1498,149 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     return parts.join('');
   }
 
-  // ---------- PDF export of BOM (jsPDF, embedded — no network dependency) ----------
+  // ================= PDF: quick BOM export =================
   function buildAndDownloadPdf(rows, meta){
     if(typeof window.jspdf === 'undefined'){ return; }
     var doc = new window.jspdf.jsPDF({ unit:'pt', format:'a4' });
     var pageW = doc.internal.pageSize.getWidth();
     var margin = 44, y = 56;
+    var L = lang==='en';
     doc.setFont('helvetica','bold'); doc.setFontSize(16);
-    doc.text('KLEMSAN A.Ş. — RFID SİSTEM ÜRÜN LİSTESİ (BOM)', margin, y);
+    doc.text(L?'KLEMSAN INC. — RFID SYSTEM PRODUCT LIST (BOM)':'KLEMSAN A.Ş. — RFID SİSTEM ÜRÜN LİSTESİ (BOM)', margin, y);
     y += 18;
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(110);
-    doc.text('Üretim Birimi · ' + new Date().toISOString().slice(0,10) + ' · Marka/model referansları kamuya açık üretici bilgilerinden derlenmiştir; alım öncesi doğrulanmalıdır.', margin, y);
+    doc.text((L?'Production Unit · ':'Üretim Birimi · ') + new Date().toISOString().slice(0,10) + (L?' · Brand/model references compiled from public manufacturer information; verify before purchase.':' · Marka/model referansları kamuya açık üretici bilgilerinden derlenmiştir; alım öncesi doğrulanmalıdır.'), margin, y);
     y += 20;
     doc.setDrawColor(200); doc.line(margin, y, pageW-margin, y); y += 18;
 
-    if(meta){
-      doc.setFontSize(9); doc.setTextColor(60);
-      meta.forEach(function(line){ doc.text(line, margin, y); y += 13; });
-      y += 8;
-    }
+    if(meta){ doc.setFontSize(9); doc.setTextColor(60); meta.forEach(function(line){ doc.text(line, margin, y); y += 13; }); y += 8; }
 
-    var colX = [margin, margin+95, margin+280, pageW-margin-70];
-    doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(20);
-    doc.text('BİLEŞEN', colX[0], y); doc.text('MARKA / MODEL', colX[1], y); doc.text('AÇIKLAMA', colX[2], y); doc.text('MİKTAR', colX[3], y);
+    var colX = [margin, margin+90, margin+250, pageW-margin-140, pageW-margin-70];
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(20);
+    doc.text(t('thComponent'), colX[0], y); doc.text(t('thModel'), colX[1], y); doc.text(t('thDesc'), colX[2], y); doc.text(t('thPrice'), colX[3], y); doc.text(t('thQty'), colX[4], y);
     y += 6; doc.setDrawColor(20); doc.line(margin, y, pageW-margin, y); y += 14;
 
-    doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
     rows.forEach(function(r){
-      var descLines = doc.splitTextToSize(r[2], pageW-margin-colX[2]-70);
-      var rowH = Math.max(descLines.length*11, 14);
-      doc.setTextColor(20); doc.text(r[0], colX[0], y);
-      doc.setFont('courier','normal'); doc.text(r[1], colX[1], y, { maxWidth: colX[2]-colX[1]-10 });
+      var descLines = doc.splitTextToSize(r.desc, colX[3]-colX[2]-10);
+      var rowH = Math.max(descLines.length*10, 13);
+      doc.setTextColor(20); doc.text(r.label, colX[0], y);
+      doc.setFont('courier','normal'); doc.text(r.model, colX[1], y, { maxWidth: colX[2]-colX[1]-10 });
       doc.setFont('helvetica','normal'); doc.setTextColor(100); doc.text(descLines, colX[2], y);
-      doc.setTextColor(20); doc.text(String(r[3]), colX[3], y);
-      y += rowH + 8;
-      doc.setDrawColor(230); doc.line(margin, y-6, pageW-margin, y-6);
+      doc.setTextColor(20); doc.text(r.price, colX[3], y);
+      doc.text(String(r.qty), colX[4], y);
+      y += rowH + 7;
+      doc.setDrawColor(230); doc.line(margin, y-5, pageW-margin, y-5);
     });
 
-    var blob = doc.output('blob');
-    saveBlob('rfid-urun-listesi.pdf', blob);
+    saveBlob('rfid-urun-listesi.pdf', doc.output('blob'));
+  }
+
+  // ================= PDF: detailed narrative report =================
+  function buildDetailedReport(reportLang, dataset){
+    if(typeof window.jspdf === 'undefined'){ return; }
+    var L = reportLang==='en';
+    var doc = new window.jspdf.jsPDF({ unit:'pt', format:'a4' });
+    var pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
+    var margin = 48, y = 0;
+
+    function ensure(need){ if(y+need>pageH-50){ doc.addPage(); y=56; } }
+    function h2(text){ ensure(26); doc.setFont('helvetica','bold'); doc.setFontSize(12.5); doc.setTextColor(20); doc.text(text, margin, y); y+=18; }
+    function para(text){ var lines=doc.splitTextToSize(text, pageW-2*margin); ensure(lines.length*13+6); doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(70); doc.text(lines, margin, y); y+=lines.length*13+12; }
+    function kv(label, value){ ensure(15); doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(90); doc.text(label, margin, y); doc.setFont('helvetica','normal'); doc.setTextColor(20); doc.text(String(value), margin+230, y); y+=15; }
+    function spacer(n){ y+=n; }
+
+    y = 60;
+    doc.setFont('helvetica','bold'); doc.setFontSize(20); doc.setTextColor(20);
+    doc.text(L?'RFID System Design Report':'RFID Sistem Tasarım Raporu', margin, y); y+=20;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(110);
+    doc.text((L?'Klemsan Inc. — Production Unit · Generated ':'Klemsan A.Ş. — Üretim Birimi · Oluşturulma ')+new Date().toISOString().slice(0,10), margin, y); y+=26;
+
+    h2(L?'1. Input Summary':'1. Girdi Özeti');
+    kv(L?'Product / material type':'Ürün / malzeme türü', dataset.productLabel);
+    kv(L?'Tracking type':'Takip türü', dataset.trackingLabel);
+    kv(L?'Region / frequency band':'Bölge / frekans bandı', dataset.regionLabel+' — '+dataset.regionBand+' ('+dataset.regionPower+')');
+    kv(L?'Environment':'Ortam', dataset.envLabel);
+    kv(L?'Metal proximity':'Metal yakınlığı', dataset.metalproxLabel);
+    kv(L?'Reliability target':'Güvenilirlik hedefi', dataset.reliabilityLabel);
+    if(dataset.geom){
+      kv(L?'Antenna count':'Anten sayısı', dataset.geom.n);
+      kv(L?'Gate/area width':'Geçit/alan genişliği', dataset.geom.gate+' mm');
+      kv(L?'Mounting height':'Montaj yüksekliği', dataset.geom.ay+' mm');
+      kv(L?'Antenna-tag vertical distance (h)':'Anten-etiket dikey mesafe (h)', dataset.geom.h+' mm');
+      kv(L?'Azimuth / elevation half-angle':'Azimuth / elevation yarı açı', dataset.geom.az+'° / '+dataset.geom.el+'°');
+      kv(L?'Mount tilt angle':'Montaj tilt açısı', dataset.geom.tilt+'°');
+      kv(L?'Antenna gain':'Anten kazancı', dataset.geom.gain+' dBiC');
+    }
+    spacer(6);
+
+    h2(L?'2. Methodology':'2. Yöntem');
+    para(L?
+      'Antennas are spaced evenly across the gate/area width. Each antenna\'s coverage footprint at the tag\'s vertical distance (h) is a cone whose radius equals h times the tangent of the azimuth half-beam angle. The critical point is the largest uncovered gap — either between two neighboring antennas or between the outermost antenna and the gate edge. The angular margin is the azimuth half-angle minus the angle subtended by the critical gap; the linear margin is the coverage radius minus the critical gap. Both must be positive for full-width coverage.'
+      :'Antenler geçit/alan genişliğine eşit aralıklarla yerleştirilir. Her antenin etiketin bulunduğu dikey mesafedeki (h) kapsama izdüşümü, yarıçapı h ile azimuth yarı huzme açısının tanjantının çarpımına eşit bir konidir. Kritik nokta, kapsanmayan en büyük boşluktur — ya iki komşu anten arasında ya da en dıştaki anten ile geçit kenarı arasında. Açısal marj, azimuth yarı açısından kritik boşluğun gördüğü açının çıkarılmasıyla; doğrusal marj ise kapsama yarıçapından kritik boşluğun çıkarılmasıyla bulunur. Geçit genişliğinin tamamen kapsanması için ikisinin de pozitif olması gerekir.');
+    para(L?
+      'The mount tilt angle and elevation half-beam angle together determine the depth (direction-of-travel) coverage window: the near and far edges are h·tan(tilt∓elevation). The effective read range scales with the reference range at the region\'s allowed power, adjusted by antenna gain using the well-known UHF backscatter approximation that every +6 dB of gain roughly doubles range (since the RF signal makes a round trip through the tag).'
+      :'Montaj tilt açısı ile elevation yarı huzme açısı birlikte, derinlik (geçiş yönü) kapsama penceresini belirler: yakın ve uzak sınırlar h·tan(tilt∓elevation) ile hesaplanır. Etkin okuma menzili, bölgenin izin verdiği güçteki referans menzilden başlayıp, UHF geri-saçılım bağlantılarında bilinen "her +6 dB kazanç menzili yaklaşık ikiye katlar" yaklaşımıyla anten kazancına göre ölçeklenir (sinyal etikete gidip geri döndüğü için).');
+    spacer(4);
+
+    if(dataset.results){
+      h2(L?'3. Calculation Results':'3. Hesaplama Sonuçları');
+      var r = dataset.results;
+      kv(L?'Critical gap':'Kritik boşluk', Math.round(r.crit)+' mm');
+      kv(L?'Coverage radius':'Kapsama yarıçapı', Math.round(r.coneR)+' mm');
+      kv(L?'Angular margin':'Açısal marj', r.marginDeg.toFixed(1)+'°');
+      kv(L?'Linear margin':'Doğrusal marj', Math.round(r.marginLin)+' mm');
+      kv(L?'Depth coverage':'Derinlik kapsaması', Math.round(dataset.depth.depthLen)+' mm');
+      kv(L?'Effective range':'Etkin menzil', dataset.range.effectiveRangeM.toFixed(2)+' m');
+      kv(L?'Range status':'Menzil durumu', dataset.range.rangeOk ? (L?'Sufficient':'Yeterli') : (L?'Insufficient':'Yetersiz'));
+      spacer(4);
+      para(dataset.overallPass
+        ? (L?'The current configuration meets the entered performance requirement.':'Mevcut konfigürasyon, girilen performans gereksinimini karşılamaktadır.')
+        : (L?('The current configuration does NOT meet the entered performance requirement. '+(dataset.suggestedN?('A minimum of '+dataset.suggestedN+' antennas is suggested.'):'No antenna count up to 12 satisfies it — reconsider the gate width, mounting height or angles.')):
+              ('Mevcut konfigürasyon, girilen performans gereksinimini KARŞILAMAMAKTADIR. '+(dataset.suggestedN?('Minimum '+dataset.suggestedN+' anten önerilir.'):'12 antene kadar hiçbiri karşılamıyor — geçit genişliği, montaj yüksekliği veya açılar gözden geçirilmeli.'))));
+    } else {
+      h2(L?'3. Configuration':'3. Konfigürasyon');
+      para(L?'Handheld scanning has no fixed placement geometry — read performance depends on the operator and the handheld reader/tag combination rather than a fixed antenna layout.':'El terminaliyle taramada sabit bir yerleşim geometrisi yoktur — okuma performansı sabit bir anten düzeninden değil, operatörden ve el terminali/etiket kombinasyonundan etkilenir.');
+    }
+    spacer(4);
+
+    h2(L?'4. Recommended Products':'4. Önerilen Ürünler');
+    dataset.rows.forEach(function(r){
+      ensure(46);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(20);
+      doc.text(r.label+' — '+r.model, margin, y); y+=13;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+      var lines = doc.splitTextToSize(r.desc+'  ('+(L?'Qty':'Miktar')+': '+r.qty+', '+(L?'Price':'Fiyat')+': '+r.price+')', pageW-2*margin);
+      doc.text(lines, margin, y); y += lines.length*12+10;
+    });
+    spacer(4);
+
+    h2(L?'5. Regional Compliance':'5. Bölgesel Uyumluluk');
+    para((L?'Selected region: ':'Seçilen bölge: ')+dataset.regionLabel+'. '+(L?'Frequency band: ':'Frekans bandı: ')+dataset.regionBand+'. '+(L?'Allowed power: ':'İzin verilen güç: ')+dataset.regionPower+'. '+
+      (L?'Reader and antenna models are typically sold as region-specific SKUs to comply with local spectrum regulation — confirm the correct regional variant with the supplier before ordering.':'Okuyucu ve anten modelleri genellikle yerel spektrum düzenlemesine uymak için bölgeye özel SKU olarak satılır — sipariş öncesi doğru bölgesel varyantı tedarikçiyle teyit edin.'));
+    spacer(4);
+
+    h2(L?'6. Notes & Sources':'6. Notlar ve Kaynaklar');
+    para(L?'This report is generated by an internal simplified engineering model (free-space cone coverage, no multipath/absorption modeling) and is not a substitute for an on-site RF survey. Product names, specifications and price ranges are compiled from public manufacturer and retailer information and are indicative only — confirm current specifications, regional variants and pricing with the supplier before purchase.':
+      'Bu rapor, basitleştirilmiş dahili bir mühendislik modeliyle (serbest uzay koni kapsaması, çoklu yol/soğurma modellemesi içermez) üretilmiştir ve yerinde RF etüdünün yerini tutmaz. Ürün adları, teknik özellikler ve fiyat aralıkları kamuya açık üretici ve perakendeci bilgilerinden derlenmiştir ve yalnızca gösterge niteliğindedir — alım öncesi güncel teknik özellikleri, bölgesel varyantı ve fiyatı tedarikçiyle teyit edin.');
+
+    saveBlob('rfid-system-report-'+reportLang+'.pdf', doc.output('blob'));
   }
 
   function saveBlob(filename, blob){
     var inArtifact = typeof window.claude !== 'undefined' && window.claude && typeof window.claude.use === 'function';
     if(inArtifact){
-      window.claude.use('downloads').then(function(dl){
-        if(dl){ dl.save({filename:filename, data:blob}); }
-      }).catch(function(){});
+      window.claude.use('downloads').then(function(dl){ if(dl){ dl.save({filename:filename, data:blob}); } }).catch(function(){});
       return;
     }
     try{
       var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      var a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }catch(e){}
   }
 
-  // ---------- tabs ----------
+  // ================= tabs =================
   document.querySelectorAll('.tabs button').forEach(function(b){
     b.addEventListener('click', function(){
       document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('active');});
@@ -1412,17 +1650,22 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     });
   });
 
-  // ---------- build ----------
+  // ================= build =================
   var lastResult = null;
+  function optLabel(group, value){
+    var o = OPTS[group].filter(function(x){ return x.v===value; })[0];
+    return o ? o.l[lang] : value;
+  }
   function readAllControls(){
-    state.n=parseInt(inN.value,10); state.gate=parseInt(inGate.value,10); state.ay=parseInt(inAY.value,10);
-    if(parseInt(inH.value,10)>state.ay){ inH.value=state.ay; }
-    state.h=parseInt(inH.value,10); state.tilt=parseInt(inTilt.value,10); state.refRange=parseFloat(inRefRange.value);
+    clampInputs();
+    state.n=parseInt(inN.value,10)||1; state.gate=parseInt(inGate.value,10)||1000; state.ay=parseInt(inAY.value,10)||1000;
+    state.h=parseInt(inH.value,10)||100; state.tilt=parseInt(inTilt.value,10)||0; state.refRange=parseFloat(inRefRange.value)||1;
     state.reqAngle=parseFloat(inReqAngle.value)||0; state.reqLinear=parseFloat(inReqLinear.value)||0;
+    state.regionMult = currentRegion().mult;
     var antId = wiz.antenna==='oto' ? recommendAntennaId(wiz.tracking) : wiz.antenna;
     var antSpec = (wiz.antenna==='manuel' || antId===null) ? null : ANTENNAS.filter(function(a){return a.id===antId;})[0];
     if(wiz.antenna==='manuel'){
-      state.az=parseFloat(inAz.value); state.el=parseFloat(inEl.value); state.gain=parseFloat(inGain.value);
+      state.az=parseFloat(inAz.value)||30; state.el=parseFloat(inEl.value)||15; state.gain=parseFloat(inGain.value)||9;
     } else if(antSpec){
       state.az=antSpec.az; state.el=antSpec.el; state.gain=antSpec.gain;
     } else {
@@ -1431,7 +1674,17 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     return { antId:antId, antSpec:antSpec };
   }
 
-  document.getElementById('btnBuild').addEventListener('click', function(){
+  function commonDatasetFields(){
+    var region = currentRegion();
+    return {
+      productLabel: optLabel('product', wiz.product), trackingLabel: optLabel('tracking', wiz.tracking),
+      regionLabel: region.l[lang], regionBand: region.band, regionPower: region.power[lang],
+      envLabel: optLabel('env', wiz.env), metalproxLabel: optLabel('metalprox', wiz.metalprox),
+      reliabilityLabel: optLabel('reliability', wiz.reliability)
+    };
+  }
+
+  function runBuild(){
     var isMobile = wiz.tracking === 'mobil';
     var tag = pickTag(wiz.product);
 
@@ -1443,43 +1696,56 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       renderSimpleRequirement(tag, readerPick);
       var rows = bomRows(tag, null, null, readerPick, {n:0});
       renderBomTable('bomTableSimple', rows);
-      lastResult = { rows:rows, meta:['Takip türü: El terminali ile mobil sayım', 'Ürün türü: '+wiz.product] };
+      lastResult = Object.assign(commonDatasetFields(), { rows:rows, isMobile:true, tagQty:inTagQty.value });
     } else {
       var picked = readAllControls();
       var m = computeMargin(), d = computeDepth(), rg = computeRange(m,d);
       var readerPick2 = pickReader(wiz.tracking, m.n);
-      var antLabel = wiz.antenna==='manuel' ? 'Manuel (özel parametreler)' : (picked.antSpec ? picked.antSpec.name : 'Dahili anten');
+      var antLabel = wiz.antenna==='manuel' ? (lang==='en'?'Manual (custom parameters)':'Manuel (özel parametreler)') : (picked.antSpec ? picked.antSpec.name : (lang==='en'?'Built-in antenna':'Dahili anten'));
 
       renderCalcStats(m); renderSimStats(m,d,rg); renderDepthStats(m,d,rg); renderRequirement(m,d,rg);
       renderSvgTop(m); renderSvgSide(m,d,rg); renderIsoScene(m,d,rg);
       var rows2 = bomRows(tag, picked.antSpec, antLabel, readerPick2, m);
       renderBomTable('bomTable', rows2);
 
-      lastResult = {
-        m:m, d:d, rg:rg, tag:tag, antLabel:antLabel, readerPick:readerPick2, rows:rows2,
-        meta:['Anten sayısı: '+m.n, 'Geçit genişliği: '+state.gate+' mm', 'Açısal marj: '+m.marginDeg.toFixed(1)+'°', 'Doğrusal marj: '+Math.round(m.marginLin)+' mm', 'Menzil durumu: '+(rg.rangeOk?'Yeterli':'Yetersiz')]
-      };
+      var passA=m.marginDeg>=state.reqAngle, passL=m.marginLin>=state.reqLinear, passR=rg.rangeOk;
+      var overallPass = passA&&passL&&passR;
+      var suggestedN=null;
+      if(!overallPass){
+        for(var n2=1;n2<=12;n2++){ var m2=computeMargin(n2), rg2=computeRange(m2,d); if(m2.marginDeg>=state.reqAngle && m2.marginLin>=state.reqLinear && rg2.rangeOk){ suggestedN=n2; break; } }
+      }
+
+      lastResult = Object.assign(commonDatasetFields(), {
+        isMobile:false, rows:rows2, results:m, depth:d, range:rg, overallPass:overallPass, suggestedN:suggestedN,
+        geom:{ n:state.n, gate:state.gate, ay:state.ay, h:state.h, az:state.az, el:state.el, tilt:state.tilt, gain:state.gain },
+        tag:tag, antLabel:antLabel, readerPick:readerPick2
+      });
     }
 
     var results = document.getElementById('results');
     results.hidden = false;
     results.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
+  }
+  function rebuildResultsUI(){
+    if(!lastResult) return;
+    var wasHidden = document.getElementById('results').hidden;
+    runBuild();
+    document.getElementById('results').hidden = wasHidden;
+  }
+
+  document.getElementById('btnBuild').addEventListener('click', runBuild);
 
   document.getElementById('btnDrawing').addEventListener('click', function(){
-    if(!lastResult || !lastResult.m) return;
-    var svgStr = buildTechDrawingSvg(lastResult.m, lastResult.d, lastResult.rg, lastResult.tag, lastResult.antLabel, lastResult.readerPick);
-    var blob = new Blob([svgStr], { type:'image/svg+xml' });
-    saveBlob('rfid-sistem-teknik-resim.svg', blob);
+    if(!lastResult || !lastResult.results) return;
+    var svgStr = buildTechDrawingSvg(lastResult.results, lastResult.depth, lastResult.range, lastResult.tag, lastResult.antLabel, lastResult.readerPick);
+    saveBlob('rfid-sistem-teknik-resim.svg', new Blob([svgStr], { type:'image/svg+xml' }));
   });
-  document.getElementById('btnPdf').addEventListener('click', function(){
-    if(!lastResult) return;
-    buildAndDownloadPdf(lastResult.rows, lastResult.meta);
-  });
-  document.getElementById('btnPdfSimple').addEventListener('click', function(){
-    if(!lastResult) return;
-    buildAndDownloadPdf(lastResult.rows, lastResult.meta);
-  });
+  document.getElementById('btnPdf').addEventListener('click', function(){ if(lastResult) buildAndDownloadPdf(lastResult.rows); });
+  document.getElementById('btnPdfSimple').addEventListener('click', function(){ if(lastResult) buildAndDownloadPdf(lastResult.rows); });
+  document.getElementById('btnReportTr').addEventListener('click', function(){ if(lastResult) buildDetailedReport('tr', lastResult); });
+  document.getElementById('btnReportEn').addEventListener('click', function(){ if(lastResult) buildDetailedReport('en', lastResult); });
+  document.getElementById('btnReportTrSimple').addEventListener('click', function(){ if(lastResult) buildDetailedReport('tr', lastResult); });
+  document.getElementById('btnReportEnSimple').addEventListener('click', function(){ if(lastResult) buildDetailedReport('en', lastResult); });
 })();
 </script>
 </body>
