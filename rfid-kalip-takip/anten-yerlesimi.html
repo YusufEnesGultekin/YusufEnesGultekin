@@ -157,6 +157,18 @@
   .req-banner .detail{ color:var(--paper); font-weight:400; opacity:.92; }
   .req-rows{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:2px; }
   .req-rows span{ font-size:11px; opacity:.85; }
+  .alt-heading{ font-family:var(--font-body); font-size:12.5px; font-weight:600; color:var(--paper); margin:14px 0 8px; }
+  .alt-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; }
+  .alt-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:11px 12px;
+    display:flex; align-items:center; gap:10px; font-family:var(--font-body);
+  }
+  .alt-card svg.icon{ color:var(--blue); flex:none; }
+  .alt-body{ flex:1; min-width:0; }
+  .alt-title{ font-size:12.5px; font-weight:600; color:var(--paper); }
+  .alt-meta{ font-family:var(--font-mono); font-size:10.5px; color:var(--dim); margin-top:2px; }
+  .alt-price{ font-family:var(--font-mono); font-size:11px; color:var(--accent-2); margin-top:2px; }
+  .alt-apply{ flex:none; }
 
   .tabs{ display:flex; gap:2px; margin-bottom:16px; flex-wrap:wrap; }
   .tabs button{
@@ -1207,31 +1219,76 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
 
   var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0, regionMult:1 };
 
-  function computeMargin(nOverride){
-    var n = nOverride||state.n;
-    var offs = offsetsFor(n, state.gate);
-    var gaps = [offs[0]-(-state.gate/2)];
+  function marginFor(n, gate, h, az){
+    var offs = offsetsFor(n, gate);
+    var gaps = [offs[0]-(-gate/2)];
     for(var i=0;i<offs.length-1;i++){ gaps.push((offs[i+1]-offs[i])/2); }
-    gaps.push(state.gate/2 - offs[offs.length-1]);
+    gaps.push(gate/2 - offs[offs.length-1]);
     var crit = Math.max.apply(null, gaps);
-    var coneR = coneHalfWidth(state.h, state.az);
-    var marginDeg = state.az - toDeg(Math.atan(crit/state.h));
+    var coneR = coneHalfWidth(h, az);
+    var marginDeg = az - toDeg(Math.atan(crit/h));
     var marginLin = coneR - crit;
     return { n:n, offs:offs, crit:crit, coneR:coneR, marginDeg:marginDeg, marginLin:marginLin };
   }
-  function computeDepth(){
-    var elRad=toRad(state.el), tiltRad=toRad(state.tilt);
-    var nearDist = state.h*Math.tan(tiltRad-elRad);
-    var farDist = state.h*Math.tan(Math.min(tiltRad+elRad, toRad(89)));
+  function depthFor(h, el, tilt){
+    var elRad=toRad(el), tiltRad=toRad(tilt);
+    var nearDist = h*Math.tan(tiltRad-elRad);
+    var farDist = h*Math.tan(Math.min(tiltRad+elRad, toRad(89)));
     return { nearDist:nearDist, farDist:farDist, depthLen:farDist-nearDist, centerOffset:(nearDist+farDist)/2 };
   }
-  function computeRange(m,d){
-    var effM = state.refRange*state.regionMult*Math.pow(10,(state.gain-9)/20), effMm = effM*1000;
-    var slantAz = Math.sqrt(m.crit*m.crit+state.h*state.h);
+  function rangeFor(m, d, h, refRange, regionMult, gain){
+    var effM = refRange*regionMult*Math.pow(10,(gain-9)/20), effMm = effM*1000;
+    var slantAz = Math.sqrt(m.crit*m.crit+h*h);
     var farDepthAbs = Math.max(Math.abs(d.nearDist), Math.abs(d.farDist));
-    var slantDepth = Math.sqrt(farDepthAbs*farDepthAbs+state.h*state.h);
+    var slantDepth = Math.sqrt(farDepthAbs*farDepthAbs+h*h);
     var worst = Math.max(slantAz, slantDepth);
     return { effectiveRangeM:effM, effectiveRangeMm:effMm, worstSlantMm:worst, rangeOk: worst<=effMm };
+  }
+  function computeMargin(nOverride){ return marginFor(nOverride||state.n, state.gate, state.h, state.az); }
+  function computeDepth(){ return depthFor(state.h, state.el, state.tilt); }
+  function computeRange(m,d){ return rangeFor(m, d, state.h, state.refRange, state.regionMult, state.gain); }
+
+  // ================= closest-alternative search =================
+  var CLASS_CANDIDATES = { gate:['genis','a6034','dar'], shelf:['kompakt','genis','a6034'], arac:['kompakt'] };
+  function findAlternatives(currentAntId, reqAngle, reqLinear, maxN){
+    var cls = TRACKING_ANTENNA_CLASS[wiz.tracking];
+    if(cls===undefined) cls='gate';
+    if(cls===null) return [];
+    var ids = CLASS_CANDIDATES[cls] || ['a6034'];
+    var out = [];
+    ids.forEach(function(id){
+      var spec = ANTENNAS.filter(function(a){ return a.id===id; })[0];
+      if(!spec) return;
+      var dC = depthFor(state.h, spec.el, state.tilt);
+      for(var n2=1; n2<=maxN; n2++){
+        var m2 = marginFor(n2, state.gate, state.h, spec.az);
+        var rg2 = rangeFor(m2, dC, state.h, state.refRange, state.regionMult, spec.gain);
+        if(m2.marginDeg>=reqAngle && m2.marginLin>=reqLinear && rg2.rangeOk){
+          out.push({ antId:id, antSpec:spec, n:n2, m:m2, d:dC, rg:rg2, sameModel: id===currentAntId });
+          break;
+        }
+      }
+    });
+    out.sort(function(a,b){
+      if(a.sameModel !== b.sameModel) return a.sameModel ? -1 : 1;
+      return a.n - b.n;
+    });
+    return out;
+  }
+  function altCardHtml(alt){
+    var L = lang==='en';
+    var readerPick = pickReader(wiz.tracking, alt.n);
+    var unitPrice = alt.antSpec.price;
+    var estLo = unitPrice[0]*alt.n + readerPick.reader.price[0]*readerPick.qty;
+    var estHi = unitPrice[1]*alt.n + readerPick.reader.price[1]*readerPick.qty;
+    return '<div class="alt-card">'+icon(OPTS.antenna.filter(function(o){return o.v===alt.antId;})[0].i)+
+      '<div class="alt-body">'+
+        '<div class="alt-title">'+alt.antSpec.name+(alt.sameModel?' <span class="chip good" style="margin-left:6px;">'+(L?'same model':'aynı model')+'</span>':'')+'</div>'+
+        '<div class="alt-meta">'+alt.n+' '+t('unit')+' · '+(L?'angular':'açısal')+' +'+alt.m.marginDeg.toFixed(1)+'° · '+(L?'linear':'doğrusal')+' +'+Math.round(alt.m.marginLin)+'mm</div>'+
+        '<div class="alt-price">~$'+Math.round(estLo).toLocaleString('en-US')+' – $'+Math.round(estHi).toLocaleString('en-US')+'</div>'+
+      '</div>'+
+      '<button type="button" class="btn alt-apply" data-ant="'+alt.antId+'" data-n="'+alt.n+'">'+(L?'Apply':'Uygula')+'</button>'+
+    '</div>';
   }
 
   function statTile(label, value, cls){ return '<div class="stat"><div class="l">'+label+'</div><div class="v'+(cls?(' '+cls):'')+'">'+value+'</div></div>'; }
@@ -1259,7 +1316,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       statTile(t('statWorst'), Math.round(rg.worstSlantMm)+' mm') + statTile(t('statRangeState'), rg.rangeOk?t('rangeOk'):t('rangeBad'), rg.rangeOk?'good':'bad');
     document.getElementById('chipsDepth').innerHTML = '<span class="chip '+(rg.rangeOk?'good':'bad')+'">'+(rg.rangeOk?t('rangeOk'):t('rangeBad'))+'</span>';
   }
-  function renderRequirement(m,d,rg){
+  function renderRequirement(m,d,rg,currentAntId){
     var passA=m.marginDeg>=state.reqAngle, passL=m.marginLin>=state.reqLinear, passR=rg.rangeOk;
     var overall = passA&&passL&&passR;
     var el = document.getElementById('reqResult');
@@ -1271,15 +1328,15 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       '<span>'+(L?'Range':'Menzil')+': '+Math.round(rg.worstSlantMm)+' mm / '+(L?'effective':'etkin')+' '+Math.round(rg.effectiveRangeMm)+' mm '+(passR?'✓':'✗')+'</span>'+
     '</div>';
     if(overall){ el.innerHTML = '<div class="headline">✓ '+(L?('Current settings ('+state.n+' antennas) meet your requirement.'):('Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.'))+'</div>'+rows; return; }
-    var suggestedN=null;
-    for(var n2=1;n2<=12;n2++){
-      var m2=computeMargin(n2), rg2=computeRange(m2,d);
-      if(m2.marginDeg>=state.reqAngle && m2.marginLin>=state.reqLinear && rg2.rangeOk){ suggestedN=n2; break; }
+    var alts = findAlternatives(currentAntId, state.reqAngle, state.reqLinear, 24);
+    var altHtml;
+    if(alts.length){
+      altHtml = '<div class="alt-heading">'+(L?'Closest alternatives that would meet your requirement:':'Gereksiniminizi karşılayacak en yakın alternatifler:')+'</div>'+
+        '<div class="alt-grid">'+alts.slice(0,3).map(altCardHtml).join('')+'</div>';
+    } else {
+      altHtml = '<div class="detail">'+(L?'No combination up to 24 antennas across the available antenna models satisfies this — reconsider the gate width, mounting height, or the requirement itself.':'Mevcut anten modelleri arasında 24 antene kadar hiçbir kombinasyon bunu karşılamıyor — geçit genişliğini, montaj yüksekliğini veya gereksinimin kendisini gözden geçirin.')+'</div>';
     }
-    var sug = suggestedN!==null
-      ? (L?('Suggested minimum antenna count: <b>'+suggestedN+'</b>.'):('Önerilen minimum anten sayısı: <b>'+suggestedN+'</b>.'))
-      : (L?'Tried up to 12 antennas, none satisfy this — reconsider gate/mount/angle values.':'12 antene kadar denendi, hiçbiri karşılamıyor — geçit/montaj/açı değerlerini gözden geçirin.');
-    el.innerHTML = '<div class="headline">✗ '+(L?('Current settings ('+state.n+' antennas) do not meet the requirement.'):('Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.'))+'</div><div class="detail">'+sug+'</div>'+rows;
+    el.innerHTML = '<div class="headline">✗ '+(L?('Current settings ('+state.n+' antennas) do not meet the requirement.'):('Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.'))+'</div>'+rows+altHtml;
   }
   function renderSimpleRequirement(tag, readerPick){
     var el = document.getElementById('reqResult');
@@ -1693,10 +1750,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       kv(L?'Effective range':'Etkin menzil', dataset.range.effectiveRangeM.toFixed(2)+' m');
       kv(L?'Range status':'Menzil durumu', dataset.range.rangeOk ? (L?'Sufficient':'Yeterli') : (L?'Insufficient':'Yetersiz'));
       spacer(4);
-      para(dataset.overallPass
-        ? (L?'The current configuration meets the entered performance requirement.':'Mevcut konfigürasyon, girilen performans gereksinimini karşılamaktadır.')
-        : (L?('The current configuration does NOT meet the entered performance requirement. '+(dataset.suggestedN?('A minimum of '+dataset.suggestedN+' antennas is suggested.'):'No antenna count up to 12 satisfies it — reconsider the gate width, mounting height or angles.')):
-              ('Mevcut konfigürasyon, girilen performans gereksinimini KARŞILAMAMAKTADIR. '+(dataset.suggestedN?('Minimum '+dataset.suggestedN+' anten önerilir.'):'12 antene kadar hiçbiri karşılamıyor — geçit genişliği, montaj yüksekliği veya açılar gözden geçirilmeli.'))));
+      if(dataset.overallPass){
+        para(L?'The current configuration meets the entered performance requirement.':'Mevcut konfigürasyon, girilen performans gereksinimini karşılamaktadır.');
+      } else {
+        para(L?'The current configuration does NOT meet the entered performance requirement. The closest alternatives found are listed below.':'Mevcut konfigürasyon, girilen performans gereksinimini KARŞILAMAMAKTADIR. Bulunan en yakın alternatifler aşağıda listelenmiştir.');
+        if(dataset.alternatives && dataset.alternatives.length){
+          dataset.alternatives.slice(0,4).forEach(function(alt){
+            ensure(16);
+            doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(20);
+            doc.text('• '+alt.antSpec.name+' × '+alt.n+(alt.sameModel?(L?'  (same model)':'  (aynı model)'):''), margin, y);
+            doc.setFont('helvetica','normal'); doc.setTextColor(90);
+            doc.text((L?'  angular +':'  açısal +')+alt.m.marginDeg.toFixed(1)+'°, '+(L?'linear +':'doğrusal +')+Math.round(alt.m.marginLin)+'mm', margin+280, y);
+            y += 15;
+          });
+        } else {
+          para(L?'No combination up to 24 antennas across the available antenna models satisfies this — reconsider the gate width, mounting height, or the requirement itself.':'Mevcut anten modelleri arasında 24 antene kadar hiçbir kombinasyon bunu karşılamıyor — geçit genişliğini, montaj yüksekliğini veya gereksinimin kendisini gözden geçirin.');
+        }
+      }
     } else {
       h2(L?'3. Configuration':'3. Konfigürasyon');
       para(L?'Handheld scanning has no fixed placement geometry — read performance depends on the operator and the handheld reader/tag combination rather than a fixed antenna layout.':'El terminaliyle taramada sabit bir yerleşim geometrisi yoktur — okuma performansı sabit bir anten düzeninden değil, operatörden ve el terminali/etiket kombinasyonundan etkilenir.');
@@ -1827,20 +1897,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       var readerPick2 = pickReader(wiz.tracking, m.n);
       var antLabel = wiz.antenna==='manuel' ? (lang==='en'?'Manual (custom parameters)':'Manuel (özel parametreler)') : (picked.antSpec ? picked.antSpec.name : (lang==='en'?'Built-in antenna':'Dahili anten'));
 
-      renderCalcStats(m); renderSimStats(m,d,rg); renderDepthStats(m,d,rg); renderRequirement(m,d,rg);
+      renderCalcStats(m); renderSimStats(m,d,rg); renderDepthStats(m,d,rg); renderRequirement(m,d,rg,picked.antId);
       renderSvgTop(m); renderSvgSide(m,d,rg); renderIsoScene(m,d,rg);
       var rows2 = bomRows(tag, picked.antSpec, antLabel, readerPick2, m);
       renderBomTable('bomTable', rows2);
 
       var passA=m.marginDeg>=state.reqAngle, passL=m.marginLin>=state.reqLinear, passR=rg.rangeOk;
       var overallPass = passA&&passL&&passR;
-      var suggestedN=null;
-      if(!overallPass){
-        for(var n2=1;n2<=12;n2++){ var m2=computeMargin(n2), rg2=computeRange(m2,d); if(m2.marginDeg>=state.reqAngle && m2.marginLin>=state.reqLinear && rg2.rangeOk){ suggestedN=n2; break; } }
-      }
+      var alternatives = overallPass ? [] : findAlternatives(picked.antId, state.reqAngle, state.reqLinear, 24);
+      var suggestedN = alternatives.length ? alternatives[0].n : null;
 
       lastResult = Object.assign(commonDatasetFields(), {
-        isMobile:false, rows:rows2, results:m, depth:d, range:rg, overallPass:overallPass, suggestedN:suggestedN,
+        isMobile:false, rows:rows2, results:m, depth:d, range:rg, overallPass:overallPass, suggestedN:suggestedN, alternatives:alternatives,
         geom:{ n:state.n, gate:state.gate, ay:state.ay, h:state.h, az:state.az, el:state.el, tilt:state.tilt, gain:state.gain },
         tag:tag, antLabel:antLabel, readerPick:readerPick2
       });
@@ -1858,6 +1926,19 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
   }
 
   document.getElementById('btnBuild').addEventListener('click', runBuild);
+
+  document.getElementById('reqResult').addEventListener('click', function(e){
+    var btn = e.target.closest('.alt-apply');
+    if(!btn) return;
+    var antId = btn.getAttribute('data-ant'), n = btn.getAttribute('data-n');
+    document.getElementById('gridAntenna').querySelectorAll('.opt-card').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-value')===antId);
+    });
+    wiz.antenna = antId;
+    document.getElementById('manualAntennaCtl').hidden = true;
+    inN.value = n;
+    runBuild();
+  });
 
   document.getElementById('btnDrawing').addEventListener('click', function(){
     if(!lastResult || !lastResult.results) return;
