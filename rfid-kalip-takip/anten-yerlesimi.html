@@ -3,279 +3,328 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anten Yerleşimi Hesap ve Simülasyon Aracı</title>
+<title>RFID Sistem Tasarım ve Simülasyon Aracı</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0f1319;
-    --panel:#171e26;
-    --panel-2:#1d2530;
-    --line:#2b3644;
-    --paper:#e9edf2;
-    --dim:#8b9aad;
-    --amber:#e2a13f;
-    --amber-ink:#3a2a0d;
-    --cyan:#5fc2d6;
-    --good:#5fae7d;
-    --bad:#d5715f;
+    --ink:#0a0d13;
+    --panel:#12161f;
+    --panel-2:#181e29;
+    --line:#262f3d;
+    --paper:#eef1f5;
+    --dim:#8894a6;
+    --accent:#ff7a1a;
+    --accent-ink:#3a1c04;
+    --accent-2:#ffb066;
+    --cyan:#3fc7ea;
+    --good:#4ade80;
+    --bad:#f87171;
     --font-display:'Big Shoulders Display', 'Arial Narrow', sans-serif;
     --font-body:'IBM Plex Sans', system-ui, sans-serif;
     --font-mono:'IBM Plex Mono', ui-monospace, monospace;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --ink:#0f1319; --panel:#171e26; --panel-2:#1d2530; --line:#2b3644;
-      --paper:#e9edf2; --dim:#8b9aad;
+      --ink:#0a0d13; --panel:#12161f; --panel-2:#181e29; --line:#262f3d; --paper:#eef1f5; --dim:#8894a6;
     }
   }
-  :root[data-theme="dark"]{
-    --ink:#0f1319; --panel:#171e26; --panel-2:#1d2530; --line:#2b3644;
-    --paper:#e9edf2; --dim:#8b9aad;
-  }
+  :root[data-theme="dark"]{ --ink:#0a0d13; --panel:#12161f; --panel-2:#181e29; --line:#262f3d; --paper:#eef1f5; --dim:#8894a6; }
   @media (prefers-color-scheme: light){
     :root:not([data-theme="dark"]){
-      --ink:#eef1f4; --panel:#ffffff; --panel-2:#f3f5f8; --line:#d6dde5;
-      --paper:#141a22; --dim:#5b6b7d;
+      --ink:#f2f4f7; --panel:#ffffff; --panel-2:#f5f7fa; --line:#d9dfe7; --paper:#161b23; --dim:#5c697b;
     }
   }
-  :root[data-theme="light"]{
-    --ink:#eef1f4; --panel:#ffffff; --panel-2:#f3f5f8; --line:#d6dde5;
-    --paper:#141a22; --dim:#5b6b7d;
-  }
+  :root[data-theme="light"]{ --ink:#f2f4f7; --panel:#ffffff; --panel-2:#f5f7fa; --line:#d9dfe7; --paper:#161b23; --dim:#5c697b; }
 
   *{box-sizing:border-box;}
   [hidden]{ display:none !important; }
-  body{
-    margin:0; background:var(--ink); color:var(--paper);
-    font-family:var(--font-body); font-size:15px; line-height:1.5;
-  }
-  ::selection{ background:var(--amber); color:var(--amber-ink); }
+  html{ scroll-behavior:smooth; }
+  body{ margin:0; background:var(--ink); color:var(--paper); font-family:var(--font-body); font-size:15px; line-height:1.55; }
+  ::selection{ background:var(--accent); color:var(--accent-ink); }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; } html{scroll-behavior:auto;} }
 
-  .wrap{ max-width:1180px; margin:0 auto; padding:28px 24px 64px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:32px 22px 70px; }
 
-  header{
-    display:flex; flex-direction:column; gap:6px; margin-bottom:22px;
-    border-bottom:1px solid var(--line); padding-bottom:18px;
-  }
-  .eyebrow{
-    font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em;
-    text-transform:uppercase; color:var(--amber); font-weight:500;
-  }
-  h1{
-    font-family:var(--font-display); font-weight:800; font-size:clamp(30px,4.4vw,44px);
-    margin:0; line-height:1.02; letter-spacing:.01em; text-wrap:balance;
-  }
-  .sub{ color:var(--dim); font-size:14px; max-width:70ch; }
+  header{ margin-bottom:30px; }
+  .eyebrow{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+  h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(32px,5vw,50px); margin:6px 0 10px; line-height:1.0; letter-spacing:.01em; }
+  .sub{ color:var(--dim); font-size:14.5px; max-width:74ch; }
 
-  .section-title{
-    font-family:var(--font-mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase;
-    color:var(--dim); margin:22px 0 8px;
+  .stepper{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 8px; }
+  .stepper .dot{
+    font-family:var(--font-mono); font-size:11px; color:var(--dim); background:var(--panel);
+    border:1px solid var(--line); border-radius:999px; padding:6px 13px 6px 10px; display:flex; align-items:center; gap:7px;
   }
+  .stepper .dot b{ background:var(--panel-2); border-radius:999px; width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-size:10.5px; color:var(--paper); }
 
-  .controls{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-    gap:18px 24px; background:var(--panel); border:1px solid var(--line);
-    border-radius:3px; padding:18px 20px; margin-bottom:6px;
+  .step{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line); border-radius:14px; padding:22px 24px; margin-bottom:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,.02) inset;
   }
-  .ctl label{
-    display:block; font-family:var(--font-mono); font-size:10.5px;
-    letter-spacing:.08em; text-transform:uppercase; color:var(--dim);
-    margin-bottom:8px;
+  .step-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+  .step-num{
+    font-family:var(--font-display); font-weight:800; font-size:15px; color:var(--accent-ink);
+    background:linear-gradient(135deg, var(--accent), var(--accent-2)); width:32px; height:32px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; flex:none;
   }
-  .ctl .val{ color:var(--amber); font-weight:600; }
-  input[type=range]{
-    width:100%; accent-color:var(--amber); height:4px; background:transparent;
+  .step h2{ font-family:var(--font-display); font-weight:700; font-size:21px; margin:0; letter-spacing:.01em; }
+  .step-note{ color:var(--dim); font-size:13px; margin:2px 0 16px 44px; max-width:70ch; }
+
+  .card-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-left:44px; }
+  @media (max-width:600px){ .card-grid{ margin-left:0; } .step-note{ margin-left:0; } }
+  .opt-card{
+    background:var(--panel-2); border:1.5px solid var(--line); border-radius:10px; padding:14px 12px;
+    display:flex; flex-direction:column; align-items:flex-start; gap:6px; cursor:pointer; text-align:left;
+    color:var(--paper); font-family:var(--font-body); transition:border-color .15s, transform .1s;
   }
+  .opt-card .ico{ font-size:22px; line-height:1; }
+  .opt-card .lbl{ font-size:13px; font-weight:600; line-height:1.25; }
+  .opt-card .desc{ font-size:11px; color:var(--dim); line-height:1.35; }
+  .opt-card:hover{ border-color:var(--accent-2); }
+  .opt-card:active{ transform:scale(.98); }
+  .opt-card.active{ border-color:var(--accent); background:rgba(255,122,26,.10); box-shadow:0 0 0 1px var(--accent) inset; }
+  .opt-card.active .lbl{ color:var(--accent-2); }
+  .opt-card:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+
+  .ctl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px 24px; margin-left:44px; }
+  @media (max-width:600px){ .ctl-grid{ margin-left:0; } }
+  .ctl label{ display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+  .ctl .val{ color:var(--accent); font-weight:600; }
+  input[type=range]{ width:100%; accent-color:var(--accent); height:4px; background:transparent; }
   input[type=number]{
     width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--paper);
-    font-family:var(--font-mono); font-size:14px; padding:8px 10px; border-radius:2px;
+    font-family:var(--font-mono); font-size:14px; padding:9px 11px; border-radius:8px;
   }
   input[type=number]:focus-visible{ outline:2px solid var(--cyan); }
-  .quickrow{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .quickrow{ display:flex; gap:6px; flex-wrap:wrap; margin-top:9px; }
   .quickrow button{
-    background:var(--panel-2); color:var(--dim); border:1px solid var(--line);
-    font-family:var(--font-mono); font-size:10.5px; padding:5px 8px; border-radius:2px; cursor:pointer;
+    background:var(--panel); color:var(--dim); border:1px solid var(--line);
+    font-family:var(--font-mono); font-size:10.5px; padding:6px 9px; border-radius:6px; cursor:pointer;
   }
-  .quickrow button.active{ background:var(--amber); color:var(--amber-ink); border-color:var(--amber); font-weight:600; }
+  .quickrow button.active{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
   .quickrow button:focus-visible{ outline:2px solid var(--cyan); }
 
-  .presetrow{ display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 22px; }
+  .cta-row{ display:flex; justify-content:center; margin:26px 0 30px; }
+  .btn-build{
+    font-family:var(--font-display); font-weight:800; font-size:18px; letter-spacing:.02em;
+    background:linear-gradient(135deg, var(--accent), #ff9a3d); color:var(--accent-ink); border:none;
+    padding:17px 34px; border-radius:12px; cursor:pointer; box-shadow:0 10px 30px -8px rgba(255,122,26,.55), 0 2px 0 rgba(0,0,0,.15) inset;
+  }
+  .btn-build:hover{ filter:brightness(1.05); }
+  .btn-build:active{ transform:translateY(1px); }
+  .btn-build:focus-visible{ outline:3px solid var(--cyan); outline-offset:2px; }
+
   .btn{
     font-family:var(--font-mono); font-size:11.5px; letter-spacing:.03em;
     background:var(--panel-2); color:var(--paper); border:1px solid var(--line);
-    padding:9px 14px; border-radius:2px; cursor:pointer;
+    padding:10px 15px; border-radius:8px; cursor:pointer;
   }
-  .btn:hover{ border-color:var(--amber); }
-  .btn.primary{ background:var(--amber); color:var(--amber-ink); border-color:var(--amber); font-weight:600; }
+  .btn:hover{ border-color:var(--accent-2); }
   .btn:focus-visible{ outline:2px solid var(--cyan); outline-offset:1px; }
 
-  .req-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:3px;
-    padding:18px 20px; margin-bottom:22px; border-left:3px solid var(--cyan);
+  #results{
+    border-top:2px dashed var(--line); padding-top:26px; margin-top:8px;
   }
-  .req-card h2{ font-family:var(--font-display); font-weight:700; font-size:18px; margin:0 0 4px; }
-  .req-card .note{ color:var(--dim); font-size:12.5px; margin:0 0 14px; }
-  .req-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px 22px; margin-bottom:16px; }
   .req-banner{
-    border-radius:3px; padding:14px 16px; font-family:var(--font-mono); font-size:13px;
-    border:1px solid var(--line); display:flex; flex-direction:column; gap:6px;
+    border-radius:12px; padding:16px 18px; font-family:var(--font-mono); font-size:13px;
+    border:1px solid var(--line); display:flex; flex-direction:column; gap:7px; margin-bottom:20px;
   }
-  .req-banner.ok{ background:rgba(95,174,125,.12); border-color:rgba(95,174,125,.45); color:var(--good); }
-  .req-banner.bad{ background:rgba(213,113,95,.12); border-color:rgba(213,113,95,.45); color:var(--bad); }
-  .req-banner .headline{ font-size:14.5px; font-weight:600; }
+  .req-banner.ok{ background:rgba(74,222,128,.10); border-color:rgba(74,222,128,.4); color:var(--good); }
+  .req-banner.bad{ background:rgba(248,113,113,.10); border-color:rgba(248,113,113,.4); color:var(--bad); }
+  .req-banner .headline{ font-size:15px; font-weight:600; }
   .req-banner .detail{ color:var(--paper); font-weight:400; opacity:.92; }
-  .req-rows{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:4px; }
+  .req-rows{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:2px; }
   .req-rows span{ font-size:11.5px; opacity:.85; }
 
-  .tabs{ display:flex; gap:2px; margin-bottom:14px; flex-wrap:wrap; }
+  .tabs{ display:flex; gap:2px; margin-bottom:16px; flex-wrap:wrap; }
   .tabs button{
-    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em;
-    text-transform:uppercase; background:none; border:none; color:var(--dim);
-    padding:10px 4px; cursor:pointer; border-bottom:2px solid transparent;
-    margin-right:22px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+    background:none; border:none; color:var(--dim); padding:10px 4px; cursor:pointer;
+    border-bottom:2px solid transparent; margin-right:24px;
   }
-  .tabs button.active{ color:var(--paper); border-bottom-color:var(--amber); }
+  .tabs button.active{ color:var(--paper); border-bottom-color:var(--accent); }
   .tabs button:focus-visible{ outline:2px solid var(--cyan); }
 
-  .panel{ display:none; }
-  .panel.active{ display:block; }
+  .panel{ display:none; } .panel.active{ display:block; }
 
-  .stage{
-    position:relative; width:100%; height:min(64vh,560px); min-height:380px;
-    background:radial-gradient(120% 140% at 50% 0%, #1b2330 0%, var(--ink) 70%);
-    border:1px solid var(--line); border-radius:3px; overflow:hidden;
+  .iso-stage{
+    position:relative; width:100%; background:radial-gradient(120% 140% at 50% 0%, #1c2331 0%, var(--ink) 72%);
+    border:1px solid var(--line); border-radius:14px; overflow:hidden; padding:6px;
   }
-  .stage canvas{ display:block; width:100%; height:100%; }
-  .legend{
-    position:absolute; left:14px; top:14px; background:rgba(15,19,25,.78);
-    border:1px solid var(--line); border-radius:3px; padding:12px 14px;
-    font-family:var(--font-mono); font-size:11px; color:var(--dim);
-    backdrop-filter:blur(3px); max-width:230px;
-  }
-  .legend .t{ color:var(--paper); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
-  .legend div.row{ display:flex; gap:8px; margin:3px 0; }
-  .legend b{ color:var(--amber); flex:0 0 34px; }
-  .hint{
-    position:absolute; right:14px; bottom:12px; font-family:var(--font-mono);
-    font-size:10.5px; color:var(--dim); background:rgba(15,19,25,.6);
-    padding:5px 9px; border:1px solid var(--line); border-radius:2px;
-  }
-  .marker{
-    position:absolute; transform:translate(-50%,-50%); pointer-events:none;
-    font-family:var(--font-mono); font-size:11.5px; color:var(--paper);
-    background:rgba(15,19,25,.82); border:1px solid var(--amber);
-    padding:1px 6px; border-radius:2px; white-space:nowrap;
-  }
+  .iso-stage svg{ width:100%; height:auto; display:block; }
+  .iso-legend{ display:flex; flex-wrap:wrap; gap:14px; padding:10px 14px 4px; font-family:var(--font-mono); font-size:10.5px; color:var(--dim); }
+  .iso-legend b{ color:var(--accent); }
 
   .statrow{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-    gap:1px; background:var(--line); border:1px solid var(--line);
-    margin-top:16px; border-radius:3px; overflow:hidden;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--line);
+    border:1px solid var(--line); margin-top:16px; border-radius:12px; overflow:hidden;
   }
   .stat{ background:var(--panel); padding:14px 16px; }
-  .stat .l{ font-family:var(--font-mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--dim); margin-bottom:6px; }
-  .stat .v{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:21px; font-weight:600; }
-  .stat .v.good{ color:var(--good); }
-  .stat .v.bad{ color:var(--bad); }
-  .badge{
-    display:inline-block; font-family:var(--font-mono); font-size:10.5px;
-    letter-spacing:.05em; text-transform:uppercase; padding:2px 8px;
-    border-radius:2px; margin-left:8px; vertical-align:middle;
-  }
-  .badge.good{ background:rgba(95,174,125,.16); color:var(--good); border:1px solid rgba(95,174,125,.4); }
-  .badge.bad{ background:rgba(213,113,95,.16); color:var(--bad); border:1px solid rgba(213,113,95,.4); }
+  .stat .l{ font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-bottom:6px; }
+  .stat .v{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:20px; font-weight:600; }
+  .stat .v.good{ color:var(--good); } .stat .v.bad{ color:var(--bad); }
 
   .calc-grid{ display:grid; grid-template-columns:1.05fr 1fr; gap:22px; align-items:start; }
   @media (max-width:820px){ .calc-grid{ grid-template-columns:1fr; } }
-  .card{ background:var(--panel); border:1px solid var(--line); border-radius:3px; padding:18px 20px; }
-  .card h2{
-    font-family:var(--font-display); font-weight:700; font-size:18px; margin:0 0 4px;
-    letter-spacing:.01em;
-  }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px; }
+  .card h3{ font-family:var(--font-display); font-weight:700; font-size:17px; margin:0 0 4px; }
   .card .note{ color:var(--dim); font-size:12.5px; margin:0 0 14px; }
   svg.diagram{ width:100%; height:auto; display:block; }
   .diagram text{ font-family:var(--font-mono); }
 
   .formula{
-    font-family:var(--font-mono); font-size:12px; color:var(--dim);
-    background:var(--panel-2); border:1px solid var(--line); border-radius:2px;
-    padding:10px 12px; margin-top:14px; overflow-x:auto; white-space:nowrap;
+    font-family:var(--font-mono); font-size:11.5px; color:var(--dim); background:var(--panel-2);
+    border:1px solid var(--line); border-radius:8px; padding:10px 12px; margin-top:14px; overflow-x:auto; white-space:nowrap;
   }
   .formula b{ color:var(--paper); font-weight:500; }
 
-  footer{ margin-top:36px; padding-top:16px; border-top:1px solid var(--line); color:var(--dim); font-size:12px; font-family:var(--font-mono); }
+  table.bom{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  table.bom th, table.bom td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--line); }
+  table.bom th{ font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--dim); }
+  table.bom td.qty{ font-family:var(--font-mono); color:var(--accent-2); font-weight:600; white-space:nowrap; }
+  table.bom td.desc{ color:var(--dim); font-size:12px; }
+  .bom-note{ color:var(--dim); font-size:11.5px; margin-top:12px; }
+  .bom-actions{ margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
+
+  footer{ margin-top:38px; padding-top:16px; border-top:1px solid var(--line); color:var(--dim); font-size:12px; font-family:var(--font-mono); }
   a{ color:var(--cyan); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Klemsan A.Ş. — Üretim Birimi · Kalıphane RFID Takip Projesi</div>
-    <h1>Anten Yerleşimi Hesap ve Simülasyon Aracı</h1>
-    <p class="sub">Kalıphane geçidine monte edilecek RFID okuyucu/anten biriminin yerleşim geometrisini belirleyen tüm değişkenler burada canlı olarak ayarlanabilir. Geçit genişliği, montaj yüksekliği, anten sayısı, azimuth/elevation huzme açıları, montaj tilt açısı, anten kazancı ve referans okuma menzili — hepsi aşağıdaki 3B simülasyonu, diyagramları ve hesap sonuçlarını anında günceller. Kendi gereksinimlerinizi (minimum marj, gereken menzil) girip sistemin bunu karşılayıp karşılamadığını görebilirsiniz.</p>
+    <div class="eyebrow">Klemsan A.Ş. — Üretim Birimi · RFID Sistem Tasarım Platformu</div>
+    <h1>RFID Sistem Tasarım ve Simülasyon Aracı</h1>
+    <p class="sub">Sadece kalıp/on-metal takibiyle sınırlı değil — herhangi bir RFID sistemi kurmak için ürün türünü, takip yöntemini, ortam koşullarını ve performans gereksinimlerinizi seçin; sistem geometriyi hesaplasın, uygun etiket/anten/okuyucuyu önersin, simülasyonu göstersin ve isterseniz teknik resmi çıkarsın.</p>
+    <div class="stepper">
+      <span class="dot"><b>1</b>Ürün Türü</span>
+      <span class="dot"><b>2</b>Takip Türü</span>
+      <span class="dot"><b>3</b>Ortam</span>
+      <span class="dot"><b>4</b>Geometri</span>
+      <span class="dot"><b>5</b>Anten</span>
+      <span class="dot"><b>6</b>Gereksinim</span>
+    </div>
   </header>
 
-  <div class="section-title">1 · Geçit ve Montaj Geometrisi</div>
-  <div class="controls">
-    <div class="ctl">
-      <label>Anten Sayısı — <span class="val" id="lblN">4</span></label>
-      <input type="range" id="inN" min="1" max="8" step="1" value="4">
+  <section class="step" id="step-product">
+    <div class="step-head"><div class="step-num">1</div><h2>Ürün / Malzeme Türü</h2></div>
+    <p class="step-note">Takip edilecek ürünün yüzeyi/malzemesi — uygun etiket türü buna göre seçilir.</p>
+    <div class="card-grid" data-group="product">
+      <button class="opt-card" data-value="genel"><span class="ico">📦</span><span class="lbl">Plastik / ahşap / karton</span><span class="desc">Genel yüzey</span></button>
+      <button class="opt-card active" data-value="metal"><span class="ico">🔩</span><span class="lbl">Metal kalıp / parça</span><span class="desc">On-metal</span></button>
+      <button class="opt-card" data-value="sivi"><span class="ico">🧴</span><span class="lbl">Sıvı dolu kap / varil</span><span class="desc">Near-liquid</span></button>
+      <button class="opt-card" data-value="tekstil"><span class="ico">👕</span><span class="lbl">Tekstil / askılı ürün</span><span class="desc">Esnek yüzey</span></button>
+      <button class="opt-card" data-value="agir"><span class="ico">🏗️</span><span class="lbl">Palet / araç / ağır ekipman</span><span class="desc">Zorlu ortam</span></button>
     </div>
-    <div class="ctl">
-      <label>Kapı Genişliği (mm) — <span class="val" id="lblGate">3496</span></label>
-      <input type="range" id="inGate" min="2000" max="5000" step="4" value="3496">
-    </div>
-    <div class="ctl">
-      <label>Kiriş Montaj Yüksekliği (mm) — <span class="val" id="lblAY">3000</span></label>
-      <input type="range" id="inAY" min="2000" max="4000" step="10" value="3000">
-    </div>
-    <div class="ctl">
-      <label>Anten–Etiket Dikey Mesafe h (mm) — <span class="val" id="lblH">1500</span></label>
-      <input type="range" id="inH" min="400" max="2400" step="10" value="1500">
-      <div class="quickrow" id="hPresets">
-        <button data-h="1500">Kalıp üstü · 1500</button>
-        <button data-h="1000">Araba üstü · 1000</button>
-        <button data-h="750">Kritik durum · 750</button>
-        <button data-h="700">Kritik durum · 700</button>
+    <div class="ctl-grid" style="margin-top:16px;">
+      <div class="ctl">
+        <label>Etiketlenecek Ürün Adedi (opsiyonel)</label>
+        <input type="number" id="inTagQty" min="0" step="1" placeholder="örn. 3000">
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="section-title">2 · Anten Karakteristiği</div>
-  <div class="controls">
-    <div class="ctl">
-      <label>Azimuth Yarı Huzme Açısı (°) — <span class="val" id="lblAz">30</span></label>
-      <input type="range" id="inAz" min="10" max="60" step="0.5" value="30">
+  <section class="step" id="step-tracking">
+    <div class="step-head"><div class="step-num">2</div><h2>Takip Türü</h2></div>
+    <p class="step-note">Bu, okuyucu/anten yerleşim biçimini ve reader modelini belirler.</p>
+    <div class="card-grid" data-group="tracking">
+      <button class="opt-card active" data-value="gate"><span class="ico">🚪</span><span class="lbl">Geçit / kapı giriş-çıkış</span><span class="desc">Portal takip</span></button>
+      <button class="opt-card" data-value="konveyor"><span class="ico">📤</span><span class="lbl">Konveyör bant üzeri</span><span class="desc">Hat içi takip</span></button>
+      <button class="opt-card" data-value="raf"><span class="ico">🗄️</span><span class="lbl">Raf / depo envanteri</span><span class="desc">Sabit anten</span></button>
+      <button class="opt-card" data-value="mobil"><span class="ico">📱</span><span class="lbl">El terminali ile sayım</span><span class="desc">Mobil okuma</span></button>
+      <button class="opt-card" data-value="arac"><span class="ico">🚜</span><span class="lbl">Araç / forklift üzeri</span><span class="desc">Hareketli platform</span></button>
     </div>
-    <div class="ctl">
-      <label>Elevation Yarı Huzme Açısı (°) — <span class="val" id="lblEl">15</span></label>
-      <input type="range" id="inEl" min="5" max="45" step="0.5" value="15">
-    </div>
-    <div class="ctl">
-      <label>Montaj Tilt Açısı (°, dikeyden) — <span class="val" id="lblTilt">0</span></label>
-      <input type="range" id="inTilt" min="0" max="35" step="1" value="0">
-    </div>
-    <div class="ctl">
-      <label>Anten Kazancı (dBiC) — <span class="val" id="lblGain">9</span></label>
-      <input type="range" id="inGain" min="4" max="12" step="0.5" value="9">
-    </div>
-    <div class="ctl">
-      <label>Referans Menzil, 9 dBiC'de (m) — <span class="val" id="lblRefRange">6.5</span></label>
-      <input type="range" id="inRefRange" min="3" max="10" step="0.1" value="6.5">
-    </div>
-  </div>
+  </section>
 
-  <div class="presetrow">
-    <button class="btn primary" id="btnPresetKlemsan">Klemsan A6034 referans değerlerini yükle (9 dBiC · 81°/25° huzme · 22° tilt)</button>
-    <button class="btn" id="btnResetDefaults">Genel varsayılanlara dön</button>
-  </div>
+  <section class="step" id="step-env">
+    <div class="step-head"><div class="step-num">3</div><h2>Ortam Koşulları</h2></div>
+    <p class="step-note">Metal yakınlığı ve ortam, etiket/donanım koruma sınıfı önerisini etkiler.</p>
+    <div class="card-grid" data-group="env">
+      <button class="opt-card active" data-value="ic"><span class="ico">🏭</span><span class="lbl">İç mekan</span></button>
+      <button class="opt-card" data-value="dis"><span class="ico">🌦️</span><span class="lbl">Dış mekan</span></button>
+      <button class="opt-card" data-value="nemli"><span class="ico">💧</span><span class="lbl">Yüksek nem / yıkamalı alan</span></button>
+    </div>
+    <div class="card-grid" style="margin-top:10px;" data-group="metalprox">
+      <button class="opt-card" data-value="dogrudan"><span class="ico">⬛</span><span class="lbl">Doğrudan metal üstü</span></button>
+      <button class="opt-card" data-value="yakin"><span class="ico">◧</span><span class="lbl">Metale yakın</span></button>
+      <button class="opt-card active" data-value="uzak"><span class="ico">◻️</span><span class="lbl">Metalden uzak</span></button>
+    </div>
+  </section>
 
-  <div class="req-card">
-    <h2>Gereksinim Kontrolü</h2>
-    <p class="note">Kendi ihtiyacınızı girin — sistem mevcut ayarların bunu karşılayıp karşılamadığını ve karşılamıyorsa kaç antene ihtiyaç olduğunu hesaplar.</p>
-    <div class="req-grid">
+  <section class="step" id="step-geom">
+    <div class="step-head"><div class="step-num">4</div><h2>Geçit / Montaj Geometrisi</h2></div>
+    <p class="step-note">Değerleri ayarlayın — sonuçlar yalnızca aşağıdaki "Sistemi Kur" butonuna bastığınızda güncellenir.</p>
+    <div class="ctl-grid">
+      <div class="ctl">
+        <label>Anten Sayısı — <span class="val" id="lblN">4</span></label>
+        <input type="range" id="inN" min="1" max="8" step="1" value="4">
+      </div>
+      <div class="ctl">
+        <label>Geçit/Alan Genişliği (mm) — <span class="val" id="lblGate">3496</span></label>
+        <input type="range" id="inGate" min="2000" max="5000" step="4" value="3496">
+      </div>
+      <div class="ctl">
+        <label>Montaj Yüksekliği (mm) — <span class="val" id="lblAY">3000</span></label>
+        <input type="range" id="inAY" min="2000" max="4000" step="10" value="3000">
+      </div>
+      <div class="ctl">
+        <label>Anten–Etiket Dikey Mesafe h (mm) — <span class="val" id="lblH">1500</span></label>
+        <input type="range" id="inH" min="400" max="2400" step="10" value="1500">
+        <div class="quickrow" id="hPresets">
+          <button data-h="1500">Kalıp üstü·1500</button>
+          <button data-h="1000">Araba üstü·1000</button>
+          <button data-h="750">Kritik·750</button>
+          <button data-h="700">Kritik·700</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="step-antenna">
+    <div class="step-head"><div class="step-num">5</div><h2>Anten Modeli</h2></div>
+    <p class="step-note">"Otomatik" seçiliyken sistem, takip türünüze göre anten modelini kendisi önerir.</p>
+    <div class="card-grid" data-group="antenna">
+      <button class="opt-card active" data-value="oto"><span class="ico">🤖</span><span class="lbl">Otomatik öneri</span><span class="desc">Takip türüne göre</span></button>
+      <button class="opt-card" data-value="a6034"><span class="ico">📡</span><span class="lbl">Times-7 A6034 tipi</span><span class="desc">9 dBiC · 81°/25°</span></button>
+      <button class="opt-card" data-value="dar"><span class="ico">🎯</span><span class="lbl">Dar huzme / uzun menzil</span><span class="desc">9 dBiC · dar açı</span></button>
+      <button class="opt-card" data-value="genis"><span class="ico">🌐</span><span class="lbl">Geniş huzme</span><span class="desc">6 dBiC · kısa mesafe</span></button>
+      <button class="opt-card" data-value="kompakt"><span class="ico">🔘</span><span class="lbl">Kompakt dairesel</span><span class="desc">Araç/nokta montaj</span></button>
+      <button class="opt-card" data-value="manuel"><span class="ico">🛠️</span><span class="lbl">Manuel (özel değer)</span><span class="desc">Kendi açı/kazancım</span></button>
+    </div>
+    <div id="manualAntennaCtl" class="ctl-grid" hidden style="margin-top:16px;">
+      <div class="ctl">
+        <label>Azimuth Yarı Huzme Açısı (°) — <span class="val" id="lblAz">30</span></label>
+        <input type="range" id="inAz" min="10" max="60" step="0.5" value="30">
+      </div>
+      <div class="ctl">
+        <label>Elevation Yarı Huzme Açısı (°) — <span class="val" id="lblEl">15</span></label>
+        <input type="range" id="inEl" min="5" max="45" step="0.5" value="15">
+      </div>
+      <div class="ctl">
+        <label>Anten Kazancı (dBiC) — <span class="val" id="lblGain">9</span></label>
+        <input type="range" id="inGain" min="4" max="12" step="0.5" value="9">
+      </div>
+    </div>
+    <div class="ctl-grid" style="margin-top:16px;">
+      <div class="ctl">
+        <label>Montaj Tilt Açısı (°, dikeyden) — <span class="val" id="lblTilt">0</span></label>
+        <input type="range" id="inTilt" min="0" max="35" step="1" value="0">
+        <div class="quickrow"><button type="button" id="btnTilt22">Klemsan referansı · 22°</button></div>
+      </div>
+      <div class="ctl">
+        <label>Referans Menzil, kataloğa göre (m) — <span class="val" id="lblRefRange">6.5</span></label>
+        <input type="range" id="inRefRange" min="3" max="10" step="0.1" value="6.5">
+      </div>
+    </div>
+  </section>
+
+  <section class="step" id="step-req">
+    <div class="step-head"><div class="step-num">6</div><h2>Performans Gereksinimi</h2></div>
+    <p class="step-note">Kendi ihtiyacınızı girin — sistem karşılayıp karşılamadığını ve gerekiyorsa kaç antene ihtiyaç olduğunu hesaplar.</p>
+    <div class="ctl-grid">
       <div class="ctl">
         <label>Minimum Açısal Marj İhtiyacı (°)</label>
         <input type="number" id="inReqAngle" min="0" max="45" step="0.5" value="0">
@@ -285,167 +334,184 @@
         <input type="number" id="inReqLinear" min="0" max="2000" step="10" value="0">
       </div>
     </div>
+    <div class="card-grid" style="margin-top:16px;" data-group="reliability">
+      <button class="opt-card active" data-value="standart"><span class="ico">✔️</span><span class="lbl">Standart güvenilirlik</span></button>
+      <button class="opt-card" data-value="yuksek"><span class="ico">⛨</span><span class="lbl">Yüksek güvenilirlik</span><span class="desc">Çift okuma teyidi</span></button>
+    </div>
+  </section>
+
+  <div class="cta-row">
+    <button class="btn-build" id="btnBuild">SİSTEMİ KUR VE SİMÜLASYONU BAŞLAT</button>
+  </div>
+
+  <section id="results" hidden>
     <div class="req-banner" id="reqResult"></div>
-  </div>
 
-  <div class="tabs">
-    <button data-tab="sim" class="active">3B Simülasyon</button>
-    <button data-tab="calc">Kapsama Analizi (Üstten)</button>
-    <button data-tab="depth">Derinlik &amp; Menzil</button>
-  </div>
-
-  <section class="panel active" id="panel-sim">
-    <div class="stage" id="stage">
-      <div class="legend">
-        <div class="t">Referans Numaraları</div>
-        <div class="row"><b>10</b><span>Taşıyıcı kiriş-kolon düzeneği</span></div>
-        <div class="row"><b>20</b><span>Okuyucu/anten birimi (yerleşim: hesap tablosu)</span></div>
-        <div class="row"><b>30</b><span>Kalıp üzerindeki RFID etiketi</span></div>
-      </div>
-      <div class="hint">sürükle: döndür · tekerlek: yakınlaştır</div>
+    <div class="tabs">
+      <button data-tab="sim" class="active">Simülasyon</button>
+      <button data-tab="calc">Kapsama Analizi</button>
+      <button data-tab="depth">Derinlik &amp; Menzil</button>
+      <button data-tab="bom">Ürün Listesi</button>
     </div>
-    <div class="statrow" id="simStats"></div>
-  </section>
 
-  <section class="panel" id="panel-calc">
-    <div class="calc-grid">
-      <div class="card">
-        <h2>Üstten Görünüş — Kapsama Analizi</h2>
-        <p class="note">Anten sayısı otomatik olarak geçit genişliğine eşit aralıklarla dağıtılır. Kritik nokta, bir okuyucu/anten biriminin kapsama konisinin ulaşamadığı en uzak noktadır (genelde geçit kenarı).</p>
-        <svg class="diagram" id="topSvg" viewBox="0 0 720 300"></svg>
-      </div>
-      <div class="card">
-        <h2>Sonuçlar</h2>
-        <p class="note">Azimuth açısı ve geçit genişliğine göre yatay kapsama marjı.</p>
-        <div class="statrow" id="calcStats" style="margin-top:0;"></div>
-        <div class="formula">
-          <b>kapsama_yarıçapı</b> = h · tan(azimuth_yarı_açı)<br>
-          <b>açısal_marj</b> = azimuth_yarı_açı − atan(kritik_boşluk / h)<br>
-          <b>doğrusal_marj</b> = kapsama_yarıçapı − kritik_boşluk
+    <section class="panel active" id="panel-sim">
+      <div class="iso-stage">
+        <svg id="isoSvg" class="diagram" viewBox="0 0 760 480"></svg>
+        <div class="iso-legend">
+          <span><b>10</b> Taşıyıcı kiriş-kolon</span>
+          <span><b>20</b> Okuyucu/anten birimi</span>
+          <span><b>30</b> Takip edilen ürün + etiket</span>
         </div>
       </div>
-    </div>
-  </section>
+      <div class="statrow" id="simStats"></div>
+    </section>
 
-  <section class="panel" id="panel-depth">
-    <div class="calc-grid">
-      <div class="card">
-        <h2>Yandan Görünüş — Derinlik &amp; Menzil</h2>
-        <p class="note">Tilt açısı ve elevation huzme açısı, antenin kalıbın geçiş yönü (derinlik) boyunca ne kadar uzunlukta bir okuma penceresi oluşturduğunu belirler. Kesikli çember, seçilen kazanç/referans menzile göre etkin okuma sınırını gösterir.</p>
-        <svg class="diagram" id="sideSvg" viewBox="0 0 720 320"></svg>
-      </div>
-      <div class="card">
-        <h2>Sonuçlar</h2>
-        <p class="note">Derinlik kapsaması ve okuma menzili kontrolü — gerçek Times-7 A6034 anten verileriyle (9 dBiC, ~6.5 m) doğrulanmış aynı yöntem.</p>
-        <div class="statrow" id="depthStats" style="margin-top:0;"></div>
-        <div class="formula">
-          <b>yakın_sınır</b> = h · tan(tilt − elevation_yarı_açı)<br>
-          <b>uzak_sınır</b> = h · tan(tilt + elevation_yarı_açı)<br>
-          <b>derinlik_uzunluğu</b> = uzak_sınır − yakın_sınır<br>
-          <b>etkin_menzil</b> = referans_menzil · 10^((kazanç−9)/20)<br>
-          <b>en_kötü_mesafe</b> = max( √(kritik_boşluk²+h²), √(derinlik_uç²+h²) )
+    <section class="panel" id="panel-calc">
+      <div class="calc-grid">
+        <div class="card">
+          <h3>Üstten Görünüş — Kapsama Analizi</h3>
+          <p class="note">Anten sayısı geçit genişliğine eşit aralıklarla dağıtılır. Kritik nokta, kapsama konisinin ulaşamadığı en uzak noktadır.</p>
+          <svg class="diagram" id="topSvg" viewBox="0 0 720 300"></svg>
+        </div>
+        <div class="card">
+          <h3>Sonuçlar</h3>
+          <div class="statrow" id="calcStats" style="margin-top:0;"></div>
+          <div class="formula">
+            <b>kapsama_yarıçapı</b> = h · tan(azimuth_yarı_açı)<br>
+            <b>açısal_marj</b> = azimuth_yarı_açı − atan(kritik_boşluk / h)<br>
+            <b>doğrusal_marj</b> = kapsama_yarıçapı − kritik_boşluk
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="panel" id="panel-depth">
+      <div class="calc-grid">
+        <div class="card">
+          <h3>Yandan Görünüş — Derinlik &amp; Menzil</h3>
+          <p class="note">Tilt ve elevation açısı okuma penceresinin derinliğini belirler. Kesikli çember etkin okuma sınırıdır.</p>
+          <svg class="diagram" id="sideSvg" viewBox="0 0 720 320"></svg>
+        </div>
+        <div class="card">
+          <h3>Sonuçlar</h3>
+          <div class="statrow" id="depthStats" style="margin-top:0;"></div>
+          <div class="formula">
+            <b>yakın_sınır</b> = h · tan(tilt − elevation_yarı_açı)<br>
+            <b>uzak_sınır</b> = h · tan(tilt + elevation_yarı_açı)<br>
+            <b>etkin_menzil</b> = referans_menzil · 10^((kazanç−9)/20)<br>
+            <b>en_kötü_mesafe</b> = max( √(kritik_boşluk²+h²), √(derinlik_uç²+h²) )
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-bom">
+      <div class="card">
+        <h3>Önerilen Ürün Listesi (BOM)</h3>
+        <p class="note">Girdiğiniz ürün türü, takip türü ve hesaplanan geometriye göre önerilen bileşenler. Kategoriler örnek/referans niteliğindedir; nihai tedarikte üretici teknik şartnameleriyle doğrulanmalıdır.</p>
+        <div style="overflow-x:auto;">
+          <table class="bom" id="bomTable"></table>
+        </div>
+        <div class="bom-actions">
+          <button class="btn" id="btnDrawing">Teknik Resim İndir (SVG)</button>
+        </div>
+      </div>
+    </section>
   </section>
 
-  <footer>Kalıphane geçit geometrisi · dahili mühendislik modeli — Yusuf Enes Gültekin, Üretim Birimi (Stajyer). Anten kazancı → menzil ilişkisi, UHF RFID geri-saçılım (backscatter) bağlantılarında bilinen "+6 dB kazanç ≈ 2× menzil" kuralına dayanan basitleştirilmiş bir yaklaşımdır.</footer>
+  <footer>Kalıphane geçit geometrisi · dahili mühendislik modeli — Yusuf Enes Gültekin, Üretim Birimi (Stajyer). Anten kazancı → menzil ilişkisi, UHF RFID geri-saçılım bağlantılarındaki "+6 dB kazanç ≈ 2× menzil" kuralına dayanan basitleştirilmiş bir yaklaşımdır.</footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 (function(){
   "use strict";
 
-  // ---------- shared state ----------
-  var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0 };
+  // ---------- catalog (example / reference — not a live vendor feed) ----------
+  var TAGS = [
+    {id:'genel', name:'Genel Amaçlı UHF Etiket', desc:'Plastik, karton, ahşap ve genel yüzeyler için standart UHF etiket.'},
+    {id:'metal', name:'On-Metal UHF Etiket', desc:'Doğrudan metal yüzeye montaj için özel altlıklı (spacer) UHF etiket.'},
+    {id:'sivi', name:'Sıvıya Yakın / Yüksek Nem UHF Etiket', desc:'Sıvı dolu kaplar ve nemli/dış ortam için optimize UHF etiket.'},
+    {id:'tekstil', name:'Tekstil/Askı UHF Etiket (esnek)', desc:'Esnek, dikilebilir veya askıya takılabilir tekstil etiketi.'},
+    {id:'agir', name:'Ağır Hizmet Endüstriyel Etiket', desc:'Darbe, ısı ve kimyasala dayanıklı gövdeli endüstriyel etiket.'}
+  ];
+  var ANTENNAS = [
+    {id:'a6034', name:'Times-7 A6034 Tipi Referans Anten', gain:9, az:40.5, el:12.5, desc:'Geçit tipi kurulumlarda referans alınan, dengeli azimuth/elevation kapsamalı anten.'},
+    {id:'dar', name:'Dar Huzmeli Yüksek Kazanç Panel Anten', gain:9, az:20, el:10, desc:'Uzun menzil, dar kapsama — geniş geçitlerde az antenle yüksek marj.'},
+    {id:'genis', name:'Geniş Huzmeli Anten', gain:6, az:45, el:40, desc:'Kısa mesafede geniş kapsama — raf, konveyör ve istasyon uygulamaları.'},
+    {id:'kompakt', name:'Dairesel Polarizasyonlu Kompakt Anten', gain:5, az:35, el:35, desc:'Küçük montaj alanı — araç/forklift üstü noktasal kapsama.'}
+  ];
+  var READERS = [
+    {id:'r4', name:'4 Portlu Sabit RFID Okuyucu', ports:4, desc:'Çok antenli geçit/konveyör/raf kurulumları için sabit okuyucu.'},
+    {id:'r2', name:'2 Portlu Kompakt Sabit Okuyucu', ports:2, desc:'Küçük geçit veya tekli istasyon kurulumları için kompakt okuyucu.'},
+    {id:'rh', name:'El Terminali (Handheld) RFID Okuyucu', ports:1, desc:'Mobil sayım ve nokta kontrol için taşınabilir okuyucu, anteni dahilidir.'}
+  ];
 
-  var inN=document.getElementById('inN'), inGate=document.getElementById('inGate'),
-      inAY=document.getElementById('inAY'), inH=document.getElementById('inH'),
-      inAz=document.getElementById('inAz'), inEl=document.getElementById('inEl'),
-      inTilt=document.getElementById('inTilt'), inGain=document.getElementById('inGain'),
-      inRefRange=document.getElementById('inRefRange'),
-      inReqAngle=document.getElementById('inReqAngle'), inReqLinear=document.getElementById('inReqLinear');
-
-  var lblN=document.getElementById('lblN'), lblGate=document.getElementById('lblGate'),
-      lblAY=document.getElementById('lblAY'), lblH=document.getElementById('lblH'),
-      lblAz=document.getElementById('lblAz'), lblEl=document.getElementById('lblEl'),
-      lblTilt=document.getElementById('lblTilt'), lblGain=document.getElementById('lblGain'),
-      lblRefRange=document.getElementById('lblRefRange');
-
-  var hPresets = document.getElementById('hPresets');
-
-  function readControls(){
-    state.n = parseInt(inN.value,10);
-    state.gate = parseInt(inGate.value,10);
-    state.ay = parseInt(inAY.value,10);
-    if(parseInt(inH.value,10) > state.ay){ inH.value = state.ay; }
-    state.h = parseInt(inH.value,10);
-    state.az = parseFloat(inAz.value);
-    state.el = parseFloat(inEl.value);
-    state.tilt = parseInt(inTilt.value,10);
-    state.gain = parseFloat(inGain.value);
-    state.refRange = parseFloat(inRefRange.value);
-    state.reqAngle = parseFloat(inReqAngle.value)||0;
-    state.reqLinear = parseFloat(inReqLinear.value)||0;
-
-    lblN.textContent = state.n;
-    lblGate.textContent = state.gate;
-    lblAY.textContent = state.ay;
-    lblH.textContent = state.h;
-    lblAz.textContent = state.az;
-    lblEl.textContent = state.el;
-    lblTilt.textContent = state.tilt;
-    lblGain.textContent = state.gain;
-    lblRefRange.textContent = state.refRange;
-
-    hPresets.querySelectorAll('button').forEach(function(b){
-      b.classList.toggle('active', Math.abs(parseInt(b.getAttribute('data-h'),10)-state.h) < 1);
-    });
+  function pickTag(product){
+    var id = {metal:'metal', genel:'genel', sivi:'sivi', tekstil:'tekstil', agir:'agir'}[product] || 'genel';
+    return TAGS.filter(function(t){ return t.id===id; })[0];
+  }
+  function recommendAntennaId(tracking){
+    var map = {gate:'a6034', konveyor:'genis', raf:'genis', mobil:null, arac:'kompakt'};
+    return (map[tracking]===undefined) ? 'a6034' : map[tracking];
+  }
+  function pickReader(tracking, n){
+    if(tracking==='mobil'){ return { reader:READERS.filter(function(r){return r.id==='rh';})[0], qty:1, antennaNeeded:false }; }
+    var r = n<=2 ? READERS.filter(function(x){return x.id==='r2';})[0] : READERS.filter(function(x){return x.id==='r4';})[0];
+    return { reader:r, qty:Math.ceil(n/r.ports), antennaNeeded:true };
   }
 
-  [inN,inGate,inAY,inH,inAz,inEl,inTilt,inGain,inRefRange].forEach(function(el){
-    el.addEventListener('input', function(){ readControls(); recompute(); });
-  });
-  [inReqAngle,inReqLinear].forEach(function(el){
-    el.addEventListener('input', function(){ readControls(); renderAll(); });
-  });
-  hPresets.querySelectorAll('button').forEach(function(b){
-    b.addEventListener('click', function(){
-      inH.value = b.getAttribute('data-h');
-      readControls(); recompute();
+  // ---------- wizard + geometry state ----------
+  var wiz = { product:'metal', tracking:'gate', env:'ic', metalprox:'uzak', antenna:'oto', reliability:'standart' };
+  var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0 };
+
+  document.querySelectorAll('.card-grid[data-group]').forEach(function(grid){
+    var group = grid.getAttribute('data-group');
+    grid.querySelectorAll('.opt-card').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        grid.querySelectorAll('.opt-card').forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        wiz[group] = btn.getAttribute('data-value');
+        if(group==='antenna'){ document.getElementById('manualAntennaCtl').hidden = (wiz.antenna!=='manuel'); }
+      });
     });
   });
 
-  document.getElementById('btnPresetKlemsan').addEventListener('click', function(){
-    inN.value=2; inGate.value=3496; inAY.value=3000; inH.value=1500;
-    inAz.value=40.5; inEl.value=12.5; inTilt.value=22; inGain.value=9; inRefRange.value=6.5;
-    readControls(); recompute();
+  var inN=document.getElementById('inN'), inGate=document.getElementById('inGate'), inAY=document.getElementById('inAY'),
+      inH=document.getElementById('inH'), inAz=document.getElementById('inAz'), inEl=document.getElementById('inEl'),
+      inTilt=document.getElementById('inTilt'), inGain=document.getElementById('inGain'), inRefRange=document.getElementById('inRefRange'),
+      inReqAngle=document.getElementById('inReqAngle'), inReqLinear=document.getElementById('inReqLinear'), inTagQty=document.getElementById('inTagQty');
+  var lblN=document.getElementById('lblN'), lblGate=document.getElementById('lblGate'), lblAY=document.getElementById('lblAY'),
+      lblH=document.getElementById('lblH'), lblAz=document.getElementById('lblAz'), lblEl=document.getElementById('lblEl'),
+      lblTilt=document.getElementById('lblTilt'), lblGain=document.getElementById('lblGain'), lblRefRange=document.getElementById('lblRefRange');
+  var hPresets = document.getElementById('hPresets');
+
+  // sliders only update their own label — NOTHING recomputes until "Sistemi Kur" is pressed
+  function mirrorLabels(){
+    lblN.textContent = inN.value; lblGate.textContent = inGate.value; lblAY.textContent = inAY.value;
+    if(parseInt(inH.value,10) > parseInt(inAY.value,10)){ inH.value = inAY.value; }
+    lblH.textContent = inH.value; lblAz.textContent = inAz.value; lblEl.textContent = inEl.value;
+    lblTilt.textContent = inTilt.value; lblGain.textContent = inGain.value; lblRefRange.textContent = inRefRange.value;
+    hPresets.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('active', Math.abs(parseInt(b.getAttribute('data-h'),10)-parseInt(inH.value,10)) < 1);
+    });
+  }
+  [inN,inGate,inAY,inH,inAz,inEl,inTilt,inGain,inRefRange].forEach(function(el){ el.addEventListener('input', mirrorLabels); });
+  hPresets.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){ inH.value = b.getAttribute('data-h'); mirrorLabels(); });
   });
-  document.getElementById('btnResetDefaults').addEventListener('click', function(){
-    inN.value=4; inGate.value=3496; inAY.value=3000; inH.value=1500;
-    inAz.value=30; inEl.value=15; inTilt.value=0; inGain.value=9; inRefRange.value=6.5;
-    inReqAngle.value=0; inReqLinear.value=0;
-    readControls(); recompute();
-  });
+  document.getElementById('btnTilt22').addEventListener('click', function(){ inTilt.value = 22; mirrorLabels(); });
+  mirrorLabels();
 
   // ---------- physics ----------
   function toRad(d){ return d*Math.PI/180; }
   function toDeg(r){ return r*180/Math.PI; }
   function coneHalfWidth(h, angleDeg){ return h*Math.tan(toRad(angleDeg)); }
-
-  function offsetsFor(n, gate){
-    var seg = gate/(n+1), offs=[];
-    for(var i=0;i<n;i++){ offs.push(-gate/2 + (i+1)*seg); }
-    return offs;
-  }
+  function offsetsFor(n, gate){ var seg=gate/(n+1), offs=[]; for(var i=0;i<n;i++){ offs.push(-gate/2+(i+1)*seg); } return offs; }
 
   function computeMargin(nOverride){
     var n = nOverride||state.n;
     var offs = offsetsFor(n, state.gate);
-    var gaps = [];
-    gaps.push(offs[0] - (-state.gate/2));
+    var gaps = [offs[0]-(-state.gate/2)];
     for(var i=0;i<offs.length-1;i++){ gaps.push((offs[i+1]-offs[i])/2); }
     gaps.push(state.gate/2 - offs[offs.length-1]);
     var crit = Math.max.apply(null, gaps);
@@ -454,416 +520,405 @@
     var marginLin = coneR - crit;
     return { n:n, offs:offs, crit:crit, coneR:coneR, marginDeg:marginDeg, marginLin:marginLin };
   }
-
   function computeDepth(){
-    var elRad = toRad(state.el), tiltRad = toRad(state.tilt);
-    var nearAngle = tiltRad - elRad;
-    var farAngle = Math.min(tiltRad + elRad, toRad(89));
-    var nearDist = state.h*Math.tan(nearAngle);
-    var farDist = state.h*Math.tan(farAngle);
-    return { nearDist:nearDist, farDist:farDist, depthLen: farDist-nearDist };
+    var elRad=toRad(state.el), tiltRad=toRad(state.tilt);
+    var nearDist = state.h*Math.tan(tiltRad-elRad);
+    var farDist = state.h*Math.tan(Math.min(tiltRad+elRad, toRad(89)));
+    return { nearDist:nearDist, farDist:farDist, depthLen:farDist-nearDist, centerOffset:(nearDist+farDist)/2 };
   }
-
-  function computeRange(m, d){
-    var effectiveRangeM = state.refRange*Math.pow(10, (state.gain-9)/20);
-    var effectiveRangeMm = effectiveRangeM*1000;
-    var slantAzimuthMm = Math.sqrt(m.crit*m.crit + state.h*state.h);
+  function computeRange(m,d){
+    var effM = state.refRange*Math.pow(10,(state.gain-9)/20), effMm = effM*1000;
+    var slantAz = Math.sqrt(m.crit*m.crit+state.h*state.h);
     var farDepthAbs = Math.max(Math.abs(d.nearDist), Math.abs(d.farDist));
-    var slantDepthMm = Math.sqrt(farDepthAbs*farDepthAbs + state.h*state.h);
-    var worstSlantMm = Math.max(slantAzimuthMm, slantDepthMm);
-    return {
-      effectiveRangeM:effectiveRangeM, effectiveRangeMm:effectiveRangeMm,
-      slantAzimuthMm:slantAzimuthMm, slantDepthMm:slantDepthMm, farDepthAbs:farDepthAbs,
-      worstSlantMm:worstSlantMm, rangeOk: worstSlantMm<=effectiveRangeMm,
-      rangeMarginMm: effectiveRangeMm-worstSlantMm
-    };
+    var slantDepth = Math.sqrt(farDepthAbs*farDepthAbs+state.h*state.h);
+    var worst = Math.max(slantAz, slantDepth);
+    return { effectiveRangeM:effM, effectiveRangeMm:effMm, worstSlantMm:worst, rangeOk: worst<=effMm };
   }
 
-  // ---------- stat tile rendering ----------
-  function statTile(label, value, cls){
-    return '<div class="stat"><div class="l">'+label+'</div><div class="v'+(cls?(' '+cls):'')+'">'+value+'</div></div>';
-  }
+  function statTile(label, value, cls){ return '<div class="stat"><div class="l">'+label+'</div><div class="v'+(cls?(' '+cls):'')+'">'+value+'</div></div>'; }
 
   function renderCalcStats(m){
-    var ok = m.marginDeg > 0;
-    var html = '';
-    html += statTile('Kritik Nokta Boşluğu', Math.round(m.crit)+' mm');
-    html += statTile('Kapsama Yarıçapı (h)', Math.round(m.coneR)+' mm');
-    html += statTile('Açısal Marj', (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', ok?'good':'bad');
-    html += statTile('Doğrusal Marj', (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', ok?'good':'bad');
-    document.getElementById('calcStats').innerHTML = html;
+    var ok = m.marginDeg>0;
+    document.getElementById('calcStats').innerHTML =
+      statTile('Kritik Nokta Boşluğu', Math.round(m.crit)+' mm') +
+      statTile('Kapsama Yarıçapı (h)', Math.round(m.coneR)+' mm') +
+      statTile('Açısal Marj', (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', ok?'good':'bad') +
+      statTile('Doğrusal Marj', (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', ok?'good':'bad');
   }
-
-  function renderSimStats(m, d, rg){
-    var okA = m.marginDeg>0, okR = rg.rangeOk;
-    var html = '';
-    html += statTile('Açısal Marj', (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', okA?'good':'bad');
-    html += statTile('Doğrusal Marj', (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', okA?'good':'bad');
-    html += statTile('Derinlik Kapsaması', Math.round(d.depthLen)+' mm');
-    html += statTile('Menzil Durumu', okR?'YETERLİ':'YETERSİZ', okR?'good':'bad');
-    document.getElementById('simStats').innerHTML = html;
+  function renderSimStats(m,d,rg){
+    var okA=m.marginDeg>0, okR=rg.rangeOk;
+    document.getElementById('simStats').innerHTML =
+      statTile('Açısal Marj', (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', okA?'good':'bad') +
+      statTile('Doğrusal Marj', (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', okA?'good':'bad') +
+      statTile('Derinlik Kapsaması', Math.round(d.depthLen)+' mm') +
+      statTile('Menzil Durumu', okR?'YETERLİ':'YETERSİZ', okR?'good':'bad');
   }
-
-  function renderDepthStats(m, d, rg){
-    var html = '';
-    html += statTile('Derinlik Kapsaması', Math.round(d.depthLen)+' mm');
-    html += statTile('Yakın Sınır', Math.round(d.nearDist)+' mm');
-    html += statTile('Uzak Sınır', Math.round(d.farDist)+' mm');
-    html += statTile('Etkin Menzil', rg.effectiveRangeM.toFixed(2)+' m');
-    html += statTile('En Kötü Mesafe', Math.round(rg.worstSlantMm)+' mm');
-    html += statTile('Menzil Durumu', rg.rangeOk?'YETERLİ':'YETERSİZ', rg.rangeOk?'good':'bad');
-    document.getElementById('depthStats').innerHTML = html;
+  function renderDepthStats(m,d,rg){
+    document.getElementById('depthStats').innerHTML =
+      statTile('Derinlik Kapsaması', Math.round(d.depthLen)+' mm') +
+      statTile('Yakın Sınır', Math.round(d.nearDist)+' mm') +
+      statTile('Uzak Sınır', Math.round(d.farDist)+' mm') +
+      statTile('Etkin Menzil', rg.effectiveRangeM.toFixed(2)+' m') +
+      statTile('En Kötü Mesafe', Math.round(rg.worstSlantMm)+' mm') +
+      statTile('Menzil Durumu', rg.rangeOk?'YETERLİ':'YETERSİZ', rg.rangeOk?'good':'bad');
   }
-
-  function renderRequirement(m, d, rg){
-    var passAngle = m.marginDeg >= state.reqAngle;
-    var passLinear = m.marginLin >= state.reqLinear;
-    var passRange = rg.rangeOk;
-    var overall = passAngle && passLinear && passRange;
+  function renderRequirement(m,d,rg){
+    var passA=m.marginDeg>=state.reqAngle, passL=m.marginLin>=state.reqLinear, passR=rg.rangeOk;
+    var overall = passA&&passL&&passR;
     var el = document.getElementById('reqResult');
-    el.classList.remove('ok','bad');
-    el.classList.add(overall?'ok':'bad');
-
+    el.classList.remove('ok','bad'); el.classList.add(overall?'ok':'bad');
     var rows = '<div class="req-rows">'+
-      '<span>Açısal marj: '+m.marginDeg.toFixed(1)+'° / hedef ≥'+state.reqAngle+'° '+(passAngle?'✓':'✗')+'</span>'+
-      '<span>Doğrusal marj: '+Math.round(m.marginLin)+' mm / hedef ≥'+state.reqLinear+' mm '+(passLinear?'✓':'✗')+'</span>'+
-      '<span>Menzil: '+Math.round(rg.worstSlantMm)+' mm / etkin '+Math.round(rg.effectiveRangeMm)+' mm '+(passRange?'✓':'✗')+'</span>'+
+      '<span>Açısal marj: '+m.marginDeg.toFixed(1)+'° / hedef ≥'+state.reqAngle+'° '+(passA?'✓':'✗')+'</span>'+
+      '<span>Doğrusal marj: '+Math.round(m.marginLin)+' mm / hedef ≥'+state.reqLinear+' mm '+(passL?'✓':'✗')+'</span>'+
+      '<span>Menzil: '+Math.round(rg.worstSlantMm)+' mm / etkin '+Math.round(rg.effectiveRangeMm)+' mm '+(passR?'✓':'✗')+'</span>'+
     '</div>';
-
-    if(overall){
-      el.innerHTML = '<div class="headline">✓ Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.</div>'+rows;
-      return;
-    }
-
-    var suggestedN = null;
+    if(overall){ el.innerHTML = '<div class="headline">✓ Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.</div>'+rows; return; }
+    var suggestedN=null;
     for(var n2=1;n2<=12;n2++){
-      var m2 = computeMargin(n2);
-      var rg2 = computeRange(m2, d);
+      var m2=computeMargin(n2), rg2=computeRange(m2,d);
       if(m2.marginDeg>=state.reqAngle && m2.marginLin>=state.reqLinear && rg2.rangeOk){ suggestedN=n2; break; }
     }
-    var sugText = suggestedN!==null
-      ? ('Önerilen minimum anten sayısı: <b>'+suggestedN+'</b> (mevcut geçit/montaj/açı değerleriyle).')
-      : ('12 antene kadar denendi, hiçbiri bu gereksinimi karşılamıyor — geçit genişliğini, montaj yüksekliğini, huzme açılarını veya menzili gözden geçirin.');
-    el.innerHTML = '<div class="headline">✗ Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.</div>'+
-      '<div class="detail">'+sugText+'</div>'+rows;
+    var sug = suggestedN!==null ? ('Önerilen minimum anten sayısı: <b>'+suggestedN+'</b>.') : ('12 antene kadar denendi, hiçbiri karşılamıyor — geçit/montaj/açı değerlerini gözden geçirin.');
+    el.innerHTML = '<div class="headline">✗ Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.</div><div class="detail">'+sug+'</div>'+rows;
   }
 
-  // ---------- top-down SVG diagram ----------
+  // ---------- top-down SVG ----------
   function renderSvgTop(m){
-    var svg = document.getElementById('topSvg');
-    var W=720,H=300, pad=60;
-    var scale = (W-2*pad)/ (state.gate+800);
-    var cx = W/2, floorY = 235, beamY = 60;
-    function X(mm){ return cx + mm*scale; }
+    var svg=document.getElementById('topSvg'), W=720,H=300,pad=60;
+    var scale=(W-2*pad)/(state.gate+800), cx=W/2, floorY=235, beamY=60;
+    function X(mm){ return cx+mm*scale; }
+    var p=[];
+    p.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--panel)"></rect>');
+    var colW=400*scale;
+    p.push('<rect x="'+(X(-state.gate/2)-colW)+'" y="'+(beamY-10)+'" width="'+colW+'" height="150" fill="none" stroke="var(--line)" stroke-width="1.4"></rect>');
+    p.push('<rect x="'+X(state.gate/2)+'" y="'+(beamY-10)+'" width="'+colW+'" height="150" fill="none" stroke="var(--line)" stroke-width="1.4"></rect>');
+    p.push('<rect x="'+X(-state.gate/2)+'" y="'+beamY+'" width="'+(X(state.gate/2)-X(-state.gate/2))+'" height="14" fill="var(--panel-2)" stroke="var(--line)" stroke-width="1.2"></rect>');
+    p.push('<text x="'+cx+'" y="'+(beamY-16)+'" text-anchor="middle" font-size="10.5" fill="var(--dim)">(10) KİRİŞ · '+state.gate+' mm</text>');
+    m.offs.forEach(function(o,idx){
+      var w=m.coneR*2*scale, x=X(o)-w/2;
+      p.push('<rect x="'+x+'" y="'+(floorY-46)+'" width="'+w+'" height="46" fill="var(--accent)" opacity="0.16"></rect>');
+      p.push('<line x1="'+X(o)+'" y1="'+(beamY+14)+'" x2="'+X(o)+'" y2="'+(floorY-46)+'" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"></line>');
+      p.push('<circle cx="'+X(o)+'" cy="'+(beamY+14)+'" r="5" fill="var(--ink)" stroke="var(--accent)" stroke-width="1.6"></circle>');
+      p.push('<text x="'+X(o)+'" y="'+(beamY+30)+'" text-anchor="middle" font-size="9" fill="var(--dim)">20'+String.fromCharCode(97+idx)+'</text>');
+    });
+    p.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
+    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">zemin</text>');
+    [-state.gate/2,state.gate/2].forEach(function(edge){
+      p.push('<line x1="'+X(edge)+'" y1="'+beamY+'" x2="'+X(edge)+'" y2="'+floorY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
+    });
+    var edgeX=X(state.gate/2), nearestOffX=X(m.offs[m.offs.length-1]), midY=floorY-10;
+    p.push('<line x1="'+nearestOffX+'" y1="'+midY+'" x2="'+edgeX+'" y2="'+midY+'" stroke="var(--cyan)" stroke-width="1.4"></line>');
+    p.push('<text x="'+((nearestOffX+edgeX)/2)+'" y="'+(midY-6)+'" text-anchor="middle" font-size="9.5" fill="var(--cyan)">kritik: '+Math.round(m.crit)+'mm</text>');
+    p.push('<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="9.5" fill="var(--dim)">'+state.n+' anten · azimuth '+state.az+'° · h='+state.h+'mm · marj '+(m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°</text>');
+    svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML = p.join('');
+  }
 
-    var parts = [];
-    parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--panel)"></rect>');
-    var colW = 400*scale;
-    parts.push('<rect x="'+(X(-state.gate/2)-colW)+'" y="'+(beamY-10)+'" width="'+colW+'" height="150" fill="none" stroke="var(--line)" stroke-width="1.4"></rect>');
-    parts.push('<rect x="'+X(state.gate/2)+'" y="'+(beamY-10)+'" width="'+colW+'" height="150" fill="none" stroke="var(--line)" stroke-width="1.4"></rect>');
-    parts.push('<rect x="'+X(-state.gate/2)+'" y="'+beamY+'" width="'+(X(state.gate/2)-X(-state.gate/2))+'" height="14" fill="var(--panel-2)" stroke="var(--line)" stroke-width="1.2"></rect>');
-    parts.push('<text x="'+cx+'" y="'+(beamY-16)+'" text-anchor="middle" font-size="10.5" fill="var(--dim)">(10) KİRİŞ · '+state.gate+' mm</text>');
+  // ---------- side-view SVG ----------
+  function renderSvgSide(m,d,rg){
+    var svg=document.getElementById('sideSvg'), W=720,H=320,floorY=H-40;
+    var maxExtent=Math.max(Math.abs(d.nearDist),Math.abs(d.farDist),rg.effectiveRangeMm*0.65,800);
+    var scale=Math.min((W-100)/(2*maxExtent),(floorY-24)/state.ay);
+    var beamY=floorY-state.ay*scale, cx=W/2;
+    function X(z){ return cx+z*scale; } function Y(h){ return floorY-h*scale; }
+    var antX=X(0), antY=beamY, tagY=Y(state.h), nearX=X(d.nearDist), farX=X(d.farDist);
+    var p=[];
+    p.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--panel)"></rect>');
+    var rangeR=rg.effectiveRangeMm*scale;
+    p.push('<circle cx="'+antX+'" cy="'+antY+'" r="'+rangeR+'" fill="none" stroke="'+(rg.rangeOk?'var(--good)':'var(--bad)')+'" stroke-width="1.3" stroke-dasharray="5,5" opacity="0.7"></circle>');
+    p.push('<polygon points="'+antX+','+antY+' '+nearX+','+tagY+' '+farX+','+tagY+'" fill="var(--accent)" opacity="0.14"></polygon>');
+    p.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+nearX+'" y2="'+tagY+'" stroke="var(--accent)" stroke-width="1.3"></line>');
+    p.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+farX+'" y2="'+tagY+'" stroke="var(--accent)" stroke-width="1.3"></line>');
+    p.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
+    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">zemin</text>');
+    p.push('<line x1="20" y1="'+tagY+'" x2="'+(W-20)+'" y2="'+tagY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
+    p.push('<text x="'+(W-24)+'" y="'+(tagY-6)+'" text-anchor="end" font-size="9.5" fill="var(--dim)">h düzlemi ('+state.h+'mm)</text>');
+    p.push('<rect x="'+(antX-10)+'" y="'+(antY-8)+'" width="20" height="8" fill="var(--paper)"></rect>');
+    p.push('<text x="'+antX+'" y="'+(antY-14)+'" text-anchor="middle" font-size="10" fill="var(--paper)">(20)</text>');
+    var nearOk=Math.sqrt(d.nearDist*d.nearDist+state.h*state.h)<=rg.effectiveRangeMm;
+    var farOk=Math.sqrt(d.farDist*d.farDist+state.h*state.h)<=rg.effectiveRangeMm;
+    p.push('<circle cx="'+nearX+'" cy="'+tagY+'" r="4.5" fill="'+(nearOk?'var(--good)':'var(--bad)')+'"></circle>');
+    p.push('<circle cx="'+farX+'" cy="'+tagY+'" r="4.5" fill="'+(farOk?'var(--good)':'var(--bad)')+'"></circle>');
+    p.push('<text x="'+nearX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">yakın</text>');
+    p.push('<text x="'+farX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">uzak</text>');
+    p.push('<line x1="'+(cx-70)+'" y1="'+(floorY+30)+'" x2="'+(cx+70)+'" y2="'+(floorY+30)+'" stroke="var(--cyan)" stroke-width="1.3" marker-end="url(#arrowh)"></line>');
+    p.push('<text x="'+cx+'" y="'+(floorY+44)+'" text-anchor="middle" font-size="9.5" fill="var(--cyan)">ürünün geçiş yönü</text>');
+    p.push('<defs><marker id="arrowh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--cyan)"></path></marker></defs>');
+    p.push('<text x="'+cx+'" y="18" text-anchor="middle" font-size="9.5" fill="var(--dim)">tilt '+state.tilt+'° · elevation '+state.el+'° · derinlik '+Math.round(d.depthLen)+'mm · etkin menzil '+rg.effectiveRangeM.toFixed(2)+'m</text>');
+    svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML = p.join('');
+  }
 
-    m.offs.forEach(function(o, idx){
-      var w = m.coneR*2*scale;
-      var x = X(o) - w/2;
-      parts.push('<rect x="'+x+'" y="'+(floorY-46)+'" width="'+w+'" height="46" fill="var(--amber)" opacity="0.16"></rect>');
-      parts.push('<line x1="'+X(o)+'" y1="'+(beamY+14)+'" x2="'+X(o)+'" y2="'+(floorY-46)+'" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"></line>');
-      parts.push('<circle cx="'+X(o)+'" cy="'+(beamY+14)+'" r="5" fill="var(--ink)" stroke="var(--amber)" stroke-width="1.6"></circle>');
-      parts.push('<text x="'+X(o)+'" y="'+(beamY+30)+'" text-anchor="middle" font-size="9" fill="var(--dim)">20'+String.fromCharCode(97+idx)+'</text>');
+  // ---------- dependency-free isometric coverage scene ----------
+  function isoRaw(x,y,z){ var r=Math.PI/6; return { px:(x-z)*Math.cos(r), py:(x+z)*Math.sin(r)-y }; }
+  function boxCorners(cx,cz,w,d,y0,y1){
+    var hw=w/2,hd=d/2;
+    return [ {x:cx-hw,y:y0,z:cz-hd},{x:cx+hw,y:y0,z:cz-hd},{x:cx+hw,y:y0,z:cz+hd},{x:cx-hw,y:y0,z:cz+hd},
+              {x:cx-hw,y:y1,z:cz-hd},{x:cx+hw,y:y1,z:cz-hd},{x:cx+hw,y:y1,z:cz+hd},{x:cx-hw,y:y1,z:cz+hd} ];
+  }
+  function renderIsoScene(m,d,rg){
+    var svg=document.getElementById('isoSvg'), W=760,H=480;
+    var gate=state.gate, ay=state.ay, h=state.h;
+    var elFactor = Math.tan(toRad(state.el))/Math.tan(toRad(state.az));
+    var coneRx = m.coneR, coneRz = m.coneR*elFactor;
+    var centerZ = d.centerOffset;
+    var colW=380, colD=260, colTopY=ay+150;
+    var colL = boxCorners(-gate/2-colW/2,0,colW,colD,0,colTopY);
+    var colR = boxCorners(gate/2+colW/2,0,colW,colD,0,colTopY);
+    var beamBox = boxCorners(0,0,gate+colW,180,ay,ay+150);
+    var groundHalfZ = Math.max(1300, Math.abs(centerZ)+coneRz*1.5+500);
+    var ground = boxCorners(0,0,gate+colW*1.6, groundHalfZ*2, -6, 0);
+
+    var basePts=20, coneBases=[], antennaPts=[];
+    m.offs.forEach(function(o){
+      antennaPts.push({x:o,y:ay,z:0});
+      var ring=[];
+      for(var i=0;i<basePts;i++){
+        var th=i/basePts*2*Math.PI;
+        ring.push({ x:o+coneRx*Math.cos(th), y:Math.max(2,ay-h), z:centerZ+coneRz*Math.sin(th) });
+      }
+      coneBases.push(ring);
     });
 
-    parts.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
-    parts.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">zemin</text>');
+    var moldW=620,moldD=880,moldH=380;
+    var moldTopY = Math.min(h, ay-40);
+    var moldBox = boxCorners(0, centerZ, moldW, moldD, Math.max(0,moldTopY-moldH), moldTopY);
+    var tagPt = {x:0, y:moldTopY+22, z:centerZ};
 
-    [-state.gate/2, state.gate/2].forEach(function(edge){
-      parts.push('<line x1="'+X(edge)+'" y1="'+beamY+'" x2="'+X(edge)+'" y2="'+floorY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
+    var allWorld = [].concat(colL,colR,beamBox,ground,moldBox,[tagPt]);
+    coneBases.forEach(function(ring){ allWorld = allWorld.concat(ring); });
+    antennaPts.forEach(function(a){ allWorld.push(a); });
+
+    var proj = allWorld.map(function(pt){ return isoRaw(pt.x,pt.y,pt.z); });
+    var minX=Math.min.apply(null,proj.map(function(p){return p.px;})), maxX=Math.max.apply(null,proj.map(function(p){return p.px;}));
+    var minY=Math.min.apply(null,proj.map(function(p){return p.py;})), maxY=Math.max.apply(null,proj.map(function(p){return p.py;}));
+    var pad=36, scale=Math.min((W-2*pad)/(maxX-minX||1), (H-2*pad)/(maxY-minY||1));
+    var midX=(minX+maxX)/2, midY=(minY+maxY)/2;
+    function S(pt){ var r=isoRaw(pt.x,pt.y,pt.z); return { x:(W/2+(r.px-midX)*scale).toFixed(1), y:(H/2+(r.py-midY)*scale).toFixed(1) }; }
+    function poly(pts){ return pts.map(function(pt){ var s=S(pt); return s.x+','+s.y; }).join(' '); }
+    function faceStr(box, idxs){ return poly(idxs.map(function(i){ return box[i]; })); }
+
+    var parts=[];
+    parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="none"></rect>');
+    // ground
+    parts.push('<polygon points="'+faceStr(ground,[4,5,6,7])+'" fill="var(--panel-2)" stroke="var(--line)" stroke-width="1"></polygon>');
+    // columns (3 visible faces each: top, front, side)
+    [colL,colR].forEach(function(box){
+      parts.push('<polygon points="'+faceStr(box,[1,2,6,5])+'" fill="#3a4657" stroke="var(--line)" stroke-width="1"></polygon>');
+      parts.push('<polygon points="'+faceStr(box,[0,1,5,4])+'" fill="#4a5768" stroke="var(--line)" stroke-width="1"></polygon>');
+      parts.push('<polygon points="'+faceStr(box,[4,5,6,7])+'" fill="#5c6a7d" stroke="var(--line)" stroke-width="1"></polygon>');
+    });
+    // beam
+    parts.push('<polygon points="'+faceStr(beamBox,[1,2,6,5])+'" fill="#5c6a7d" stroke="var(--line)" stroke-width="1"></polygon>');
+    parts.push('<polygon points="'+faceStr(beamBox,[0,1,5,4])+'" fill="#6c7a8d" stroke="var(--line)" stroke-width="1"></polygon>');
+    parts.push('<polygon points="'+faceStr(beamBox,[4,5,6,7])+'" fill="#7c8a9d" stroke="var(--line)" stroke-width="1"></polygon>');
+    var beamLabelPt = S({x:0,y:ay+150,z:-90});
+    parts.push('<text x="'+beamLabelPt.x+'" y="'+(parseFloat(beamLabelPt.y)-8)+'" text-anchor="middle" font-size="11" fill="var(--dim)">(10) '+gate+'mm kiriş</text>');
+
+    // coverage cones + antennas (back-to-front by z of offset, roughly)
+    var order = m.offs.map(function(o,idx){return idx;}).sort(function(a,b){ return m.offs[a]-m.offs[b]; });
+    order.forEach(function(idx){
+      var ring = coneBases[idx], apex = antennaPts[idx];
+      var pathPts = [apex].concat(ring);
+      parts.push('<polygon points="'+poly(pathPts)+'" fill="var(--accent)" opacity="0.16"></polygon>');
+      var ringClosed = ring.concat([ring[0]]);
+      parts.push('<polyline points="'+poly(ringClosed)+'" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.55"></polyline>');
+      [0,5,10,15].forEach(function(ri){
+        parts.push('<line x1="'+S(apex).x+'" y1="'+S(apex).y+'" x2="'+S(ring[ri]).x+'" y2="'+S(ring[ri]).y+'" stroke="var(--accent)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"></line>');
+      });
+      var antBox = boxCorners(apex.x, apex.z, 90, 70, apex.y-40, apex.y);
+      parts.push('<polygon points="'+faceStr(antBox,[4,5,6,7])+'" fill="#14181f" stroke="var(--accent)" stroke-width="1"></polygon>');
+      var lab = S({x:apex.x,y:apex.y-46,z:apex.z});
+      parts.push('<text x="'+lab.x+'" y="'+lab.y+'" text-anchor="middle" font-size="10" fill="var(--accent-2)">20'+String.fromCharCode(97+idx)+'</text>');
     });
 
-    var edgeX = X(state.gate/2), nearestOffX = X(m.offs[m.offs.length-1]);
-    var midY = floorY-10;
-    parts.push('<line x1="'+nearestOffX+'" y1="'+midY+'" x2="'+edgeX+'" y2="'+midY+'" stroke="var(--cyan)" stroke-width="1.4"></line>');
-    parts.push('<text x="'+((nearestOffX+edgeX)/2)+'" y="'+(midY-6)+'" text-anchor="middle" font-size="9.5" fill="var(--cyan)">kritik: '+Math.round(m.crit)+'mm</text>');
+    // mold + tag
+    parts.push('<polygon points="'+faceStr(moldBox,[1,2,6,5])+'" fill="#5a6577" stroke="var(--line)" stroke-width="1"></polygon>');
+    parts.push('<polygon points="'+faceStr(moldBox,[0,1,5,4])+'" fill="#6b768a" stroke="var(--line)" stroke-width="1"></polygon>');
+    parts.push('<polygon points="'+faceStr(moldBox,[4,5,6,7])+'" fill="#7c8aa0" stroke="var(--line)" stroke-width="1"></polygon>');
+    var overallOk = m.marginDeg>0 && rg.rangeOk;
+    var tagS = S(tagPt);
+    parts.push('<circle cx="'+tagS.x+'" cy="'+tagS.y+'" r="7" fill="'+(overallOk?'var(--good)':'var(--bad)')+'" class="tag-pulse"></circle>');
+    var tagLab = S({x:tagPt.x, y:tagPt.y+26, z:tagPt.z});
+    parts.push('<text x="'+tagLab.x+'" y="'+tagLab.y+'" text-anchor="middle" font-size="10" fill="var(--paper)">(30) etiket</text>');
 
-    parts.push('<text x="'+cx+'" y="'+(H-8)+'" text-anchor="middle" font-size="9.5" fill="var(--dim)">'+state.n+' anten · azimuth yarı huzme '+state.az+'° · h='+state.h+'mm · marj '+(m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°</text>');
+    parts.push('<style>.tag-pulse{ animation:tagpulse 1.8s ease-in-out infinite; } @keyframes tagpulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }</style>');
 
     svg.setAttribute('viewBox','0 0 '+W+' '+H);
     svg.innerHTML = parts.join('');
   }
 
-  // ---------- side-view SVG diagram (depth / tilt / range) ----------
-  function renderSvgSide(m, d, rg){
-    var svg = document.getElementById('sideSvg');
-    var W=720,H=320,pad=50;
-    var floorY = H-40;
-    var maxExtent = Math.max(Math.abs(d.nearDist), Math.abs(d.farDist), rg.effectiveRangeMm*0.65, 800);
-    var scaleX = (W-2*pad)/(2*maxExtent);
-    var scaleY = (floorY-24)/state.ay;
-    var scale = Math.min(scaleX, scaleY);
-    var beamY = floorY - state.ay*scale;
-    var cx = W/2;
-    function X(zMm){ return cx + zMm*scale; }
-    function Y(hMm){ return floorY - hMm*scale; }
-
-    var antX = X(0), antY = beamY;
-    var tagY = Y(state.h);
-    var nearX = X(d.nearDist), farX = X(d.farDist);
-
-    var parts = [];
-    parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--panel)"></rect>');
-
-    // range arc (dashed circle) centered on antenna
-    var rangeR = rg.effectiveRangeMm*scale;
-    parts.push('<circle cx="'+antX+'" cy="'+antY+'" r="'+rangeR+'" fill="none" stroke="'+(rg.rangeOk?'var(--good)':'var(--bad)')+'" stroke-width="1.3" stroke-dasharray="5,5" opacity="0.7"></circle>');
-
-    // coverage triangle (antenna -> near -> far along tag plane)
-    parts.push('<polygon points="'+antX+','+antY+' '+nearX+','+tagY+' '+farX+','+tagY+'" fill="var(--amber)" opacity="0.14"></polygon>');
-    parts.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+nearX+'" y2="'+tagY+'" stroke="var(--amber)" stroke-width="1.3"></line>');
-    parts.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+farX+'" y2="'+tagY+'" stroke="var(--amber)" stroke-width="1.3"></line>');
-
-    // floor + tag plane
-    parts.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
-    parts.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">zemin</text>');
-    parts.push('<line x1="20" y1="'+tagY+'" x2="'+(W-20)+'" y2="'+tagY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
-    parts.push('<text x="'+(W-24)+'" y="'+(tagY-6)+'" text-anchor="end" font-size="9.5" fill="var(--dim)">h düzlemi ('+state.h+'mm)</text>');
-
-    // antenna mount
-    parts.push('<rect x="'+(antX-10)+'" y="'+(antY-8)+'" width="20" height="8" fill="var(--paper)"></rect>');
-    parts.push('<text x="'+antX+'" y="'+(antY-14)+'" text-anchor="middle" font-size="10" fill="var(--paper)">(20)</text>');
-
-    // near/far markers
-    var nearOk = Math.sqrt(d.nearDist*d.nearDist+state.h*state.h) <= rg.effectiveRangeMm;
-    var farOk = Math.sqrt(d.farDist*d.farDist+state.h*state.h) <= rg.effectiveRangeMm;
-    parts.push('<circle cx="'+nearX+'" cy="'+tagY+'" r="4.5" fill="'+(nearOk?'var(--good)':'var(--bad)')+'"></circle>');
-    parts.push('<circle cx="'+farX+'" cy="'+tagY+'" r="4.5" fill="'+(farOk?'var(--good)':'var(--bad)')+'"></circle>');
-    parts.push('<text x="'+nearX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">yakın</text>');
-    parts.push('<text x="'+farX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">uzak</text>');
-
-    // travel direction arrow
-    parts.push('<line x1="'+(cx-70)+'" y1="'+(floorY+30)+'" x2="'+(cx+70)+'" y2="'+(floorY+30)+'" stroke="var(--cyan)" stroke-width="1.3" marker-end="url(#arrowh)"></line>');
-    parts.push('<text x="'+cx+'" y="'+(floorY+44)+'" text-anchor="middle" font-size="9.5" fill="var(--cyan)">kalıbın geçiş yönü</text>');
-
-    parts.push('<defs><marker id="arrowh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--cyan)"></path></marker></defs>');
-
-    parts.push('<text x="'+cx+'" y="18" text-anchor="middle" font-size="9.5" fill="var(--dim)">tilt '+state.tilt+'° · elevation yarı huzme '+state.el+'° · derinlik '+Math.round(d.depthLen)+'mm · etkin menzil '+rg.effectiveRangeM.toFixed(2)+'m</text>');
-
-    svg.setAttribute('viewBox','0 0 '+W+' '+H);
-    svg.innerHTML = parts.join('');
+  // ---------- product selection + BOM ----------
+  function renderBOM(tag, antSpec, antLabel, readerPick, m){
+    var qty = parseInt(inTagQty.value,10);
+    var qtyText = (qty && qty>0) ? (qty+' adet') : 'proje kapsamına göre';
+    var rows = [];
+    rows.push(['Etiket', tag.name, tag.desc, qtyText]);
+    if(readerPick.antennaNeeded){
+      rows.push(['Anten', antLabel, antSpec ? antSpec.desc : 'Manuel olarak girilen özel açı/kazanç değerleri.', m.n+' adet']);
+      rows.push(['Anten Kablosu', 'Standart RF kablo', 'Anten–okuyucu bağlantısı.', m.n+' adet']);
+      rows.push(['Montaj Braketi', 'Ayarlanabilir montaj braketi', 'Kiriş üzerine anten sabitleme.', m.n+' adet']);
+    }
+    rows.push(['Okuyucu', readerPick.reader.name, readerPick.reader.desc, readerPick.qty+' adet']);
+    var html = '<thead><tr><th>Bileşen</th><th>Önerilen Model</th><th>Açıklama</th><th>Miktar</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      html += '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td class="desc">'+r[2]+'</td><td class="qty">'+r[3]+'</td></tr>';
+    });
+    html += '</tbody>';
+    document.getElementById('bomTable').innerHTML = html;
   }
 
-  function renderAll(){
-    var m = computeMargin();
-    var d = computeDepth();
-    var rg = computeRange(m, d);
-    renderCalcStats(m);
-    renderSimStats(m, d, rg);
-    renderDepthStats(m, d, rg);
-    renderSvgTop(m);
-    renderSvgSide(m, d, rg);
-    renderRequirement(m, d, rg);
-    return { m:m, d:d, rg:rg };
+  // ---------- technical drawing export ----------
+  function buildTechDrawingSvg(m,d,rg,tag,antLabel,readerPick){
+    var W=1200,H=820, BLACK='#111', GRAY='#555';
+    var gate=state.gate, ay=state.ay;
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+    var parts=[];
+    parts.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" font-family="IBM Plex Mono, monospace">');
+    parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#ffffff"></rect>');
+    parts.push('<text x="40" y="46" font-size="22" fill="'+BLACK+'" font-weight="bold">KLEMSAN A.Ş. — RFID SİSTEM TEKNİK RESMİ</text>');
+    parts.push('<text x="40" y="68" font-size="12" fill="'+GRAY+'">Üretim Birimi · dahili mühendislik modeli · '+new Date().toISOString().slice(0,10)+'</text>');
+    parts.push('<line x1="40" y1="80" x2="'+(W-40)+'" y2="80" stroke="'+BLACK+'" stroke-width="1.2"></line>');
+
+    // top view (plan)
+    var tvX0=60, tvY0=130, tvW=560, tvH=280;
+    var scaleT=(tvW-100)/(gate+700), cxT=tvX0+tvW/2, floorYT=tvY0+tvH-30, beamYT=tvY0+40;
+    function XT(mm){ return cxT+mm*scaleT; }
+    parts.push('<text x="'+tvX0+'" y="'+(tvY0-14)+'" font-size="14" fill="'+BLACK+'" font-weight="bold">A — Üstten Görünüş (plan)</text>');
+    var colWT=380*scaleT;
+    parts.push('<rect x="'+(XT(-gate/2)-colWT)+'" y="'+(beamYT-8)+'" width="'+colWT+'" height="140" fill="none" stroke="'+BLACK+'" stroke-width="1.4"></rect>');
+    parts.push('<rect x="'+XT(gate/2)+'" y="'+(beamYT-8)+'" width="'+colWT+'" height="140" fill="none" stroke="'+BLACK+'" stroke-width="1.4"></rect>');
+    parts.push('<rect x="'+XT(-gate/2)+'" y="'+beamYT+'" width="'+(XT(gate/2)-XT(-gate/2))+'" height="12" fill="#eee" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
+    m.offs.forEach(function(o,idx){
+      parts.push('<circle cx="'+XT(o)+'" cy="'+(beamYT+12)+'" r="5" fill="#fff" stroke="'+BLACK+'" stroke-width="1.4"></circle>');
+      parts.push('<text x="'+XT(o)+'" y="'+(beamYT+30)+'" text-anchor="middle" font-size="9" fill="'+GRAY+'">20'+String.fromCharCode(97+idx)+'</text>');
+    });
+    parts.push('<line x1="'+(tvX0+20)+'" y1="'+floorYT+'" x2="'+(tvX0+tvW-20)+'" y2="'+floorYT+'" stroke="'+BLACK+'" stroke-width="1.2"></line>');
+    // gate width dimension line
+    var dimY = floorYT+18;
+    parts.push('<line x1="'+XT(-gate/2)+'" y1="'+dimY+'" x2="'+XT(gate/2)+'" y2="'+dimY+'" stroke="'+BLACK+'" stroke-width="1" marker-start="url(#dimA)" marker-end="url(#dimA)"></line>');
+    parts.push('<text x="'+cxT+'" y="'+(dimY+16)+'" text-anchor="middle" font-size="11" fill="'+BLACK+'">'+gate+' mm</text>');
+
+    // front view
+    var fvX0=660, fvY0=130, fvW=500, fvH=280;
+    var scaleF=(fvH-60)/ay, cxF=fvX0+fvW/2, floorYF=fvY0+fvH-20, beamYF=floorYF-ay*scaleF;
+    function XF(mm){ return cxF+mm*scaleF; } function YF(mm){ return floorYF-mm*scaleF; }
+    parts.push('<text x="'+fvX0+'" y="'+(fvY0-14)+'" font-size="14" fill="'+BLACK+'" font-weight="bold">B — Önden Görünüş</text>');
+    parts.push('<rect x="'+(XF(-gate/2)-30)+'" y="'+(beamYF-160)+'" width="30" height="'+(floorYF-(beamYF-160))+'" fill="none" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
+    parts.push('<rect x="'+XF(gate/2)+'" y="'+(beamYF-160)+'" width="30" height="'+(floorYF-(beamYF-160))+'" fill="none" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
+    parts.push('<rect x="'+XF(-gate/2)+'" y="'+(beamYF-14)+'" width="'+(XF(gate/2)-XF(-gate/2))+'" height="14" fill="#eee" stroke="'+BLACK+'" stroke-width="1.2"></rect>');
+    parts.push('<line x1="'+(fvX0+10)+'" y1="'+floorYF+'" x2="'+(fvX0+fvW-10)+'" y2="'+floorYF+'" stroke="'+BLACK+'" stroke-width="1.2"></line>');
+    m.offs.forEach(function(o,idx){
+      var apexX=XF(o), apexY=beamYF-14;
+      var hw=coneHalfWidth(state.h,state.az)*scaleF;
+      parts.push('<polygon points="'+apexX+','+apexY+' '+(apexX-hw)+','+(apexY+state.h*scaleF)+' '+(apexX+hw)+','+(apexY+state.h*scaleF)+'" fill="#ddd" opacity="0.6" stroke="'+GRAY+'" stroke-width="0.8"></polygon>');
+      parts.push('<rect x="'+(apexX-10)+'" y="'+(apexY-6)+'" width="20" height="6" fill="'+BLACK+'"></rect>');
+    });
+    var dimYF = fvY0+16;
+    parts.push('<line x1="'+XF(0)+'" y1="'+floorYF+'" x2="'+XF(0)+'" y2="'+beamYF+'" stroke="'+BLACK+'" stroke-width="1" marker-start="url(#dimA)" marker-end="url(#dimA)"></line>');
+    parts.push('<text x="'+(XF(0)+8)+'" y="'+((floorYF+beamYF)/2)+'" font-size="11" fill="'+BLACK+'">h='+state.h+'mm</text>');
+    parts.push('<text x="'+fvX0+'" y="'+(fvY0-30)+'" font-size="11" fill="'+GRAY+'">Montaj yüksekliği: '+ay+' mm · Tilt: '+state.tilt+'°</text>');
+
+    parts.push('<defs><marker id="dimA" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,4 L8,1 L8,7 Z" fill="'+BLACK+'"></path></marker></defs>');
+
+    // parameter / BOM table
+    var ty=460;
+    parts.push('<line x1="40" y1="'+(ty-14)+'" x2="'+(W-40)+'" y2="'+(ty-14)+'" stroke="'+BLACK+'" stroke-width="1"></line>');
+    parts.push('<text x="40" y="'+ty+'" font-size="13" fill="'+BLACK+'" font-weight="bold">Sistem Parametreleri</text>');
+    var params = [
+      ['Anten sayısı (n)', m.n], ['Geçit genişliği', gate+' mm'], ['Montaj yüksekliği', ay+' mm'],
+      ['Anten-etiket dikey mesafe h', state.h+' mm'], ['Azimuth yarı huzme açısı', state.az+'°'],
+      ['Elevation yarı huzme açısı', state.el+'°'], ['Montaj tilt açısı', state.tilt+'°'],
+      ['Anten kazancı', state.gain+' dBiC'], ['Açısal marj', m.marginDeg.toFixed(1)+'°'],
+      ['Doğrusal marj', Math.round(m.marginLin)+' mm'], ['Derinlik kapsaması', Math.round(d.depthLen)+' mm'],
+      ['Etkin menzil', rg.effectiveRangeM.toFixed(2)+' m'], ['Menzil durumu', rg.rangeOk?'YETERLİ':'YETERSİZ'],
+      ['Etiket', tag.name], ['Anten modeli', antLabel], ['Okuyucu', readerPick.reader.name+' × '+readerPick.qty]
+    ];
+    var colX=[40,340,640,940], rowH=20, colW=300;
+    params.forEach(function(pr,i){
+      var col = Math.floor(i/4), row = i%4;
+      var x = colX[col], y = ty+22+row*rowH;
+      parts.push('<text x="'+x+'" y="'+y+'" font-size="11" fill="'+GRAY+'">'+esc(pr[0])+'</text>');
+      parts.push('<text x="'+(x+180)+'" y="'+y+'" font-size="11" fill="'+BLACK+'" font-weight="bold">'+esc(pr[1])+'</text>');
+    });
+
+    parts.push('<text x="40" y="'+(H-24)+'" font-size="10" fill="'+GRAY+'">Referans Numaraları: (10) taşıyıcı kiriş-kolon düzeneği · (20) okuyucu/anten birimi · (30) takip edilen ürün/etiket. Ürün kategorileri örnek/referans niteliğindedir.</text>');
+    parts.push('</svg>');
+    return parts.join('');
   }
 
-  function recompute(){
-    renderAll();
-    update3D();
+  function saveBlob(filename, blob){
+    var inArtifact = typeof window.claude !== 'undefined' && window.claude && typeof window.claude.use === 'function';
+    if(inArtifact){
+      window.claude.use('downloads').then(function(dl){
+        if(dl){ dl.save({filename:filename, data:blob}); }
+      }).catch(function(){ /* declined or unavailable */ });
+      return;
+    }
+    try{
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }catch(e){}
   }
 
   // ---------- tabs ----------
   document.querySelectorAll('.tabs button').forEach(function(b){
     b.addEventListener('click', function(){
       document.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('active');});
-      document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('active');});
+      document.querySelectorAll('#results .panel').forEach(function(x){x.classList.remove('active');});
       b.classList.add('active');
       document.getElementById('panel-'+b.getAttribute('data-tab')).classList.add('active');
-      onResize();
     });
   });
 
-  // ---------- 3D scene ----------
-  var stage = document.getElementById('stage');
-  var scene, camera, renderer, controls, group;
-  var pivots=[], markerPts=[];
-  var moldMesh, tagMesh, clock;
-
-  function initThree(){
-    clock = new THREE.Clock();
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(42, stage.clientWidth/stage.clientHeight, 0.05, 100);
-    camera.position.set(4.6, 3.4, 5.6);
-
-    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    renderer.setSize(stage.clientWidth, stage.clientHeight);
-    stage.insertBefore(renderer.domElement, stage.firstChild);
-
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.target.set(0,1.4,0);
-    controls.enableDamping = true; controls.dampingFactor=0.08;
-    controls.minDistance=2.5; controls.maxDistance=14;
-    controls.maxPolarAngle = Math.PI*0.49;
-
-    scene.add(new THREE.AmbientLight(0x8fa3bf, 0.55));
-    var dl = new THREE.DirectionalLight(0xffffff, 0.9);
-    dl.position.set(3,6,4);
-    scene.add(dl);
-    var dl2 = new THREE.DirectionalLight(0x5fc2d6, 0.25);
-    dl2.position.set(-4,2,-3);
-    scene.add(dl2);
-
-    var floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(14,14),
-      new THREE.MeshStandardMaterial({ color:0x141a22, roughness:0.95, metalness:0.05 })
-    );
-    floor.rotation.x = -Math.PI/2;
-    scene.add(floor);
-    var grid = new THREE.GridHelper(14,28,0x2b3644,0x212a35);
-    scene.add(grid);
-
-    group = new THREE.Group();
-    scene.add(group);
-
-    moldMesh = new THREE.Mesh(
-      new THREE.BoxGeometry(0.62,0.42,0.9),
-      new THREE.MeshStandardMaterial({ color:0x4a5361, roughness:0.4, metalness:0.75 })
-    );
-    scene.add(moldMesh);
-
-    tagMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.045,16,16),
-      new THREE.MeshStandardMaterial({ color:0x2a2a2a, emissive:0x000000, roughness:0.4 })
-    );
-    scene.add(tagMesh);
-
-    window.addEventListener('resize', onResize);
-    buildGeometry();
-    animate();
+  // ---------- build ----------
+  var lastResult = null;
+  function readAllControls(){
+    state.n=parseInt(inN.value,10); state.gate=parseInt(inGate.value,10); state.ay=parseInt(inAY.value,10);
+    if(parseInt(inH.value,10)>state.ay){ inH.value=state.ay; }
+    state.h=parseInt(inH.value,10); state.tilt=parseInt(inTilt.value,10); state.refRange=parseFloat(inRefRange.value);
+    state.reqAngle=parseFloat(inReqAngle.value)||0; state.reqLinear=parseFloat(inReqLinear.value)||0;
+    var antId = wiz.antenna==='oto' ? recommendAntennaId(wiz.tracking) : wiz.antenna;
+    var antSpec = (wiz.antenna==='manuel' || antId===null) ? null : ANTENNAS.filter(function(a){return a.id===antId;})[0];
+    if(wiz.antenna==='manuel'){
+      state.az=parseFloat(inAz.value); state.el=parseFloat(inEl.value); state.gain=parseFloat(inGain.value);
+    } else if(antSpec){
+      state.az=antSpec.az; state.el=antSpec.el; state.gain=antSpec.gain;
+    } else {
+      // mobil tracking with no fixed antenna — keep manual sliders as fallback baseline
+      state.az=parseFloat(inAz.value)||30; state.el=parseFloat(inEl.value)||15; state.gain=parseFloat(inGain.value)||9;
+    }
+    return { antId:antId, antSpec:antSpec };
   }
 
-  function buildGeometry(){
-    while(group.children.length){ group.remove(group.children[0]); }
-    pivots = [];
-    markerPts = [];
+  document.getElementById('btnBuild').addEventListener('click', function(){
+    var picked = readAllControls();
+    var m = computeMargin(), d = computeDepth(), rg = computeRange(m,d);
+    var tag = pickTag(wiz.product);
+    var readerPick = pickReader(wiz.tracking, m.n);
+    var antLabel = wiz.antenna==='manuel' ? 'Manuel (özel parametreler)' : (picked.antSpec ? picked.antSpec.name : 'Dahili (el terminali anteni)');
 
-    var mm = 0.001;
-    var gate = state.gate*mm, ay = state.ay*mm, h = state.h*mm;
-    var coneR = coneHalfWidth(state.h, state.az)*mm;
-    var elFactor = Math.tan(toRad(state.el)) / Math.tan(toRad(state.az));
-    var tiltRad = toRad(state.tilt);
+    renderCalcStats(m); renderSimStats(m,d,rg); renderDepthStats(m,d,rg); renderRequirement(m,d,rg);
+    renderSvgTop(m); renderSvgSide(m,d,rg); renderIsoScene(m,d,rg);
+    renderBOM(tag, picked.antSpec, antLabel, readerPick, m);
 
-    var colGeo = new THREE.BoxGeometry(0.22,ay+0.3,0.22);
-    var colMat = new THREE.MeshStandardMaterial({ color:0xaab4c2, roughness:0.55, metalness:0.35 });
-    var colL = new THREE.Mesh(colGeo,colMat); colL.position.set(-gate/2-0.15, (ay+0.3)/2-0.15, 0);
-    var colR = new THREE.Mesh(colGeo,colMat); colR.position.set(gate/2+0.15, (ay+0.3)/2-0.15, 0);
-    group.add(colL, colR);
+    lastResult = { m:m, d:d, rg:rg, tag:tag, antLabel:antLabel, readerPick:readerPick };
 
-    var beamGeo = new THREE.BoxGeometry(gate+0.5,0.16,0.26);
-    var beamMat = new THREE.MeshStandardMaterial({ color:0x8b96a5, roughness:0.5, metalness:0.4 });
-    var beam = new THREE.Mesh(beamGeo, beamMat);
-    beam.position.set(0, ay, 0);
-    group.add(beam);
-    markerPts.push({ label:'(10)', pos:new THREE.Vector3(0, ay+0.16, 0) });
+    var results = document.getElementById('results');
+    results.hidden = false;
+    results.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
 
-    var offs = offsetsFor(state.n, state.gate);
-    var antMat = new THREE.MeshStandardMaterial({ color:0x14181e, roughness:0.35, metalness:0.6 });
-    var coneMat = new THREE.MeshStandardMaterial({
-      color:0xe2a13f, transparent:true, opacity:0.14, side:THREE.DoubleSide, depthWrite:false
-    });
-    var coneEdgeMat = new THREE.LineBasicMaterial({ color:0xe2a13f, transparent:true, opacity:0.5 });
+  document.getElementById('btnDrawing').addEventListener('click', function(){
+    if(!lastResult) return;
+    var svgStr = buildTechDrawingSvg(lastResult.m, lastResult.d, lastResult.rg, lastResult.tag, lastResult.antLabel, lastResult.readerPick);
+    var blob = new Blob([svgStr], { type:'image/svg+xml' });
+    saveBlob('rfid-sistem-teknik-resim.svg', blob);
+  });
 
-    offs.forEach(function(o, idx){
-      var x = o*mm;
-      var ant = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.09,0.14), antMat);
-      ant.position.set(x, ay-0.11, 0);
-      group.add(ant);
-
-      var pivot = new THREE.Group();
-      pivot.position.set(x, ay-0.16, 0);
-      pivot.rotation.x = tiltRad;
-      group.add(pivot);
-      pivots.push(pivot);
-
-      var cone = new THREE.Mesh(new THREE.ConeGeometry(coneR, h, 28, 1, true), coneMat);
-      cone.position.set(0, -h/2, 0);
-      cone.scale.set(1,1,elFactor);
-      pivot.add(cone);
-
-      var edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.ConeGeometry(coneR,h,20,1,true)), coneEdgeMat);
-      edges.position.copy(cone.position);
-      edges.scale.copy(cone.scale);
-      pivot.add(edges);
-
-      if(idx===0 || idx===offs.length-1){
-        markerPts.push({ label:'20'+String.fromCharCode(97+idx), pos:new THREE.Vector3(x, ay-0.02, 0) });
-      }
-    });
-
-    moldMesh.position.set(0, h*0.35+0.05, 0);
-    tagMesh.position.set(0, h*0.35+0.05+0.24, 0);
-    markerPts.push({ label:'(30)', pos: null });
-  }
-
-  function update3D(){ if(scene) buildGeometry(); }
-
-  var moldT = 0;
-  function animate(){
-    requestAnimationFrame(animate);
-    var dt = clock.getDelta();
-    moldT += dt*0.22;
-    var travel = (state.gate*0.001*0.5)+1.1;
-    var z = Math.sin(moldT)*travel;
-    var mm=0.001, h=state.h*mm;
-    moldMesh.position.z = z; moldMesh.position.y = h*0.35+0.05;
-    tagMesh.position.z = z; tagMesh.position.y = h*0.35+0.05+0.24;
-
-    var offs = offsetsFor(state.n, state.gate);
-    var coneR = coneHalfWidth(state.h, state.az)*mm;
-    var d = computeDepth();
-    var nearM = d.nearDist*mm, farM = d.farDist*mm;
-    var loM = Math.min(nearM,farM)*1.05-0.03, hiM = Math.max(nearM,farM)*1.05+0.03;
-    var insideAz = offs.some(function(o){ return Math.abs(o*mm - tagMesh.position.x) < coneR*0.55; });
-    var insideDepth = z>=loM && z<=hiM;
-    var inside = insideAz && insideDepth;
-    tagMesh.material.emissive.setHex(inside ? 0xe2a13f : 0x000000);
-    tagMesh.material.color.setHex(inside ? 0xe2a13f : 0x2a2a2a);
-
-    controls.update();
-    renderer.render(scene, camera);
-    updateMarkers();
-  }
-
-  function updateMarkers(){
-    var stageEl = stage;
-    var existing = stageEl.querySelectorAll('.marker');
-    existing.forEach(function(e){ e.remove(); });
-    var w = stage.clientWidth, h2 = stage.clientHeight;
-    markerPts.forEach(function(mp){
-      var pos = mp.pos ? mp.pos.clone() : tagMesh.position.clone();
-      pos.project(camera);
-      if(pos.z>1) return;
-      var x = (pos.x*0.5+0.5)*w, y=(-(pos.y*0.5)+0.5)*h2;
-      if(x<0||x>w||y<0||y>h2) return;
-      var div = document.createElement('div');
-      div.className='marker';
-      div.style.left = x+'px'; div.style.top = y+'px';
-      div.textContent = mp.label;
-      stage.appendChild(div);
-    });
-  }
-
-  function onResize(){
-    if(!renderer) return;
-    var w = stage.clientWidth, h = stage.clientHeight;
-    if(w<10||h<10) return;
-    camera.aspect = w/h; camera.updateProjectionMatrix();
-    renderer.setSize(w,h);
-  }
-
-  // ---------- boot ----------
-  readControls();
-  recompute();
-  initThree();
-  setTimeout(onResize, 60);
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ /* no modal state to close on this page */ }
+  });
 })();
 </script>
 </body>
