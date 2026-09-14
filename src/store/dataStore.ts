@@ -1,0 +1,221 @@
+import { create } from "zustand";
+import {
+  ALARMS,
+  BOILER_HISTORY,
+  DATA_HISTORY_START,
+  ENERGY_RECORDS,
+  HOLIDAYS,
+  M3_BIRIM_FIYAT,
+  NOW,
+  READINGS,
+  ROOMS,
+  SCHEDULE,
+  THRESHOLDS,
+  computeHissedilen,
+} from "../lib/mockData";
+import type {
+  AlarmRecord,
+  BoilerRecord,
+  DateRange,
+  DateRangePreset,
+  EnergyRecord,
+  HolidayEntry,
+  OverrideRecord,
+  Reading,
+  Room,
+  ScheduleEntry,
+  SistemModu,
+  Thresholds,
+  UserRole,
+} from "../lib/types";
+import { resolveDateRange } from "../lib/calculations";
+
+let overrideSeq = 1;
+
+interface DataState {
+  rooms: Room[];
+  readings: Reading[];
+  boilerHistory: BoilerRecord[];
+  alarms: AlarmRecord[];
+  energyRecords: EnergyRecord[];
+  overrides: OverrideRecord[];
+  thresholds: Thresholds;
+  schedule: ScheduleEntry[];
+  holidays: HolidayEntry[];
+  m3BirimFiyat: number;
+
+  role: UserRole;
+  setRole: (r: UserRole) => void;
+
+  systemMode: SistemModu;
+  emergencyStop: boolean;
+  lastUpdate: number;
+  connectionOk: boolean;
+
+  datePreset: DateRangePreset;
+  customRange: { start: number; end: number } | null;
+  setDatePreset: (p: DateRangePreset) => void;
+  setCustomRange: (start: number, end: number) => void;
+  getDateRange: () => DateRange;
+
+  tick: () => void;
+  applyOverride: (setpoint: number, kullanici: string, not?: string) => void;
+  toggleEmergencyStop: (kullanici: string) => void;
+  acknowledgeAlarm: (id: string, kullanici: string) => void;
+  closeAlarm: (id: string) => void;
+  updateThresholds: (t: Partial<Thresholds>) => void;
+  updateRoom: (id: string, patch: Partial<Room>) => void;
+}
+
+export const useDataStore = create<DataState>((set, get) => ({
+  rooms: ROOMS,
+  readings: READINGS,
+  boilerHistory: BOILER_HISTORY,
+  alarms: ALARMS,
+  energyRecords: ENERGY_RECORDS,
+  overrides: [],
+  thresholds: THRESHOLDS,
+  schedule: SCHEDULE,
+  holidays: HOLIDAYS,
+  m3BirimFiyat: M3_BIRIM_FIYAT,
+
+  role: "yonetici",
+  setRole: (r) => set({ role: r }),
+
+  systemMode: "otomatik",
+  emergencyStop: false,
+  lastUpdate: NOW,
+  connectionOk: true,
+
+  datePreset: "son30gun",
+  customRange: null,
+  setDatePreset: (p) => set({ datePreset: p }),
+  setCustomRange: (start, end) =>
+    set({ customRange: { start, end }, datePreset: "ozel" }),
+  getDateRange: () => {
+    const s = get();
+    return resolveDateRange(
+      s.datePreset,
+      DATA_HISTORY_START,
+      Date.now(),
+      s.customRange ?? undefined
+    );
+  },
+
+  tick: () => {
+    const s = get();
+    if (s.emergencyStop) {
+      set({ lastUpdate: Date.now() });
+      return;
+    }
+    const ts = Date.now();
+    const connectionOk = Math.random() > 0.03;
+    const newReadings: Reading[] = s.rooms.map((room) => {
+      const prior = [...s.readings]
+        .filter((r) => r.roomId === room.id)
+        .sort((a, b) => b.ts - a.ts)[0];
+      const base = prior ? prior.sicaklik : 21;
+      const drift = (Math.random() - 0.5) * 0.5;
+      const temp = Number((base + drift).toFixed(2));
+      const humidity = Number((45 + (Math.random() - 0.5) * 10).toFixed(1));
+      return {
+        roomId: room.id,
+        ts,
+        sicaklik: temp,
+        nem: humidity,
+        hissedilenSicaklik: Number(computeHissedilen(temp, humidity).toFixed(2)),
+        havaKaliteIndeksi:
+          room.sensorTipi === "SAS-IAQ"
+            ? Number((60 + Math.random() * 30).toFixed(0))
+            : undefined,
+        online: connectionOk ? Math.random() > 0.01 : false,
+      };
+    });
+
+    let quorumOk = true;
+    const cepheler = ["kuzey", "guney", "dogu", "bati"];
+    for (const c of cepheler) {
+      const inCluster = s.rooms.filter((r) => r.cephe === c).map((r) => r.id);
+      const temps = newReadings
+        .filter((r) => inCluster.includes(r.roomId))
+        .map((r) => r.sicaklik);
+      if (temps.length === 0) continue;
+      const avg = temps.reduce((a, b) => a + b, 0) / temps.length;
+      const maxDev = Math.max(...temps.map((t) => Math.abs(t - avg)));
+      if (maxDev > s.thresholds.guvenEsigiSapma) quorumOk = false;
+    }
+
+    const systemMode: SistemModu = quorumOk ? "otomatik" : "pasif-guvenli";
+
+    set({
+      readings: [...s.readings, ...newReadings],
+      lastUpdate: ts,
+      connectionOk,
+      systemMode: s.systemMode === "manuel" ? "manuel" : systemMode,
+    });
+  },
+
+  applyOverride: (setpoint, kullanici, not) => {
+    const s = get();
+    const rec: OverrideRecord = {
+      id: `ovr-${overrideSeq++}`,
+      ts: Date.now(),
+      kullanici,
+      setpoint,
+      not,
+    };
+    const boilerRec: BoilerRecord = {
+      ts: Date.now(),
+      setpoint,
+      acikMi: true,
+      sebep: "manuel-override",
+      kullanici,
+    };
+    set({
+      overrides: [rec, ...s.overrides],
+      boilerHistory: [...s.boilerHistory, boilerRec],
+      systemMode: "manuel",
+    });
+  },
+
+  toggleEmergencyStop: (kullanici) => {
+    const s = get();
+    const next = !s.emergencyStop;
+    set({
+      emergencyStop: next,
+      systemMode: next ? "manuel" : "otomatik",
+    });
+    if (next) {
+      const rec: AlarmRecord = {
+        id: `alarm-emergency-${Date.now()}`,
+        roomId: s.rooms[0].id,
+        ts: Date.now(),
+        tur: "guven-esigi",
+        durum: "acik",
+        mesaj: `ACİL DURDUR aktifleştirildi (${kullanici}). Tüm otomasyon durduruldu.`,
+      };
+      set({ alarms: [rec, ...s.alarms] });
+    }
+  },
+
+  acknowledgeAlarm: (id, kullanici) =>
+    set((s) => ({
+      alarms: s.alarms.map((a) =>
+        a.id === id
+          ? { ...a, durum: "onaylandi", onaylayan: kullanici, onayZamani: Date.now() }
+          : a
+      ),
+    })),
+
+  closeAlarm: (id) =>
+    set((s) => ({
+      alarms: s.alarms.map((a) => (a.id === id ? { ...a, durum: "kapandi" } : a)),
+    })),
+
+  updateThresholds: (t) => set((s) => ({ thresholds: { ...s.thresholds, ...t } })),
+
+  updateRoom: (id, patch) =>
+    set((s) => ({
+      rooms: s.rooms.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    })),
+}));
