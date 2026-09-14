@@ -352,60 +352,103 @@ function generateAll(): SimState {
 
 // Dashboard'un boş/tamamen yeşil açılmaması için, gerçek takvim mevsimi ne
 // olursa olsun (örn. yaz ayında ısıtma sezonu dışı kalınsa bile) en güncel
-// anda birkaç sınıfta örnek uyarı/alarm durumu görülmesini garanti eder.
+// anda sınıfların büyükçe bir kısmında örnek uyarı/alarm durumu görülmesini
+// garanti eder. Oranlar toplam nokta sayısına göre otantik biçimde ölçeklenir.
 function applyLiveShowcase(readings: Reading[], alarms: AlarmRecord[]) {
   const lastTs = Math.max(...readings.map((r) => r.ts));
   const findLast = (roomId: string) =>
     readings.find((r) => r.roomId === roomId && r.ts === lastTs);
+  const HOUR = 3_600_000;
 
-  const warmRoomId = "oda-6";
-  const coldRoomId = "oda-15";
-  const offlineRoomId = "oda-22";
-  const [dropRoomId, chronicRoomId] = CHRONIC_ROOM_IDS;
-
-  const warm = findLast(warmRoomId);
-  if (warm) {
-    warm.sicaklik = 25.6;
-    warm.hissedilenSicaklik = 25.9;
+  const total = ROOMS.length;
+  function pickEvery(start: number, step: number, count: number): string[] {
+    const ids: string[] = [];
+    for (let i = 0; i < count; i++) {
+      ids.push(ROOMS[(start + i * step) % total].id);
+    }
+    return ids;
   }
 
-  const cold = findLast(coldRoomId);
-  if (cold) {
-    cold.sicaklik = 17.1;
-    cold.hissedilenSicaklik = 16.4;
-  }
+  const aniDususRooms = pickEvery(0, 5, Math.max(2, Math.round(total * 0.11)));
+  const kronikRooms = pickEvery(1, 5, Math.max(2, Math.round(total * 0.11)));
+  const guvenEsigiRooms = pickEvery(2, 7, Math.max(1, Math.round(total * 0.06)));
+  const offlineAlarmRooms = pickEvery(3, 6, Math.max(2, Math.round(total * 0.08)));
+  const warmWarningRooms = pickEvery(4, 6, Math.max(2, Math.round(total * 0.08)));
+  const coldWarningRooms = pickEvery(5, 6, Math.max(2, Math.round(total * 0.08)));
 
-  const offline = findLast(offlineRoomId);
-  if (offline) {
-    offline.online = false;
-  }
-
-  const dropReading = findLast(dropRoomId);
-  const dropRoom = ROOMS.find((r) => r.id === dropRoomId);
-  if (dropReading && dropRoom) {
-    dropReading.sicaklik -= 3.2;
-    dropReading.hissedilenSicaklik -= 3.2;
+  aniDususRooms.forEach((roomId, i) => {
+    const room = ROOMS.find((r) => r.id === roomId);
+    const reading = findLast(roomId);
+    if (!room) return;
+    const derece = 2.8 + (i % 4) * 0.5;
+    if (reading) {
+      reading.sicaklik -= derece;
+      reading.hissedilenSicaklik -= derece;
+    }
     alarms.push({
-      id: `alarm-demo-drop-${lastTs}`,
-      roomId: dropRoomId,
-      ts: lastTs,
+      id: `alarm-demo-drop-${roomId}`,
+      roomId,
+      ts: lastTs - i * HOUR,
       tur: "ani-dusus",
       durum: "acik",
-      mesaj: `${dropRoom.ad}: 15 dk içinde 3.2°C üzeri ani düşüş tespit edildi (pencere açılmış olabilir).`,
+      mesaj: `${room.ad}: 15 dk içinde ${derece.toFixed(1)}°C üzeri ani düşüş tespit edildi (pencere açılmış olabilir).`,
     });
-  }
+  });
 
-  const chronicRoom = ROOMS.find((r) => r.id === chronicRoomId);
-  if (chronicRoom) {
+  kronikRooms.forEach((roomId, i) => {
+    const room = ROOMS.find((r) => r.id === roomId);
+    if (!room) return;
     alarms.push({
-      id: `alarm-demo-chronic-${lastTs}`,
-      roomId: chronicRoomId,
-      ts: lastTs,
+      id: `alarm-demo-chronic-${roomId}`,
+      roomId,
+      ts: lastTs - i * HOUR,
       tur: "kronik-sorun",
       durum: "acik",
-      mesaj: `${chronicRoom.ad}: tekrarlayan ısı kaybı paterni tespit edildi (kronik sorun adayı).`,
+      mesaj: `${room.ad}: tekrarlayan ısı kaybı paterni tespit edildi (kronik sorun adayı).`,
     });
-  }
+  });
+
+  guvenEsigiRooms.forEach((roomId, i) => {
+    const room = ROOMS.find((r) => r.id === roomId);
+    if (!room) return;
+    alarms.push({
+      id: `alarm-demo-guven-${roomId}`,
+      roomId,
+      ts: lastTs - i * HOUR,
+      tur: "guven-esigi",
+      durum: "acik",
+      mesaj: `${room.ad}: cephe kümesi içinde tutarsız veri tespit edildi, ilgili nokta güven eşiği dışında kaldı.`,
+    });
+  });
+
+  offlineAlarmRooms.forEach((roomId, i) => {
+    const room = ROOMS.find((r) => r.id === roomId);
+    const reading = findLast(roomId);
+    if (!room) return;
+    if (reading) reading.online = false;
+    alarms.push({
+      id: `alarm-demo-offline-${roomId}`,
+      roomId,
+      ts: lastTs - i * HOUR,
+      tur: "sensor-offline",
+      durum: "acik",
+      mesaj: `${room.ad}: sensör haberleşme kaybı.`,
+    });
+  });
+
+  warmWarningRooms.forEach((roomId, i) => {
+    const reading = findLast(roomId);
+    if (!reading) return;
+    reading.sicaklik = 24.6 + (i % 3) * 0.6;
+    reading.hissedilenSicaklik = 24.9 + (i % 3) * 0.6;
+  });
+
+  coldWarningRooms.forEach((roomId, i) => {
+    const reading = findLast(roomId);
+    if (!reading) return;
+    reading.sicaklik = 17.6 - (i % 3) * 0.6;
+    reading.hissedilenSicaklik = 17.0 - (i % 3) * 0.6;
+  });
 }
 
 const generated = generateAll();
