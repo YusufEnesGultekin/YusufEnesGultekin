@@ -1513,7 +1513,21 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
       '<span>'+(L?'Linear margin':'Doğrusal marj')+': '+Math.round(m.marginLin)+' mm / '+(L?'target':'hedef')+' ≥'+state.reqLinear+' mm '+(passL?'✓':'✗')+'</span>'+
       '<span>'+(L?'Range':'Menzil')+': '+Math.round(rg.worstSlantMm)+' mm / '+(L?'effective':'etkin')+' '+Math.round(rg.effectiveRangeMm)+' mm '+(passR?'✓':'✗')+'</span>'+
     '</div>';
-    if(overall){ el.innerHTML = '<div class="headline">✓ '+(L?('Current settings ('+state.n+' antennas) meet your requirement.'):('Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.'))+'</div>'+rows; return; }
+    if(overall){
+      var headline = '<div class="headline">✓ '+(L?('Current settings ('+state.n+' antennas) meet your requirement.'):('Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.'))+'</div>';
+      var savingsHtml = '';
+      if(state.n>1){
+        var savingCandidates = findAlternatives(currentAntId, state.reqAngle, state.reqLinear, state.n);
+        var sameAlt = savingCandidates.filter(function(a){ return a.sameModel && a.n<state.n; })[0];
+        if(sameAlt){
+          savingsHtml = '<div class="alt-heading" style="margin-top:14px;">'+
+            (L?('You are over-provisioned: the same antenna model would already meet the requirement with fewer units.')
+               :('Gereğinden fazla anten kullanıyorsunuz: aynı anten modeliyle daha az sayıda anten de bu gereksinimi karşılar.'))+
+            '</div><div class="alt-grid">'+altCardHtml(sameAlt)+'</div>';
+        }
+      }
+      el.innerHTML = headline+rows+savingsHtml; return;
+    }
     var alts = findAlternatives(currentAntId, state.reqAngle, state.reqLinear, 24);
     var altHtml;
     if(alts.length){
