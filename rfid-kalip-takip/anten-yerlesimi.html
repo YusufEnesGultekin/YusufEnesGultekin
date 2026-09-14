@@ -1132,7 +1132,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       interference:'<path d="M4 4l16 16"/><path d="M8.5 8.5a6.5 6.5 0 0 1 7 1M5.8 11.2a10.5 10.5 0 0 1 4-2.7M12 17.5h.01"/>',
       coin:'<circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6"/><path d="M9 6.5v5M6.5 9h5" opacity=".0"/>',
       wallet:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14.5" r="1.2"/>',
-      crown:'<path d="M4 18h16M4 18l-1-9 5 4 4-7 4 7 5-4-1 9"/>'
+      crown:'<path d="M4 18h16M4 18l-1-9 5 4 4-7 4 7 5-4-1 9"/>',
+      machine:'<rect x="3" y="8" width="11" height="12" rx="1"/><path d="M6.5 8V5h4v3"/><path d="M14 12h2M14 17h2"/><circle cx="20" cy="14.5" r="1.3"/><path d="M17.4 11.8a4.2 4.2 0 0 1 0 5.4M15.4 9.8a7 7 0 0 1 0 9.4" opacity=".75"/>'
     }[name] || '';
     return '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
   }
@@ -1249,7 +1250,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
               gida:'genel', elektronik:'metal', cam:'genel', kargo:'genel', personel:'genel'}[product] || 'genel';
     return TAGS.filter(function(x){ return x.id===id; })[0];
   }
-  var TRACKING_ANTENNA_CLASS = { gate:'gate', kargo:'gate', konveyor:'shelf', raf:'shelf', personel:'shelf', mobil:null, arac:'arac' };
+  var TRACKING_ANTENNA_CLASS = { gate:'gate', kargo:'gate', konveyor:'shelf', raf:'shelf', personel:'shelf', mobil:null, arac:'arac', makina:'shelf' };
   function recommendAntennaId(tracking, budget){
     var cls = TRACKING_ANTENNA_CLASS[tracking];
     if(cls===undefined) cls='gate';
@@ -1282,6 +1283,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     tracking:[
       {v:'gate', i:'gate', def:true, l:{tr:'Geçit / kapı giriş-çıkış', en:'Gate / doorway entry-exit'}, d:{tr:'Portal takip', en:'Portal tracking'}},
       {v:'konveyor', i:'conveyor', l:{tr:'Konveyör bant üzeri', en:'On conveyor belt'}, d:{tr:'Hat içi takip', en:'In-line tracking'}},
+      {v:'makina', i:'machine', l:{tr:'Makineye monteli anten', en:'Machine-mounted antenna'}, d:{tr:'Her makineye bir anten', en:'One antenna per machine'}},
       {v:'raf', i:'rack', l:{tr:'Raf / depo envanteri', en:'Shelf / warehouse inventory'}, d:{tr:'Sabit anten', en:'Fixed antenna'}},
       {v:'mobil', i:'handheld', l:{tr:'El terminali ile sayım', en:'Handheld scanning'}, d:{tr:'Mobil okuma', en:'Mobile reading'}},
       {v:'arac', i:'forklift', l:{tr:'Araç / forklift üzeri', en:'Vehicle / forklift mounted'}, d:{tr:'Hareketli platform', en:'Moving platform'}},
@@ -1336,7 +1338,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         btn.classList.add('active');
         wiz[group] = btn.getAttribute('data-value');
         if(group==='antenna'){ document.getElementById('manualAntennaCtl').hidden = (wiz.antenna!=='manuel'); }
-        if(group==='tracking'){ applyTrackingVisibility(); }
+        if(group==='tracking'){
+          applyTrackingVisibility();
+          if(wiz.tracking==='makina' && inN && parseInt(inN.value,10)!==1){ inN.value = 1; }
+        }
         if(group==='region'){ renderRegionInfo(); }
         if(group==='product'){ applyMetalproxCompat(); }
       });
