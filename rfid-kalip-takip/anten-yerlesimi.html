@@ -63,16 +63,16 @@
   .lang-switch button.active{ background:var(--accent); color:var(--accent-ink); font-weight:600; }
   .lang-switch button:focus-visible{ outline:2px solid var(--blue); }
 
-  .wrap{ max-width:1180px; margin:0 auto; padding:30px 22px 70px; }
+  .wrap{ max-width:1180px; margin:0 auto; padding:22px 22px 56px; }
 
-  header{ margin-bottom:26px; }
+  header{ margin-bottom:18px; }
   .eyebrow{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); font-weight:600; }
   h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(30px,4.6vw,46px); margin:8px 0 10px; line-height:1.0; letter-spacing:.01em; text-wrap:balance; }
   .sub{ color:var(--dim); font-size:14.5px; max-width:74ch; }
 
   .step{
-    position:relative; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:24px 26px 26px;
-    margin-bottom:16px; scroll-margin-top:70px;
+    position:relative; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:18px 22px 20px;
+    margin-bottom:12px; scroll-margin-top:70px;
   }
   .step::before, .step::after, .card.tick::before, .card.tick::after{
     content:''; position:absolute; width:12px; height:12px; border:1.4px solid var(--blue); opacity:.55; pointer-events:none;
@@ -88,14 +88,33 @@
     background:var(--accent); width:30px; height:30px; border-radius:3px; display:flex; align-items:center; justify-content:center; flex:none;
   }
   .step h2{ font-family:var(--font-display); font-weight:700; font-size:21px; margin:0; letter-spacing:.01em; }
-  .step-note{ color:var(--dim); font-size:12.5px; margin:2px 0 18px 43px; max-width:70ch; }
-  @media (max-width:600px){ .step-note{ margin-left:0; } }
+  .step-head{ margin-bottom:14px; }
 
-  .opt-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:9px; }
-  .opt-grid.sub-grid{ margin-top:12px; }
+  .info-tip{
+    position:relative; display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px;
+    border-radius:50%; background:color-mix(in srgb, var(--dim) 26%, transparent); color:var(--dim);
+    font-family:var(--font-mono); font-size:10px; font-weight:700; cursor:help; flex:none; margin-left:8px;
+    vertical-align:middle; line-height:1; transition:background .12s, color .12s;
+  }
+  .info-tip:hover, .info-tip.open, .info-tip:focus-visible{ background:var(--accent); color:var(--accent-ink); outline:none; }
+  .info-tip .bubble{
+    display:none; position:absolute; z-index:40; left:50%; top:calc(100% + 9px); transform:translateX(-50%);
+    width:max(220px, min(300px, 60vw)); background:var(--paper); color:var(--ink); font-family:var(--font-body);
+    font-weight:400; font-size:12px; line-height:1.5; padding:10px 13px; border-radius:5px;
+    box-shadow:0 12px 30px -8px rgba(0,0,0,.45); text-align:left; white-space:normal; cursor:auto;
+  }
+  .info-tip:hover .bubble, .info-tip.open .bubble{ display:block; }
+  .info-tip .bubble::before{
+    content:''; position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+    border:6px solid transparent; border-bottom-color:var(--paper);
+  }
+  @media (max-width:600px){ .info-tip .bubble{ width:max(200px, min(260px, 80vw)); } }
+
+  .opt-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:7px; }
+  .opt-grid.sub-grid{ margin-top:10px; }
   .opt-card{
-    background:var(--panel-2); border:1px solid var(--line); border-radius:3px; padding:13px 13px;
-    display:flex; align-items:flex-start; gap:10px; cursor:pointer; text-align:left; color:var(--paper);
+    background:var(--panel-2); border:1px solid var(--line); border-radius:3px; padding:10px 11px;
+    display:flex; align-items:flex-start; gap:9px; cursor:pointer; text-align:left; color:var(--paper);
     font-family:var(--font-body); transition:border-color .12s, background .12s;
   }
   .opt-card svg.icon{ margin-top:1px; color:var(--dim); }
@@ -108,9 +127,9 @@
   .opt-card.active .lbl{ color:var(--accent-2); }
   .opt-card:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
 
-  .ctl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px 24px; }
-  .ctl-grid.stacked{ margin-top:18px; }
-  .ctl label{ display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+  .ctl-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px 18px; }
+  .ctl-grid.stacked{ margin-top:14px; }
+  .ctl label{ display:flex; align-items:center; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-bottom:7px; }
   .ctl .unit{ color:var(--dim); font-weight:400; }
   input[type=number]{
     width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--paper);
@@ -143,7 +162,7 @@
   .btn:focus-visible{ outline:2px solid var(--blue); outline-offset:1px; }
   .btn.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
 
-  .ruler{ display:flex; align-items:center; gap:10px; margin:34px 0 18px; color:var(--dim); }
+  .ruler{ display:flex; align-items:center; gap:10px; margin:22px 0 14px; color:var(--dim); }
   .ruler::before, .ruler::after{ content:''; flex:1; height:1px; background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px); }
   .ruler span{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; white-space:nowrap; }
 
@@ -188,14 +207,14 @@
     display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--line);
     border:1px solid var(--line); margin-top:16px; border-radius:4px; overflow:hidden;
   }
-  .stat{ background:var(--panel); padding:14px 16px; }
+  .stat{ background:var(--panel); padding:11px 13px; }
   .stat .l{ font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-bottom:6px; }
   .stat .v{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:20px; font-weight:600; }
   .stat .v.good{ color:var(--good); } .stat .v.bad{ color:var(--bad); }
 
   .calc-grid{ display:grid; grid-template-columns:1.05fr 1fr; gap:20px; align-items:start; margin-top:14px; }
   @media (max-width:820px){ .calc-grid{ grid-template-columns:1fr; } }
-  .card{ background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:16px 18px; position:relative; }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:13px 15px; position:relative; }
   .card h3{ font-family:var(--font-display); font-weight:700; font-size:16px; margin:0 0 4px; }
   .card .note{ color:var(--dim); font-size:12px; margin:0 0 12px; }
   svg.diagram{ width:100%; height:auto; display:block; }
@@ -232,6 +251,24 @@
   .bom-note{ color:var(--dim); font-size:11.5px; margin-top:12px; line-height:1.5; }
   .bom-actions{ margin-top:16px; display:flex; gap:10px; flex-wrap:wrap; }
 
+  .filter-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px; }
+  .filter-chip{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.03em; background:var(--panel-2); color:var(--dim);
+    border:1px solid var(--line); padding:6px 12px; border-radius:999px; cursor:pointer;
+  }
+  .filter-chip:hover{ border-color:var(--accent-2); color:var(--paper); }
+  .filter-chip.active{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; }
+  .survey-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; margin-top:4px; }
+  .survey-card{ background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:14px 15px; }
+  .survey-card .sc-cat{ font-family:var(--font-mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); margin-bottom:6px; }
+  .survey-card .sc-head{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .survey-card .sc-brand{ font-family:var(--font-display); font-weight:700; font-size:15px; }
+  .survey-card .sc-model{ font-family:var(--font-mono); font-size:11px; color:var(--accent-2); }
+  .survey-card .sc-spec{ font-size:11.5px; color:var(--dim); margin:5px 0 10px; }
+  .survey-card ul{ margin:0 0 8px; padding-left:16px; font-size:11.5px; line-height:1.5; }
+  .survey-card ul.pros li{ color:var(--good); } .survey-card ul.cons li{ color:var(--bad); }
+  .survey-empty{ color:var(--dim); font-size:12.5px; padding:14px 2px; }
+
   footer{ margin-top:38px; padding-top:16px; border-top:1px solid var(--line); color:var(--dim); font-size:12px; font-family:var(--font-mono); }
 </style>
 </head>
@@ -265,8 +302,7 @@
   </header>
 
   <section class="step" id="step-product">
-    <div class="step-head"><div class="step-num">1</div><h2 data-i18n="step1Title">Ürün / Malzeme Türü</h2></div>
-    <p class="step-note" data-i18n="step1Note">Takip edilecek ürünün yüzeyi/malzemesi — uygun etiket türü buna göre seçilir.</p>
+    <div class="step-head"><div class="step-num">1</div><h2 data-i18n="step1Title">Ürün / Malzeme Türü</h2><span class="info-tip-slot" data-tip-slot="step1Note"></span></div>
     <div class="opt-grid" id="gridProduct"></div>
     <div class="ctl-grid stacked">
       <div class="ctl">
@@ -277,28 +313,24 @@
   </section>
 
   <section class="step" id="step-tracking">
-    <div class="step-head"><div class="step-num">2</div><h2 data-i18n="step2Title">Takip Türü</h2></div>
-    <p class="step-note" data-i18n="step2Note">Bu, geometri/anten adımlarının gerekip gerekmediğini ve reader modelini belirler.</p>
+    <div class="step-head"><div class="step-num">2</div><h2 data-i18n="step2Title">Takip Türü</h2><span class="info-tip-slot" data-tip-slot="step2Note"></span></div>
     <div class="opt-grid" id="gridTracking"></div>
   </section>
 
   <section class="step" id="step-region">
-    <div class="step-head"><div class="step-num">3</div><h2 data-i18n="stepRegionTitle">Bölge / Frekans Bandı</h2></div>
-    <p class="step-note" data-i18n="stepRegionNote">UHF RFID frekans bandı ve izin verilen verici gücü bölgeye göre değişir; bu da tipik okuma menzilini doğrudan etkiler.</p>
+    <div class="step-head"><div class="step-num">3</div><h2 data-i18n="stepRegionTitle">Bölge / Frekans Bandı</h2><span class="info-tip-slot" data-tip-slot="stepRegionNote"></span></div>
     <div class="opt-grid" id="gridRegion"></div>
     <div class="formula" id="regionInfo" style="margin-top:14px;"></div>
   </section>
 
   <section class="step" id="step-env">
-    <div class="step-head"><div class="step-num">4</div><h2 data-i18n="step3Title">Ortam Koşulları</h2></div>
-    <p class="step-note" data-i18n="step3Note">Metal yakınlığı ve ortam, etiket/donanım koruma sınıfı önerisini etkiler.</p>
+    <div class="step-head"><div class="step-num">4</div><h2 data-i18n="step3Title">Ortam Koşulları</h2><span class="info-tip-slot" data-tip-slot="step3Note"></span></div>
     <div class="opt-grid" id="gridEnv"></div>
     <div class="opt-grid sub-grid" id="gridMetalprox"></div>
   </section>
 
   <section class="step" id="step-geom">
-    <div class="step-head"><div class="step-num">5</div><h2 data-i18n="step4Title">Geçit / Montaj Geometrisi</h2></div>
-    <p class="step-note" data-i18n="step4Note">Değerleri yazın — sonuçlar yalnızca "Sistemi Kur" butonuna bastığınızda güncellenir.</p>
+    <div class="step-head"><div class="step-num">5</div><h2 data-i18n="step4Title">Geçit / Montaj Geometrisi</h2><span class="info-tip-slot" data-tip-slot="step4Note"></span></div>
     <div class="ctl-grid">
       <div class="ctl">
         <label data-i18n="lblAntCount">Anten Sayısı</label>
@@ -326,50 +358,48 @@
   </section>
 
   <section class="step" id="step-antenna">
-    <div class="step-head"><div class="step-num">6</div><h2 data-i18n="step5Title">Anten Modeli</h2></div>
-    <p class="step-note" data-i18n="step5Note">"Otomatik" seçiliyken sistem, takip türünüze göre anten modelini kendisi önerir.</p>
+    <div class="step-head"><div class="step-num">6</div><h2 data-i18n="step5Title">Anten Modeli</h2><span class="info-tip-slot" data-tip-slot="step5Note"></span></div>
     <div class="opt-grid" id="gridAntenna"></div>
     <div id="manualAntennaCtl" class="ctl-grid stacked" hidden>
       <div class="ctl">
-        <label data-i18n="lblAzimuth">Azimuth Yarı Huzme Açısı (°)</label>
+        <label><span data-i18n="lblAzimuth">Azimuth Yarı Huzme Açısı (°)</span><span class="info-tip-slot" data-tip-slot="lblAzimuthTip"></span></label>
         <input type="number" id="inAz" min="1" max="89" step="0.5" value="30">
       </div>
       <div class="ctl">
-        <label data-i18n="lblElevation">Elevation Yarı Huzme Açısı (°)</label>
+        <label><span data-i18n="lblElevation">Elevation Yarı Huzme Açısı (°)</span><span class="info-tip-slot" data-tip-slot="lblElevationTip"></span></label>
         <input type="number" id="inEl" min="1" max="89" step="0.5" value="15">
       </div>
       <div class="ctl">
-        <label data-i18n="lblGain">Anten Kazancı (dBiC)</label>
+        <label><span data-i18n="lblGain">Anten Kazancı (dBiC)</span><span class="info-tip-slot" data-tip-slot="lblGainTip"></span></label>
         <input type="number" id="inGain" min="0" step="0.5" value="9">
       </div>
     </div>
     <div class="ctl-grid stacked">
       <div class="ctl">
-        <label data-i18n="lblTilt">Montaj Tilt Açısı (°, dikeyden)</label>
+        <label><span data-i18n="lblTilt">Montaj Tilt Açısı (°, dikeyden)</span><span class="info-tip-slot" data-tip-slot="lblTiltTip"></span></label>
         <input type="number" id="inTilt" min="0" max="89" step="1" value="0">
         <div class="quickrow"><button type="button" id="btnTilt22" data-i18n="presetTilt22">Klemsan referansı · 22°</button></div>
       </div>
       <div class="ctl">
-        <label data-i18n="lblRefRange">Referans Menzil, kataloğa göre (m, 9 dBiC'de)</label>
+        <label><span data-i18n="lblRefRange">Referans Menzil, kataloğa göre (m, 9 dBiC'de)</span><span class="info-tip-slot" data-tip-slot="lblRefRangeTip"></span></label>
         <input type="number" id="inRefRange" min="0.1" step="0.1" value="6.5">
       </div>
     </div>
   </section>
 
   <section class="step" id="step-req">
-    <div class="step-head"><div class="step-num">7</div><h2 data-i18n="step6Title">Performans Gereksinimi</h2></div>
-    <p class="step-note" data-i18n="step6Note">Kendi ihtiyacınızı girin — sistem karşılayıp karşılamadığını hesaplar.</p>
+    <div class="step-head"><div class="step-num">7</div><h2 data-i18n="step6Title">Performans Gereksinimi</h2><span class="info-tip-slot" data-tip-slot="step6Note"></span></div>
     <div class="ctl-grid" id="reqMarginCtls">
       <div class="ctl">
-        <label data-i18n="lblReqAngle">Minimum Açısal Marj İhtiyacı (°)</label>
+        <label><span data-i18n="lblReqAngle">Minimum Açısal Marj İhtiyacı (°)</span><span class="info-tip-slot" data-tip-slot="lblReqAngleTip"></span></label>
         <input type="number" id="inReqAngle" min="0" max="89" step="0.5" value="0">
       </div>
       <div class="ctl">
-        <label data-i18n="lblReqLinear">Minimum Doğrusal Marj İhtiyacı (mm)</label>
+        <label><span data-i18n="lblReqLinear">Minimum Doğrusal Marj İhtiyacı (mm)</span><span class="info-tip-slot" data-tip-slot="lblReqLinearTip"></span></label>
         <input type="number" id="inReqLinear" min="0" step="10" value="0">
       </div>
     </div>
-    <p class="step-note" data-i18n="budgetNote" style="margin:16px 0 10px;">Bütçe tercihiniz, "Otomatik" anten önerisini seçilen kategori içinde daha uygun fiyatlı veya daha üst segment bir modele yönlendirir.</p>
+    <div class="ruler" style="margin:18px 0 10px;"><span data-i18n="budgetLabel">Bütçe</span><span class="info-tip-slot" data-tip-slot="budgetNote"></span></div>
     <div class="opt-grid sub-grid" id="gridBudget"></div>
     <div class="ruler" style="margin:22px 0 14px;"><span data-i18n="reliabilityLabel">Güvenilirlik</span></div>
     <div class="opt-grid sub-grid" id="gridReliability"></div>
@@ -388,6 +418,7 @@
         <button data-tab="sim" class="active" data-i18n="tabSim">Simülasyon</button>
         <button data-tab="bom" data-i18n="tabBom">Ürün Listesi</button>
         <button data-tab="detay" data-i18n="tabDetay">Hesap Detayları</button>
+        <button data-tab="market" data-i18n="tabMarket">Piyasa Taraması</button>
       </div>
 
       <section class="panel active" id="panel-sim">
@@ -452,6 +483,12 @@
             </div>
           </div>
         </details>
+      </section>
+
+      <section class="panel" id="panel-market">
+        <p class="note" data-i18n="marketNote" style="margin:0 0 14px;">Seçtiğiniz ürün türü, geçit anteni ve okuyucu kategorisine göre karşılaştırmalı piyasa/marka taraması — artı/eksi yönleriyle.</p>
+        <div class="filter-row" id="marketFilters"></div>
+        <div id="marketBody"></div>
       </section>
     </div>
 
@@ -936,15 +973,85 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     unit:{tr:'adet', en:'pcs'},
     budgetNote:{tr:'Bütçe tercihiniz, "Otomatik" anten önerisini seçilen kategori içinde daha uygun fiyatlı veya daha üst segment bir modele yönlendirir.',
                 en:'Your budget preference steers the "Automatic" antenna recommendation toward a cheaper or higher-end model within the fitting category.'},
-    reliabilityLabel:{tr:'Güvenilirlik', en:'Reliability'}
+    reliabilityLabel:{tr:'Güvenilirlik', en:'Reliability'},
+    budgetLabel:{tr:'Bütçe', en:'Budget'},
+    tabMarket:{tr:'Piyasa Taraması', en:'Market Survey'},
+    marketNote:{tr:'Seçtiğiniz ürün türü, geçit anteni ve okuyucu kategorisine göre karşılaştırmalı piyasa/marka taraması — artı/eksi yönleriyle.',
+                en:'A comparative market/brand survey for your chosen product type, gate antenna and reader category — with pros and cons.'},
+    marketEmpty:{tr:'Bu kategori için henüz piyasa taraması verisi eklenmedi.', en:'No market survey data has been added for this category yet.'},
+    filterAll:{tr:'Tümü', en:'All'},
+    scCategoryTag:{tr:'Etiket', en:'Tag'}, scCategoryAntenna:{tr:'Anten', en:'Antenna'}, scCategoryReader:{tr:'Okuyucu', en:'Reader'},
+    prosLabel:{tr:'Artı yönleri', en:'Pros'}, consLabel:{tr:'Eksi yönleri', en:'Cons'},
+    lblAzimuthTip:{tr:'Antenin yatay düzlemdeki huzme (ışın) açısının yarısı — geçit genişliği boyunca kapsamayı belirler.',
+                   en:'Half the antenna beamwidth in the horizontal plane — determines coverage across the gate width.'},
+    lblElevationTip:{tr:'Antenin dikey düzlemdeki huzme açısının yarısı — okuma derinliğini (yakın/uzak sınır) belirler.',
+                     en:'Half the antenna beamwidth in the vertical plane — determines read depth (near/far edge).'},
+    lblGainTip:{tr:'Anten kazancı arttıkça etkin okuma menzili artar; referans menzil bu kazanca göre ölçeklenir.',
+                en:'Higher antenna gain increases the effective read range, scaled from the reference range.'},
+    lblTiltTip:{tr:'Antenin dikeyden ne kadar açıyla eğik monte edildiği — okuma konisinin yere göre konumunu kaydırır.',
+                en:'How far the antenna is tilted from vertical — shifts the read cone relative to the floor.'},
+    lblRefRangeTip:{tr:'Üreticinin datasheet\'inde belirtilen, referans kazançta (genelde 9 dBiC) ölçülen tipik okuma mesafesi.',
+                    en:'The manufacturer datasheet\'s typical read distance, measured at a reference gain (usually 9 dBiC).'},
+    lblReqAngleTip:{tr:'Kritik noktada en az bu kadar açısal marj isteniyorsa girin; 0 = özel bir marj gerekmiyor.',
+                    en:'Enter the minimum angular margin required at the critical point; 0 = no margin required.'},
+    lblReqLinearTip:{tr:'Kritik noktada en az bu kadar mm doğrusal marj isteniyorsa girin; 0 = özel bir marj gerekmiyor.',
+                     en:'Enter the minimum linear margin (mm) required at the critical point; 0 = no margin required.'},
+    statCritTip:{tr:'Geçit ortasından en yakın kritik noktaya (ör. komşu istasyon/geçit) olan yatay mesafe.',
+                 en:'Horizontal distance from the gate center to the nearest critical point (e.g. a neighboring station/gate).'},
+    statConeRTip:{tr:'Montaj yüksekliğinde, azimuth açısına göre antenin yerde kapladığı dairesel yarıçap.',
+                  en:'The circular radius the antenna covers on the floor at mounting height, from the azimuth angle.'},
+    statAngularTip:{tr:'Anten huzme açısı ile kritik noktaya olan açı arasındaki fark — pozitifse kritik nokta güvenle kapsanıyor demektir.',
+                    en:'The gap between the antenna beam angle and the angle to the critical point — positive means the point is safely covered.'},
+    statLinearTip:{tr:'Kapsama yarıçapı ile kritik nokta mesafesi arasındaki fark, mm cinsinden.',
+                   en:'The difference between the coverage radius and the critical-point distance, in mm.'},
+    statDepthTip:{tr:'Antenin elevation açısına göre, yakın sınır ile uzak sınır arasındaki okuma derinliği.',
+                  en:'The read depth between the near and far edge, from the antenna elevation angle.'},
+    statRangeStateTip:{tr:'Hesaplanan en kötü durum mesafesinin, antenin etkin menzili içinde kalıp kalmadığı.',
+                       en:'Whether the calculated worst-case distance stays within the antenna\'s effective range.'},
+    statNearTip:{tr:'Okuma konisinin etikete en yakın başladığı nokta.', en:'The point where the read cone begins, closest to the tag.'},
+    statFarTip:{tr:'Okuma konisinin etikete en uzakta bittiği nokta.', en:'The point where the read cone ends, farthest from the tag.'},
+    statEffRangeTip:{tr:'Referans menzilin, bölge güç limiti ve kazanç farkına göre ölçeklenmiş hali.',
+                     en:'The reference range scaled by the region\'s power limit and the gain difference.'},
+    statWorstTip:{tr:'Etikete olan en kötü durum (en uzak) diyagonal mesafe — etkin menzille karşılaştırılır.',
+                  en:'The worst-case (farthest) diagonal distance to the tag — compared against the effective range.'}
   };
   function t(k){ return (STR[k] && STR[k][lang]) || k; }
+  function infoTip(key){
+    return '<span class="info-tip" data-tip="'+key+'" tabindex="0" role="button" aria-label="?">'+
+      '<span aria-hidden="true">?</span><span class="bubble">'+t(key)+'</span></span>';
+  }
+  function renderInfoTips(){
+    document.querySelectorAll('.info-tip-slot').forEach(function(el){ el.innerHTML = infoTip(el.getAttribute('data-tip-slot')); });
+  }
   function applyI18n(){
     document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
     document.documentElement.lang = lang;
     document.title = lang==='en' ? 'RFID System Design & Simulation Tool' : 'RFID Sistem Tasarım ve Simülasyon Aracı';
+    renderInfoTips();
   }
+  function positionBubble(tip){
+    var bubble = tip.querySelector('.bubble'); if(!bubble) return;
+    bubble.style.transform = 'translateX(-50%)';
+    var rect = bubble.getBoundingClientRect(), pad = 10, shift = 0;
+    if(rect.left < pad) shift = pad - rect.left;
+    else if(rect.right > window.innerWidth - pad) shift = (window.innerWidth - pad) - rect.right;
+    if(shift) bubble.style.transform = 'translateX(calc(-50% + '+shift+'px))';
+  }
+  document.addEventListener('click', function(e){
+    var tip = e.target.closest('.info-tip');
+    document.querySelectorAll('.info-tip.open').forEach(function(o){ if(o!==tip) o.classList.remove('open'); });
+    if(tip){ tip.classList.toggle('open'); if(tip.classList.contains('open')) positionBubble(tip); }
+  });
+  document.addEventListener('keydown', function(e){
+    if((e.key==='Enter' || e.key===' ') && e.target.classList && e.target.classList.contains('info-tip')){
+      e.preventDefault(); e.target.classList.toggle('open'); if(e.target.classList.contains('open')) positionBubble(e.target);
+    }
+  });
+  document.addEventListener('mouseover', function(e){
+    var tip = e.target.closest && e.target.closest('.info-tip');
+    if(tip) positionBubble(tip);
+  });
 
   // ================= icon set =================
   function icon(name){
@@ -1370,29 +1477,29 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     '</div>';
   }
 
-  function statTile(label, value, cls){ return '<div class="stat"><div class="l">'+label+'</div><div class="v'+(cls?(' '+cls):'')+'">'+value+'</div></div>'; }
+  function statTile(label, value, cls, tipKey){ return '<div class="stat"><div class="l">'+label+(tipKey?infoTip(tipKey):'')+'</div><div class="v'+(cls?(' '+cls):'')+'">'+value+'</div></div>'; }
 
   function renderCalcStats(m){
     var ok = m.marginDeg>0;
     document.getElementById('calcStats').innerHTML =
-      statTile(t('statCrit'), Math.round(m.crit)+' mm') + statTile(t('statConeR'), Math.round(m.coneR)+' mm') +
-      statTile(t('statAngular'), (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', ok?'good':'bad') +
-      statTile(t('statLinear'), (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', ok?'good':'bad');
+      statTile(t('statCrit'), Math.round(m.crit)+' mm', null, 'statCritTip') + statTile(t('statConeR'), Math.round(m.coneR)+' mm', null, 'statConeRTip') +
+      statTile(t('statAngular'), (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', ok?'good':'bad', 'statAngularTip') +
+      statTile(t('statLinear'), (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', ok?'good':'bad', 'statLinearTip');
     document.getElementById('chipsCalc').innerHTML = '<span class="chip '+(ok?'good':'bad')+'">'+(m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°</span>';
   }
   function renderSimStats(m,d,rg){
     var okA=m.marginDeg>0, okR=rg.rangeOk;
     document.getElementById('simStats').innerHTML =
-      statTile(t('statAngular'), (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', okA?'good':'bad') +
-      statTile(t('statLinear'), (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', okA?'good':'bad') +
-      statTile(t('statDepth'), Math.round(d.depthLen)+' mm') +
-      statTile(t('statRangeState'), okR?t('rangeOk'):t('rangeBad'), okR?'good':'bad');
+      statTile(t('statAngular'), (m.marginDeg>=0?'+':'')+m.marginDeg.toFixed(1)+'°', okA?'good':'bad', 'statAngularTip') +
+      statTile(t('statLinear'), (m.marginLin>=0?'+':'')+Math.round(m.marginLin)+' mm', okA?'good':'bad', 'statLinearTip') +
+      statTile(t('statDepth'), Math.round(d.depthLen)+' mm', null, 'statDepthTip') +
+      statTile(t('statRangeState'), okR?t('rangeOk'):t('rangeBad'), okR?'good':'bad', 'statRangeStateTip');
   }
   function renderDepthStats(m,d,rg){
     document.getElementById('depthStats').innerHTML =
-      statTile(t('statDepth'), Math.round(d.depthLen)+' mm') + statTile(t('statNear'), Math.round(d.nearDist)+' mm') +
-      statTile(t('statFar'), Math.round(d.farDist)+' mm') + statTile(t('statEffRange'), rg.effectiveRangeM.toFixed(2)+' m') +
-      statTile(t('statWorst'), Math.round(rg.worstSlantMm)+' mm') + statTile(t('statRangeState'), rg.rangeOk?t('rangeOk'):t('rangeBad'), rg.rangeOk?'good':'bad');
+      statTile(t('statDepth'), Math.round(d.depthLen)+' mm', null, 'statDepthTip') + statTile(t('statNear'), Math.round(d.nearDist)+' mm', null, 'statNearTip') +
+      statTile(t('statFar'), Math.round(d.farDist)+' mm', null, 'statFarTip') + statTile(t('statEffRange'), rg.effectiveRangeM.toFixed(2)+' m', null, 'statEffRangeTip') +
+      statTile(t('statWorst'), Math.round(rg.worstSlantMm)+' mm', null, 'statWorstTip') + statTile(t('statRangeState'), rg.rangeOk?t('rangeOk'):t('rangeBad'), rg.rangeOk?'good':'bad', 'statRangeStateTip');
     document.getElementById('chipsDepth').innerHTML = '<span class="chip '+(rg.rangeOk?'good':'bad')+'">'+(rg.rangeOk?t('rangeOk'):t('rangeBad'))+'</span>';
   }
   function renderRequirement(m,d,rg,currentAntId){
@@ -1417,6 +1524,59 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
     }
     el.innerHTML = '<div class="headline">✗ '+(L?('Current settings ('+state.n+' antennas) do not meet the requirement.'):('Mevcut ayarlar ('+state.n+' anten) gereksinimi karşılamıyor.'))+'</div>'+rows+altHtml;
   }
+  // ================= market survey tab (filterable) =================
+  var marketFilterBrand = 'all';
+  function collectSurveyItems(dataset){
+    var items = [];
+    if(dataset.tag){
+      var ts = MARKET_SURVEY.tag[dataset.tag.id];
+      if(ts) ts.forEach(function(it){ items.push(Object.assign({cat:'tag'}, it)); });
+    }
+    if(dataset.results){
+      var as = MARKET_SURVEY.antenna.gate;
+      if(as) as.forEach(function(it){ items.push(Object.assign({cat:'antenna'}, it)); });
+    }
+    if(dataset.readerPick){
+      var isHandheld = dataset.readerPick.reader && dataset.readerPick.reader.id==='rh';
+      var rs = isHandheld ? MARKET_SURVEY.reader.handheld : MARKET_SURVEY.reader.fixed;
+      if(rs) rs.forEach(function(it){ items.push(Object.assign({cat:'reader'}, it)); });
+    }
+    return items;
+  }
+  function surveyCardHtml(it){
+    var catKey = it.cat==='tag' ? 'scCategoryTag' : (it.cat==='antenna' ? 'scCategoryAntenna' : 'scCategoryReader');
+    var pros = (it.pros && it.pros[lang]) || [], cons = (it.cons && it.cons[lang]) || [];
+    return '<div class="survey-card">'+
+      '<div class="sc-cat">'+t(catKey)+'</div>'+
+      '<div class="sc-head"><span class="sc-brand">'+it.brand+'</span><span class="sc-model">'+it.model+'</span></div>'+
+      '<div class="sc-spec">'+it.spec+'</div>'+
+      (pros.length ? '<div class="sc-cat">'+t('prosLabel')+'</div><ul class="pros">'+pros.map(function(p){ return '<li>'+p+'</li>'; }).join('')+'</ul>' : '')+
+      (cons.length ? '<div class="sc-cat">'+t('consLabel')+'</div><ul class="cons">'+cons.map(function(c){ return '<li>'+c+'</li>'; }).join('')+'</ul>' : '')+
+      '</div>';
+  }
+  function renderMarketTab(dataset){
+    if(!dataset) return;
+    var items = collectSurveyItems(dataset);
+    var filterEl = document.getElementById('marketFilters'), bodyEl = document.getElementById('marketBody');
+    if(!items.length){
+      filterEl.innerHTML = '';
+      bodyEl.innerHTML = '<div class="survey-empty">'+t('marketEmpty')+'</div>';
+      return;
+    }
+    var brands = items.map(function(i){ return i.brand; }).filter(function(b,i,arr){ return arr.indexOf(b)===i; });
+    if(marketFilterBrand!=='all' && brands.indexOf(marketFilterBrand)===-1) marketFilterBrand = 'all';
+    filterEl.innerHTML = ['all'].concat(brands).map(function(b){
+      return '<button type="button" class="filter-chip'+(marketFilterBrand===b?' active':'')+'" data-brand="'+b+'">'+(b==='all'?t('filterAll'):b)+'</button>';
+    }).join('');
+    var shown = marketFilterBrand==='all' ? items : items.filter(function(i){ return i.brand===marketFilterBrand; });
+    bodyEl.innerHTML = '<div class="survey-grid">'+shown.map(surveyCardHtml).join('')+'</div>';
+  }
+  document.getElementById('marketFilters').addEventListener('click', function(e){
+    var btn = e.target.closest('.filter-chip'); if(!btn) return;
+    marketFilterBrand = btn.getAttribute('data-brand');
+    if(lastResult) renderMarketTab(lastResult);
+  });
+
   function renderSimpleRequirement(tag, readerPick){
     var el = document.getElementById('reqResult');
     el.classList.remove('bad'); el.classList.add('ok');
@@ -2103,6 +2263,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var n,r,i,a,
         geom:{ n:state.n, gate:state.gate, ay:state.ay, h:state.h, az:state.az, el:state.el, tilt:state.tilt, gain:state.gain },
         tag:tag, antLabel:antLabel, readerPick:readerPick2
       });
+      renderMarketTab(lastResult);
     }
 
     var results = document.getElementById('results');
