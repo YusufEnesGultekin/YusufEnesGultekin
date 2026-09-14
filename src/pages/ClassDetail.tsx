@@ -30,6 +30,8 @@ export default function ClassDetail() {
   const sortedRooms = useMemo(() => sortRooms(rooms, "ad"), [rooms]);
   const [roomId, setRoomId] = useState(sortedRooms[0]?.id ?? "");
   const [page, setPage] = useState(0);
+  const [showAllProblems, setShowAllProblems] = useState(false);
+  const [showRawTable, setShowRawTable] = useState(false);
   const range = getDateRange();
 
   const room = rooms.find((r) => r.id === roomId);
@@ -99,7 +101,7 @@ export default function ClassDetail() {
             Değerleri Sıkıntılı Olan Sınıflar ({problemRooms.length})
           </div>
           <div className="toolbar" style={{ marginBottom: 0 }}>
-            {problemRooms.map((r) => {
+            {(showAllProblems ? problemRooms : problemRooms.slice(0, 6)).map((r) => {
               const status = statusByRoomId.get(r.id) ?? "normal";
               return (
                 <button key={r.id} className={`chip ${roomId === r.id ? "active" : ""}`} onClick={() => selectRoom(r.id)}>
@@ -107,6 +109,11 @@ export default function ClassDetail() {
                 </button>
               );
             })}
+            {problemRooms.length > 6 && (
+              <button className="chip" onClick={() => setShowAllProblems((v) => !v)}>
+                {showAllProblems ? "Daha Az Göster" : `+${problemRooms.length - 6} daha`}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -215,48 +222,59 @@ export default function ClassDetail() {
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
-        <div className="section-title">
-          Tüm Ölçüm Kayıtları ({rawRows.length} kayıt — seçilen tarih aralığı)
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Zaman</th>
-              <th>Sıcaklık</th>
-              <th>Nem</th>
-              <th>Hissedilen</th>
-              <th>Hava Kalitesi</th>
-              <th>Bağlantı</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pagedRows.map((r) => (
-              <tr key={r.ts}>
-                <td>{new Date(r.ts).toLocaleString("tr-TR")}</td>
-                <td>{r.sicaklik.toFixed(2)} °C</td>
-                <td>%{r.nem.toFixed(1)}</td>
-                <td>{r.hissedilenSicaklik.toFixed(2)} °C</td>
-                <td>{r.havaKaliteIndeksi ?? "-"}</td>
-                <td>{r.online ? "Online" : "Offline"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="toolbar" style={{ justifyContent: "center", marginTop: 12, marginBottom: 0 }}>
-          <button className="btn secondary" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
-            ← Önceki
-          </button>
-          <span style={{ alignSelf: "center", fontSize: 12.5, color: "var(--text-dim)" }}>
-            Sayfa {page + 1} / {pageCount}
-          </span>
-          <button
-            className="btn secondary"
-            disabled={page >= pageCount - 1}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Sonraki →
+        <div
+          className="section-title"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}
+          onClick={() => setShowRawTable((v) => !v)}
+        >
+          <span>Tüm Ölçüm Kayıtları ({rawRows.length} kayıt — seçilen tarih aralığı)</span>
+          <button className="btn secondary" onClick={() => setShowRawTable((v) => !v)}>
+            {showRawTable ? "Gizle ▲" : "Göster ▼"}
           </button>
         </div>
+        {showRawTable && (
+          <>
+            <table>
+              <thead>
+                <tr>
+                  <th>Zaman</th>
+                  <th>Sıcaklık</th>
+                  <th>Nem</th>
+                  <th>Hissedilen</th>
+                  <th>Hava Kalitesi</th>
+                  <th>Bağlantı</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pagedRows.map((r) => (
+                  <tr key={r.ts}>
+                    <td>{new Date(r.ts).toLocaleString("tr-TR")}</td>
+                    <td>{r.sicaklik.toFixed(2)} °C</td>
+                    <td>%{r.nem.toFixed(1)}</td>
+                    <td>{r.hissedilenSicaklik.toFixed(2)} °C</td>
+                    <td>{r.havaKaliteIndeksi ?? "-"}</td>
+                    <td>{r.online ? "Online" : "Offline"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="toolbar" style={{ justifyContent: "center", marginTop: 12, marginBottom: 0 }}>
+              <button className="btn secondary" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+                ← Önceki
+              </button>
+              <span style={{ alignSelf: "center", fontSize: 12.5, color: "var(--text-dim)" }}>
+                Sayfa {page + 1} / {pageCount}
+              </span>
+              <button
+                className="btn secondary"
+                disabled={page >= pageCount - 1}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Sonraki →
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

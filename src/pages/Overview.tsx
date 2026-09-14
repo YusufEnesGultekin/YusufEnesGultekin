@@ -42,6 +42,8 @@ export default function Overview() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [search, setSearch] = useState("");
   const [groupByFloor, setGroupByFloor] = useState(true);
+  const [onlyProblems, setOnlyProblems] = useState(false);
+  const [showDetailTable, setShowDetailTable] = useState(false);
 
   const roomStatuses = useMemo(
     () => rooms.map((r) => ({ room: r, status: getRoomStatus(r, readings, alarms, thresholds) })),
@@ -72,21 +74,24 @@ export default function Overview() {
     },
   ];
 
-  const filteredRooms = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase("tr");
-    const base = term
-      ? rooms.filter((r) => r.ad.toLocaleLowerCase("tr").includes(term))
-      : rooms;
-    return sortRooms(base, sortKey, sortDir, readings);
-  }, [rooms, search, sortKey, sortDir, readings]);
-
-  const floors = [...new Set(sortRooms(rooms, "kat").map((r) => r.kat))];
-
   const statusByRoomId = useMemo(() => {
     const map = new Map<string, string>();
     roomStatuses.forEach((r) => map.set(r.room.id, r.status));
     return map;
   }, [roomStatuses]);
+
+  const filteredRooms = useMemo(() => {
+    const term = search.trim().toLocaleLowerCase("tr");
+    let base = term
+      ? rooms.filter((r) => r.ad.toLocaleLowerCase("tr").includes(term))
+      : rooms;
+    if (onlyProblems) {
+      base = base.filter((r) => (statusByRoomId.get(r.id) ?? "normal") !== "normal");
+    }
+    return sortRooms(base, sortKey, sortDir, readings);
+  }, [rooms, search, sortKey, sortDir, readings, onlyProblems, statusByRoomId]);
+
+  const floors = [...new Set(sortRooms(rooms, "kat").map((r) => r.kat))];
 
   return (
     <div>
@@ -111,18 +116,24 @@ export default function Overview() {
             <button className={`chip ${!groupByFloor ? "active" : ""}`} onClick={() => setGroupByFloor(false)}>
               Tek Liste
             </button>
+            <button className={`chip ${onlyProblems ? "active" : ""}`} onClick={() => setOnlyProblems((v) => !v)}>
+              Sadece Sorunlu ({rooms.length - roomStatuses.filter((r) => r.status === "normal").length})
+            </button>
           </div>
           {groupByFloor ? (
-            floors.map((floor) => (
+            floors.map((floor) => {
+              const floorRooms = sortRooms(
+                filteredRooms.filter((r) => r.kat === floor),
+                sortKey,
+                sortDir,
+                readings
+              );
+              if (floorRooms.length === 0) return null;
+              return (
               <div key={floor} style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>{floor}</div>
                 <div className="floor-plan-grid">
-                  {sortRooms(
-                    roomStatuses.filter((r) => r.room.kat === floor).map((r) => r.room),
-                    sortKey,
-                    sortDir,
-                    readings
-                  ).map((room) => {
+                  {floorRooms.map((room) => {
                     const status = statusByRoomId.get(room.id) ?? "normal";
                     const last = getLastReading(readings, room.id);
                     return (
@@ -141,7 +152,8 @@ export default function Overview() {
                   })}
                 </div>
               </div>
-            ))
+              );
+            })
           ) : (
             <div className="floor-plan-grid">
               {filteredRooms.map((room) => {
@@ -200,7 +212,18 @@ export default function Overview() {
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
-        <div className="section-title">Tüm Sınıflar — Detaylı Liste ({filteredRooms.length} nokta)</div>
+        <div
+          className="section-title"
+          style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}
+          onClick={() => setShowDetailTable((v) => !v)}
+        >
+          <span>Tüm Sınıflar — Detaylı Liste ({filteredRooms.length} nokta)</span>
+          <button className="btn secondary" onClick={() => setShowDetailTable((v) => !v)}>
+            {showDetailTable ? "Gizle ▲" : "Göster ▼"}
+          </button>
+        </div>
+        {showDetailTable && (
+          <>
         <div className="toolbar">
           <input
             className="input"
@@ -269,6 +292,8 @@ export default function Overview() {
             </tbody>
           </table>
         </div>
+          </>
+        )}
       </div>
     </div>
   );
