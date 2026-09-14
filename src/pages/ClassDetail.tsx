@@ -13,7 +13,7 @@ import { useDataStore } from "../store/dataStore";
 import DateRangePicker from "../components/DateRangePicker";
 import { filterReadings, computeRoomKpi } from "../lib/calculations";
 import { sortRooms } from "../lib/sort";
-import { getRoomStatus } from "../lib/roomStatus";
+import { getLastReading, getRoomStatus } from "../lib/roomStatus";
 import KpiCard from "../components/KpiCard";
 
 const STATUS_DOT: Record<string, string> = { normal: "🟢", uyari: "🟡", alarm: "🔴" };
@@ -48,6 +48,14 @@ export default function ClassDetail() {
     [roomStatuses]
   );
   const currentStatus = statusByRoomId.get(roomId) ?? "normal";
+  const lastReading = useMemo(() => getLastReading(readings, roomId), [readings, roomId]);
+  const roomAlarms = useMemo(
+    () =>
+      alarms
+        .filter((a) => a.roomId === roomId && a.durum === "acik")
+        .sort((a, b) => b.ts - a.ts),
+    [alarms, roomId]
+  );
 
   const chartData = useMemo(() => {
     const filtered = filterReadings(readings, range).filter((r) => r.roomId === roomId);
@@ -132,6 +140,54 @@ export default function ClassDetail() {
               {STATUS_DOT[currentStatus]} {STATUS_LABEL[currentStatus]}
             </span>
           </div>
+
+          {currentStatus !== "normal" && lastReading && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderRadius: 8,
+                background: "rgba(239, 68, 68, 0.08)",
+                border: "1px solid var(--danger)",
+              }}
+            >
+              <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+                OLMASI GEREKEN (HEDEF ARALIK)
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+                {thresholds.hedefMinSicaklik}°C – {thresholds.hedefMaxSicaklik}°C
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+                ÖLÇÜLEN (SON OKUMA — {new Date(lastReading.ts).toLocaleString("tr-TR")})
+              </div>
+              <div style={{ fontSize: 26, fontWeight: 700, color: "var(--danger)" }}>
+                {lastReading.online
+                  ? `${lastReading.hissedilenSicaklik.toFixed(1)}°C`
+                  : "Sensör Offline — veri gelmiyor"}
+                {lastReading.online && (
+                  <span style={{ fontSize: 14, fontWeight: 600, marginLeft: 8, color: "var(--text-dim)" }}>
+                    (hedeften{" "}
+                    {lastReading.hissedilenSicaklik > thresholds.hedefMaxSicaklik
+                      ? `+${(lastReading.hissedilenSicaklik - thresholds.hedefMaxSicaklik).toFixed(1)}°C fazla`
+                      : `${(lastReading.hissedilenSicaklik - thresholds.hedefMinSicaklik).toFixed(1)}°C eksik`}
+                    )
+                  </span>
+                )}
+              </div>
+              {roomAlarms.length > 0 && (
+                <div style={{ marginTop: 10, fontSize: 13 }}>
+                  {roomAlarms.map((a) => (
+                    <div key={a.id} style={{ marginBottom: 4 }}>
+                      <span className="badge acik" style={{ marginRight: 6 }}>
+                        {a.tur}
+                      </span>
+                      {a.mesaj}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
