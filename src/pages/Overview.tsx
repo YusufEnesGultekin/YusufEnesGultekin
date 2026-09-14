@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Cell,
   Pie,
@@ -12,6 +12,7 @@ import { useDataStore } from "../store/dataStore";
 import KpiCard from "../components/KpiCard";
 import { getLastReading, getRoomStatus } from "../lib/roomStatus";
 import { average, round } from "../lib/calculations";
+import { sortRooms, type RoomSortKey } from "../lib/sort";
 
 const STATUS_COLOR: Record<string, string> = {
   normal: "#22c55e",
@@ -19,9 +20,28 @@ const STATUS_COLOR: Record<string, string> = {
   alarm: "#ef4444",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  normal: "Normal",
+  uyari: "Uyarı",
+  alarm: "Alarm",
+};
+
+const SORT_OPTIONS: { key: RoomSortKey; label: string }[] = [
+  { key: "ad", label: "İsme Göre (A-Z)" },
+  { key: "kat", label: "Kata Göre" },
+  { key: "cephe", label: "Cepheye Göre" },
+  { key: "sicaklik", label: "Sıcaklığa Göre" },
+  { key: "hissedilen", label: "Hissedilen Sıcaklığa Göre" },
+  { key: "nem", label: "Neme Göre" },
+];
+
 export default function Overview() {
   const { rooms, readings, alarms, thresholds, systemMode, emergencyStop } =
     useDataStore();
+  const [sortKey, setSortKey] = useState<RoomSortKey>("ad");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [search, setSearch] = useState("");
+  const [groupByFloor, setGroupByFloor] = useState(true);
 
   const roomStatuses = useMemo(
     () => rooms.map((r) => ({ room: r, status: getRoomStatus(r, readings, alarms, thresholds) })),
@@ -52,7 +72,21 @@ export default function Overview() {
     },
   ];
 
-  const floors = [...new Set(rooms.map((r) => r.kat))];
+  const filteredRooms = useMemo(() => {
+    const term = search.trim().toLocaleLowerCase("tr");
+    const base = term
+      ? rooms.filter((r) => r.ad.toLocaleLowerCase("tr").includes(term))
+      : rooms;
+    return sortRooms(base, sortKey, sortDir, readings);
+  }, [rooms, search, sortKey, sortDir, readings]);
+
+  const floors = [...new Set(sortRooms(rooms, "kat").map((r) => r.kat))];
+
+  const statusByRoomId = useMemo(() => {
+    const map = new Map<string, string>();
+    roomStatuses.forEach((r) => map.set(r.room.id, r.status));
+    return map;
+  }, [roomStatuses]);
 
   return (
     <div>
@@ -70,13 +104,26 @@ export default function Overview() {
       <div className="grid-2">
         <div className="card">
           <div className="section-title">Bina Kat/Sınıf Planı — Canlı Durum</div>
-          {floors.map((floor) => (
-            <div key={floor} style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>{floor}</div>
-              <div className="floor-plan-grid">
-                {roomStatuses
-                  .filter((r) => r.room.kat === floor)
-                  .map(({ room, status }) => {
+          <div className="toolbar" style={{ marginBottom: 12 }}>
+            <button className={`chip ${groupByFloor ? "active" : ""}`} onClick={() => setGroupByFloor(true)}>
+              Kata Göre Grupla
+            </button>
+            <button className={`chip ${!groupByFloor ? "active" : ""}`} onClick={() => setGroupByFloor(false)}>
+              Tek Liste
+            </button>
+          </div>
+          {groupByFloor ? (
+            floors.map((floor) => (
+              <div key={floor} style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>{floor}</div>
+                <div className="floor-plan-grid">
+                  {sortRooms(
+                    roomStatuses.filter((r) => r.room.kat === floor).map((r) => r.room),
+                    sortKey,
+                    sortDir,
+                    readings
+                  ).map((room) => {
+                    const status = statusByRoomId.get(room.id) ?? "normal";
                     const last = getLastReading(readings, room.id);
                     return (
                       <div key={room.id} className={`room-tile status-${status}`}>
@@ -92,9 +139,29 @@ export default function Overview() {
                       </div>
                     );
                   })}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="floor-plan-grid">
+              {filteredRooms.map((room) => {
+                const status = statusByRoomId.get(room.id) ?? "normal";
+                const last = getLastReading(readings, room.id);
+                return (
+                  <div key={room.id} className={`room-tile status-${status}`}>
+                    <div className="room-name">{room.ad}</div>
+                    <div className="room-meta">
+                      {room.kat} · {room.cephe.toUpperCase()}
+                    </div>
+                    <div className="room-temp">
+                      {last ? `${last.hissedilenSicaklik.toFixed(1)}°C` : "-"}
+                    </div>
+                    <div className="room-meta">{last?.online ? "Online" : "Offline"}</div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
+          )}
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -129,6 +196,78 @@ export default function Overview() {
               {currentAvgFelt} °C
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="section-title">Tüm Sınıflar — Detaylı Liste ({filteredRooms.length} nokta)</div>
+        <div className="toolbar">
+          <input
+            className="input"
+            placeholder="Sınıf ara..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ minWidth: 200 }}
+          />
+          <select className="input" value={sortKey} onChange={(e) => setSortKey(e.target.value as RoomSortKey)}>
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.key} value={o.key}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <button className="chip" onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}>
+            {sortDir === "asc" ? "Artan ↑" : "Azalan ↓"}
+          </button>
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Sınıf</th>
+                <th>Kat</th>
+                <th>Cephe</th>
+                <th>Sensör</th>
+                <th>Slave ID</th>
+                <th>Sıcaklık</th>
+                <th>Nem</th>
+                <th>Hissedilen</th>
+                <th>Hava Kalitesi</th>
+                <th>Durum</th>
+                <th>Bağlantı</th>
+                <th>Son Güncelleme</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRooms.map((room) => {
+                const last = getLastReading(readings, room.id);
+                const status = statusByRoomId.get(room.id) ?? "normal";
+                return (
+                  <tr key={room.id}>
+                    <td>
+                      {room.ad}
+                      {room.kritikNokta && <span className="badge acik" style={{ marginLeft: 6 }}>KRİTİK</span>}
+                    </td>
+                    <td>{room.kat}</td>
+                    <td>{room.cephe.toUpperCase()}</td>
+                    <td>{room.sensorTipi}</td>
+                    <td>{room.modbusSlaveId}</td>
+                    <td>{last ? `${last.sicaklik.toFixed(1)} °C` : "-"}</td>
+                    <td>{last ? `%${last.nem.toFixed(0)}` : "-"}</td>
+                    <td>{last ? `${last.hissedilenSicaklik.toFixed(1)} °C` : "-"}</td>
+                    <td>{last?.havaKaliteIndeksi ?? "-"}</td>
+                    <td>
+                      <span className={`pill ${status === "normal" ? "ok" : status === "uyari" ? "warn" : "danger"}`}>
+                        {STATUS_LABEL[status]}
+                      </span>
+                    </td>
+                    <td>{last?.online ? "Online" : "Offline"}</td>
+                    <td>{last ? new Date(last.ts).toLocaleString("tr-TR") : "-"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

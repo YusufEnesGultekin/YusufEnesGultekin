@@ -65,6 +65,8 @@ interface DataState {
   closeAlarm: (id: string) => void;
   updateThresholds: (t: Partial<Thresholds>) => void;
   updateRoom: (id: string, patch: Partial<Room>) => void;
+  addRoom: (room: Omit<Room, "id" | "buildingId" | "modbusSlaveId">) => void;
+  removeRoom: (id: string) => void;
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -217,5 +219,33 @@ export const useDataStore = create<DataState>((set, get) => ({
   updateRoom: (id, patch) =>
     set((s) => ({
       rooms: s.rooms.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    })),
+
+  addRoom: (room) =>
+    set((s) => {
+      const nextIdNum = s.rooms.length + 1 + Math.floor(Math.random() * 1000);
+      const nextSlaveId = Math.max(0, ...s.rooms.map((r) => r.modbusSlaveId)) + 1;
+      const newRoom: Room = {
+        ...room,
+        id: `oda-yeni-${nextIdNum}`,
+        buildingId: s.rooms[0]?.buildingId ?? "bina-1",
+        modbusSlaveId: nextSlaveId,
+      };
+      const ts = Date.now();
+      const seedReading: Reading = {
+        roomId: newRoom.id,
+        ts,
+        sicaklik: 21,
+        nem: 45,
+        hissedilenSicaklik: computeHissedilen(21, 45),
+        havaKaliteIndeksi: newRoom.sensorTipi === "SAS-IAQ" ? 70 : undefined,
+        online: true,
+      };
+      return { rooms: [...s.rooms, newRoom], readings: [...s.readings, seedReading] };
+    }),
+
+  removeRoom: (id) =>
+    set((s) => ({
+      rooms: s.rooms.filter((r) => r.id !== id),
     })),
 }));

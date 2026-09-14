@@ -10,11 +10,16 @@ import {
 } from "recharts";
 import { useDataStore } from "../store/dataStore";
 import DateRangePicker from "../components/DateRangePicker";
-import { filterBoiler } from "../lib/calculations";
+import { filterBoiler, predictRoomTemp } from "../lib/calculations";
+import { computeHissedilen } from "../lib/mockData";
+import { getLastReading } from "../lib/roomStatus";
+import { sortRooms } from "../lib/sort";
 import KpiCard from "../components/KpiCard";
 
 export default function BoilerControl() {
   const {
+    rooms,
+    readings,
     boilerHistory,
     overrides,
     getDateRange,
@@ -23,15 +28,15 @@ export default function BoilerControl() {
     emergencyStop,
     toggleEmergencyStop,
     systemMode,
+    thresholds,
   } = useDataStore();
   const range = getDateRange();
-  const [setpointInput, setSetpointInput] = useState("55");
+  const latest = [...boilerHistory].sort((a, b) => b.ts - a.ts)[0];
+  const [setpointInput, setSetpointInput] = useState(String(latest?.setpoint ?? 55));
   const [note, setNote] = useState("");
   const [confirmingStop, setConfirmingStop] = useState(false);
 
   const canOverride = role === "yonetici";
-
-  const latest = [...boilerHistory].sort((a, b) => b.ts - a.ts)[0];
 
   const chartData = useMemo(() => {
     const filtered = filterBoiler(boilerHistory, range).sort((a, b) => a.ts - b.ts);
@@ -40,6 +45,39 @@ export default function BoilerControl() {
       setpoint: b.setpoint,
     }));
   }, [boilerHistory, range]);
+
+  const trialSetpoint = Number(setpointInput);
+  const currentSetpoint = latest?.setpoint ?? 55;
+
+  const prediction = useMemo(() => {
+    if (Number.isNaN(trialSetpoint)) return [];
+    return sortRooms(rooms, "ad").map((room) => {
+      const last = getLastReading(readings, room.id);
+      const guncelSicaklik = last?.sicaklik ?? 21;
+      const guncelHissedilen = last?.hissedilenSicaklik ?? 21;
+      const ongorulenSicaklik = predictRoomTemp(guncelSicaklik, currentSetpoint, trialSetpoint);
+      const ongorulenHissedilen = Number(
+        computeHissedilen(ongorulenSicaklik, last?.nem ?? 45).toFixed(2)
+      );
+      const hedefIcinde =
+        ongorulenHissedilen >= thresholds.hedefMinSicaklik &&
+        ongorulenHissedilen <= thresholds.hedefMaxSicaklik;
+      return {
+        room,
+        guncelHissedilen,
+        ongorulenSicaklik,
+        ongorulenHissedilen,
+        fark: Number((ongorulenHissedilen - guncelHissedilen).toFixed(2)),
+        hedefIcinde,
+      };
+    });
+  }, [rooms, readings, trialSetpoint, currentSetpoint, thresholds]);
+
+  const ortOngorulenHissedilen = prediction.length
+    ? Number(
+        (prediction.reduce((s, p) => s + p.ongorulenHissedilen, 0) / prediction.length).toFixed(2)
+      )
+    : 0;
 
   function handleOverride() {
     const val = Number(setpointInput);
@@ -79,20 +117,33 @@ export default function BoilerControl() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="card">
-            <div className="section-title">Manuel Override Paneli</div>
+            <div className="section-title">Manuel Override / Öngörü Simülasyonu</div>
+            <p style={{ fontSize: 12.5, color: "var(--text-dim)", marginTop: -6 }}>
+              Aşağıya deneyeceğiniz setpoint değerini girin — sağdaki/alttaki tabloda tüm
+              sınıfların bu değerde kaç dereceye geleceğinin öngörüsünü canlı görürsünüz.
+              Sonucu beğenirseniz "Override Uygula" ile gerçekten devreye alabilirsiniz.
+            </p>
             {!canOverride && (
               <p style={{ color: "var(--text-dim)", fontSize: 13 }}>
-                Bu işlem için Yönetici rolü gereklidir.
+                Override uygulamak için Yönetici rolü gereklidir; öngörüyü herkes görebilir.
               </p>
             )}
             <div className="form-row">
-              <label>Manuel Setpoint (°C)</label>
+              <label>Denenecek / Manuel Setpoint (°C)</label>
+              <input
+                className="input"
+                type="range"
+                min={35}
+                max={70}
+                step={0.5}
+                value={Number.isNaN(trialSetpoint) ? currentSetpoint : trialSetpoint}
+                onChange={(e) => setSetpointInput(e.target.value)}
+              />
               <input
                 className="input"
                 type="number"
                 value={setpointInput}
                 onChange={(e) => setSetpointInput(e.target.value)}
-                disabled={!canOverride || emergencyStop}
               />
             </div>
             <div className="form-row">
@@ -107,6 +158,16 @@ export default function BoilerControl() {
             <button className="btn" disabled={!canOverride || emergencyStop} onClick={handleOverride}>
               Override Uygula
             </button>
+          </div>
+
+          <div className="card">
+            <div className="section-title">Öngörülen Ortalama Hissedilen Sıcaklık</div>
+            <div style={{ fontSize: 30, fontWeight: 700 }}>{ortOngorulenHissedilen} °C</div>
+            <div style={{ fontSize: 12.5, color: "var(--text-dim)" }}>
+              Hedef aralık: {thresholds.hedefMinSicaklik}-{thresholds.hedefMaxSicaklik} °C ·
+              Setpoint {currentSetpoint}°C → {Number.isNaN(trialSetpoint) ? currentSetpoint : trialSetpoint}°C
+              olarak denendi
+            </div>
           </div>
 
           <div className="card">
@@ -141,6 +202,48 @@ export default function BoilerControl() {
               </div>
             )}
           </div>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="section-title">
+          Setpoint {Number.isNaN(trialSetpoint) ? currentSetpoint : trialSetpoint}°C Olursa —
+          Sınıf Bazlı Öngörü
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Sınıf</th>
+                <th>Cephe</th>
+                <th>Güncel Hissedilen</th>
+                <th>Öngörülen Sıcaklık</th>
+                <th>Öngörülen Hissedilen</th>
+                <th>Fark</th>
+                <th>Hedef Aralıkta mı</th>
+              </tr>
+            </thead>
+            <tbody>
+              {prediction.map((p) => (
+                <tr key={p.room.id}>
+                  <td>{p.room.ad}</td>
+                  <td>{p.room.cephe.toUpperCase()}</td>
+                  <td>{p.guncelHissedilen.toFixed(1)} °C</td>
+                  <td>{p.ongorulenSicaklik.toFixed(1)} °C</td>
+                  <td style={{ fontWeight: 700 }}>{p.ongorulenHissedilen.toFixed(1)} °C</td>
+                  <td style={{ color: p.fark > 0 ? "#ef4444" : p.fark < 0 ? "#3b82f6" : "var(--text-dim)" }}>
+                    {p.fark > 0 ? "+" : ""}
+                    {p.fark} °C
+                  </td>
+                  <td>
+                    <span className={`pill ${p.hedefIcinde ? "ok" : "warn"}`}>
+                      {p.hedefIcinde ? "Evet" : "Hayır"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 

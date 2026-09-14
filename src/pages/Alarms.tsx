@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useDataStore } from "../store/dataStore";
+import { sortRooms } from "../lib/sort";
 
 const TUR_LABEL: Record<string, string> = {
   "ani-dusus": "Ani Düşüş",
@@ -15,6 +16,7 @@ export default function Alarms() {
   const [durumFilter, setDurumFilter] = useState("hepsi");
 
   const canAct = role === "yonetici" || role === "bakim";
+  const sortedRooms = useMemo(() => sortRooms(rooms, "ad"), [rooms]);
 
   const filtered = useMemo(() => {
     return [...alarms]
@@ -30,7 +32,7 @@ export default function Alarms() {
       <div className="toolbar">
         <select className="input" value={roomFilter} onChange={(e) => setRoomFilter(e.target.value)}>
           <option value="hepsi">Tüm Sınıflar</option>
-          {rooms.map((r) => (
+          {sortedRooms.map((r) => (
             <option key={r.id} value={r.id}>
               {r.ad}
             </option>

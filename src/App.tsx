@@ -6,6 +6,7 @@ import BoilerControl from "./pages/BoilerControl";
 import Alarms from "./pages/Alarms";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Simulation from "./pages/Simulation";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="kombi" element={<BoilerControl />} />
           <Route path="alarmlar" element={<Alarms />} />
           <Route path="raporlar" element={<Reports />} />
+          <Route path="simulasyon" element={<Simulation />} />
           <Route path="ayarlar" element={<Settings />} />
         </Route>
       </Routes>

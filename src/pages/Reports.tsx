@@ -19,7 +19,8 @@ import DateRangePicker from "../components/DateRangePicker";
 import KpiCard from "../components/KpiCard";
 import { buildReport } from "../lib/reportEngine";
 import { exportReportToExcel } from "../lib/excelExport";
-import { exportReportToPdf } from "../lib/pdfExport";
+import { exportReportToWord } from "../lib/wordExport";
+import { sortRooms } from "../lib/sort";
 
 const TABS = [
   { key: "genel", label: "Genel Rapor" },
@@ -37,19 +38,42 @@ export default function Reports() {
     useDataStore();
   const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("genel");
   const range = getDateRange();
+  const sortedRooms = useMemo(() => sortRooms(rooms, "ad"), [rooms]);
+  const [selectedRoomIds, setSelectedRoomIds] = useState<Set<string> | null>(null);
+  const [roomSearch, setRoomSearch] = useState("");
+  const [exporting, setExporting] = useState(false);
+
+  const activeSelection = selectedRoomIds ?? new Set(rooms.map((r) => r.id));
+  const reportRooms = useMemo(
+    () => sortRooms(rooms.filter((r) => activeSelection.has(r.id)), "ad"),
+    [rooms, activeSelection]
+  );
+  const reportAlarms = useMemo(
+    () => alarms.filter((a) => activeSelection.has(a.roomId)),
+    [alarms, activeSelection]
+  );
+
+  function toggleRoom(id: string) {
+    setSelectedRoomIds((prev) => {
+      const base = new Set(prev ?? rooms.map((r) => r.id));
+      if (base.has(id)) base.delete(id);
+      else base.add(id);
+      return base;
+    });
+  }
 
   const report = useMemo(
     () =>
       buildReport(
         range,
-        rooms,
+        reportRooms,
         readings,
         boilerHistory,
-        alarms,
+        reportAlarms,
         energyRecords,
         thresholds.kronikTekrarSayisi
       ),
-    [range, rooms, readings, boilerHistory, alarms, energyRecords, thresholds]
+    [range, reportRooms, readings, boilerHistory, reportAlarms, energyRecords, thresholds]
   );
 
   const heatmapData = useMemo(() => {
@@ -90,12 +114,70 @@ export default function Reports() {
         ))}
       </div>
 
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="section-title">
+          Rapora Dahil Edilecek Sınıflar ({reportRooms.length}/{rooms.length})
+        </div>
+        <div className="toolbar">
+          <input
+            className="input"
+            placeholder="Sınıf ara..."
+            value={roomSearch}
+            onChange={(e) => setRoomSearch(e.target.value)}
+            style={{ minWidth: 200 }}
+          />
+          <button className="chip" onClick={() => setSelectedRoomIds(new Set(rooms.map((r) => r.id)))}>
+            Tümünü Seç
+          </button>
+          <button className="chip" onClick={() => setSelectedRoomIds(new Set())}>
+            Tümünü Kaldır
+          </button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            maxHeight: 160,
+            overflowY: "auto",
+          }}
+        >
+          {sortedRooms
+            .filter((r) => r.ad.toLocaleLowerCase("tr").includes(roomSearch.toLocaleLowerCase("tr")))
+            .map((r) => (
+              <label
+                key={r.id}
+                className="chip"
+                style={{ display: "flex", alignItems: "center", gap: 6, cursor: "pointer" }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeSelection.has(r.id)}
+                  onChange={() => toggleRoom(r.id)}
+                />
+                {r.ad}
+              </label>
+            ))}
+        </div>
+      </div>
+
       <div className="toolbar">
         <button className="btn" onClick={() => exportReportToExcel(report, `genel-rapor-${range.label}.xlsx`)}>
           Excel Olarak İndir (Tüm Sekmeler)
         </button>
-        <button className="btn secondary" onClick={() => exportReportToPdf(report, `genel-rapor-${range.label}.pdf`)}>
-          PDF Olarak İndir
+        <button
+          className="btn secondary"
+          disabled={exporting}
+          onClick={async () => {
+            setExporting(true);
+            try {
+              await exportReportToWord(report, `genel-rapor-${range.label}.docx`);
+            } finally {
+              setExporting(false);
+            }
+          }}
+        >
+          {exporting ? "Word Hazırlanıyor..." : "Word Olarak İndir"}
         </button>
         {role === "salt-okuyucu" && (
           <span style={{ fontSize: 12, color: "var(--text-dim)", alignSelf: "center" }}>
@@ -195,7 +277,7 @@ export default function Reports() {
                 </tr>
               </thead>
               <tbody>
-                {rooms.map((room) => (
+                {sortRooms(reportRooms, "ad").map((room) => (
                   <tr key={room.id}>
                     <td>{room.ad}</td>
                     {heatmapData.days.map((d) => {

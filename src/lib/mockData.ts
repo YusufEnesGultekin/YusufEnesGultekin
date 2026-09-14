@@ -10,6 +10,8 @@ import type {
   ScheduleEntry,
   Thresholds,
 } from "./types";
+import { SETPOINT_SENSITIVITY } from "./calculations";
+import { GUNCEL_M3_FIYAT_VARSAYIM_TL } from "./simulationEngine";
 
 export const BUILDING: Building = {
   id: "bina-1",
@@ -21,51 +23,60 @@ export const FLOORS: Floor[] = [
   { id: "kat-0", buildingId: BUILDING.id, ad: "Zemin Kat", siraNo: 0 },
   { id: "kat-1", buildingId: BUILDING.id, ad: "1. Kat", siraNo: 1 },
   { id: "kat-2", buildingId: BUILDING.id, ad: "2. Kat", siraNo: 2 },
+  { id: "kat-3", buildingId: BUILDING.id, ad: "3. Kat", siraNo: 3 },
 ];
 
 const cepheler = ["kuzey", "guney", "dogu", "bati"] as const;
 
+// Her katta 2 sınıf seviyesi (4'er şube) + kat başına 1 özel oda = 9 nokta/kat.
+const GRADES_PER_FLOOR: [number, number][] = [
+  [1, 2],
+  [3, 4],
+  [5, 6],
+  [7, 8],
+];
+const SECTIONS = ["A", "B", "C", "D"] as const;
+const SPECIAL_ROOMS = [
+  "Fen Laboratuvarı",
+  "Kütüphane",
+  "Bilgisayar Laboratuvarı",
+  "Öğretmenler Odası",
+];
+
 function makeRooms(): Room[] {
   const rooms: Room[] = [];
   let slaveId = 1;
-  const names = [
-    "1-A Sınıfı",
-    "1-B Sınıfı",
-    "2-A Sınıfı",
-    "2-B Sınıfı",
-    "3-A Sınıfı",
-    "3-B Sınıfı",
-    "4-A Sınıfı",
-    "4-B Sınıfı",
-    "Öğretmenler Odası",
-    "İdare Odası",
-    "Kütüphane",
-    "Fen Laboratuvarı",
-  ];
+  let idx = 0;
   FLOORS.forEach((floor, fi) => {
-    for (let i = 0; i < 4; i++) {
-      const idx = fi * 4 + i;
+    const [g1, g2] = GRADES_PER_FLOOR[fi];
+    const roomNames = [
+      ...SECTIONS.map((s) => `${g1}-${s} Sınıfı`),
+      ...SECTIONS.map((s) => `${g2}-${s} Sınıfı`),
+      SPECIAL_ROOMS[fi],
+    ];
+    roomNames.forEach((ad) => {
       const cephe = cepheler[idx % cepheler.length];
-      const isCritical = names[idx] === "Fen Laboratuvarı" || names[idx] === "Kütüphane";
+      const isCritical = SPECIAL_ROOMS.includes(ad);
       rooms.push({
         id: `oda-${idx + 1}`,
         floorId: floor.id,
         buildingId: BUILDING.id,
-        ad: names[idx] ?? `Oda ${idx + 1}`,
+        ad,
         kat: floor.ad,
         cephe,
-        sensorTipi: idx % 5 === 0 ? "SAS-IAQ" : "SAS-TH",
+        sensorTipi: idx % 5 === 0 || isCritical ? "SAS-IAQ" : "SAS-TH",
         modbusSlaveId: slaveId++,
         kritikNokta: isCritical,
       });
-    }
+      idx++;
+    });
   });
   return rooms;
 }
 
 export const ROOMS: Room[] = makeRooms();
 
-export const CHRONIC_ROOM_IDS = ["oda-3", "oda-9"];
+export const CHRONIC_ROOM_IDS = ["oda-3", "oda-14", "oda-27"];
 
 export const THRESHOLDS: Thresholds = {
   aniDususDerece: 2.5,
@@ -198,7 +209,7 @@ function generateAll(): SimState {
       let base = roomBaseline[room.id];
       const chronic = CHRONIC_ROOM_IDS.includes(room.id);
       let target = heatingActive
-        ? base + (currentSetpoint - 55) * 0.08
+        ? base + (currentSetpoint - 55) * SETPOINT_SENSITIVITY
         : base + (outdoor - 16) * 0.15;
 
       if (chronic && heatingActive && !holiday) {
@@ -342,7 +353,7 @@ export const READINGS: Reading[] = generated.readings;
 export const BOILER_HISTORY: BoilerRecord[] = generated.boiler;
 export const ALARMS: AlarmRecord[] = generated.alarms;
 
-export const M3_BIRIM_FIYAT = 14.85;
+export const M3_BIRIM_FIYAT = GUNCEL_M3_FIYAT_VARSAYIM_TL;
 
 export function generateEnergyRecords(): EnergyRecord[] {
   const records: EnergyRecord[] = [];

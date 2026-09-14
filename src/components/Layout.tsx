@@ -8,6 +8,7 @@ const NAV = [
   { to: "/kombi", label: "Kombi Kontrol Paneli", roles: ["yonetici", "bakim"] },
   { to: "/alarmlar", label: "Alarm / Bildirim Merkezi", roles: ["yonetici", "bakim"] },
   { to: "/raporlar", label: "Raporlar", roles: ["yonetici", "bakim", "salt-okuyucu"] },
+  { to: "/simulasyon", label: "Simülasyon", roles: ["yonetici", "bakim", "salt-okuyucu"] },
   { to: "/ayarlar", label: "Ayarlar", roles: ["yonetici"] },
 ];
 

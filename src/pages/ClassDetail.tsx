@@ -11,16 +11,43 @@ import {
 } from "recharts";
 import { useDataStore } from "../store/dataStore";
 import DateRangePicker from "../components/DateRangePicker";
-import { filterReadings } from "../lib/calculations";
-import { computeRoomKpi } from "../lib/calculations";
+import { filterReadings, computeRoomKpi } from "../lib/calculations";
+import { sortRooms } from "../lib/sort";
+import { getRoomStatus } from "../lib/roomStatus";
 import KpiCard from "../components/KpiCard";
 
+const STATUS_DOT: Record<string, string> = { normal: "🟢", uyari: "🟡", alarm: "🔴" };
+const STATUS_LABEL: Record<string, string> = {
+  normal: "Normal",
+  uyari: "Uyarı — takip edilmeli",
+  alarm: "Alarm — müdahale gerekebilir",
+};
+
+const PAGE_SIZE = 25;
+
 export default function ClassDetail() {
-  const { rooms, readings, getDateRange } = useDataStore();
-  const [roomId, setRoomId] = useState(rooms[0]?.id ?? "");
+  const { rooms, readings, alarms, thresholds, getDateRange } = useDataStore();
+  const sortedRooms = useMemo(() => sortRooms(rooms, "ad"), [rooms]);
+  const [roomId, setRoomId] = useState(sortedRooms[0]?.id ?? "");
+  const [page, setPage] = useState(0);
   const range = getDateRange();
 
   const room = rooms.find((r) => r.id === roomId);
+
+  const roomStatuses = useMemo(
+    () => rooms.map((r) => ({ room: r, status: getRoomStatus(r, readings, alarms, thresholds) })),
+    [rooms, readings, alarms, thresholds]
+  );
+  const statusByRoomId = useMemo(() => {
+    const map = new Map<string, string>();
+    roomStatuses.forEach((r) => map.set(r.room.id, r.status));
+    return map;
+  }, [roomStatuses]);
+  const problemRooms = useMemo(
+    () => sortRooms(roomStatuses.filter((r) => r.status !== "normal").map((r) => r.room), "ad"),
+    [roomStatuses]
+  );
+  const currentStatus = statusByRoomId.get(roomId) ?? "normal";
 
   const chartData = useMemo(() => {
     const filtered = filterReadings(readings, range).filter((r) => r.roomId === roomId);
@@ -37,18 +64,50 @@ export default function ClassDetail() {
       }));
   }, [readings, range, roomId]);
 
+  const rawRows = useMemo(() => {
+    return [...filterReadings(readings, range).filter((r) => r.roomId === roomId)].sort(
+      (a, b) => b.ts - a.ts
+    );
+  }, [readings, range, roomId]);
+
+  const pageCount = Math.max(1, Math.ceil(rawRows.length / PAGE_SIZE));
+  const pagedRows = rawRows.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
   const kpi = useMemo(
     () => computeRoomKpi(filterReadings(readings, range), roomId),
     [readings, range, roomId]
   );
 
+  function selectRoom(id: string) {
+    setRoomId(id);
+    setPage(0);
+  }
+
   return (
     <div>
+      {problemRooms.length > 0 && (
+        <div className="card" style={{ marginBottom: 16, borderColor: "var(--warn)" }}>
+          <div className="section-title" style={{ color: "var(--warn)" }}>
+            Değerleri Sıkıntılı Olan Sınıflar ({problemRooms.length})
+          </div>
+          <div className="toolbar" style={{ marginBottom: 0 }}>
+            {problemRooms.map((r) => {
+              const status = statusByRoomId.get(r.id) ?? "normal";
+              return (
+                <button key={r.id} className={`chip ${roomId === r.id ? "active" : ""}`} onClick={() => selectRoom(r.id)}>
+                  {STATUS_DOT[status]} {r.ad}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="toolbar">
-        <select className="input" value={roomId} onChange={(e) => setRoomId(e.target.value)}>
-          {rooms.map((r) => (
+        <select className="input" value={roomId} onChange={(e) => selectRoom(e.target.value)}>
+          {sortedRooms.map((r) => (
             <option key={r.id} value={r.id}>
-              {r.ad}
+              {STATUS_DOT[statusByRoomId.get(r.id) ?? "normal"]} {r.ad}
             </option>
           ))}
         </select>
@@ -56,11 +115,22 @@ export default function ClassDetail() {
       <DateRangePicker />
 
       {room && (
-        <div className="card" style={{ marginBottom: 16 }}>
+        <div
+          className="card"
+          style={{
+            marginBottom: 16,
+            borderColor: currentStatus !== "normal" ? "var(--warn)" : undefined,
+          }}
+        >
           <div className="section-title">{room.ad}</div>
           <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
             {room.kat} · Cephe: {room.cephe.toUpperCase()} · Sensör: {room.sensorTipi} ·
             Modbus Slave ID: {room.modbusSlaveId} · {room.kritikNokta ? "Kritik Nokta" : "Standart Nokta"}
+          </div>
+          <div style={{ marginTop: 8 }}>
+            <span className={`pill ${currentStatus === "normal" ? "ok" : currentStatus === "uyari" ? "warn" : "danger"}`}>
+              {STATUS_DOT[currentStatus]} {STATUS_LABEL[currentStatus]}
+            </span>
           </div>
         </div>
       )}
@@ -86,6 +156,51 @@ export default function ClassDetail() {
             <Line type="monotone" dataKey="hissedilen" name="Hissedilen Sıcaklık (°C)" stroke="#2dd4bf" dot={false} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <div className="section-title">
+          Tüm Ölçüm Kayıtları ({rawRows.length} kayıt — seçilen tarih aralığı)
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Zaman</th>
+              <th>Sıcaklık</th>
+              <th>Nem</th>
+              <th>Hissedilen</th>
+              <th>Hava Kalitesi</th>
+              <th>Bağlantı</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pagedRows.map((r) => (
+              <tr key={r.ts}>
+                <td>{new Date(r.ts).toLocaleString("tr-TR")}</td>
+                <td>{r.sicaklik.toFixed(2)} °C</td>
+                <td>%{r.nem.toFixed(1)}</td>
+                <td>{r.hissedilenSicaklik.toFixed(2)} °C</td>
+                <td>{r.havaKaliteIndeksi ?? "-"}</td>
+                <td>{r.online ? "Online" : "Offline"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="toolbar" style={{ justifyContent: "center", marginTop: 12, marginBottom: 0 }}>
+          <button className="btn secondary" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+            ← Önceki
+          </button>
+          <span style={{ alignSelf: "center", fontSize: 12.5, color: "var(--text-dim)" }}>
+            Sayfa {page + 1} / {pageCount}
+          </span>
+          <button
+            className="btn secondary"
+            disabled={page >= pageCount - 1}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Sonraki →
+          </button>
+        </div>
       </div>
     </div>
   );

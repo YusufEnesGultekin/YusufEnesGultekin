@@ -9,8 +9,20 @@ import type {
 } from "./types";
 
 // TEK MERKEZİ HESAPLAMA KATMANI
-// Dashboard, rapor ekranı ve Excel/PDF export'u SADECE bu fonksiyonları
+// Dashboard, rapor ekranı ve Excel/Word export'u SADECE bu fonksiyonları
 // kullanmalı. Aynı sayının farklı yerde farklı çıkması burada engellenir.
+
+// Kombi setpoint'i 1°C değiştiğinde bir sınıfın sıcaklığının ne kadar
+// değişeceğini gösteren katsayı (mockData'daki simülasyon ile birebir aynı).
+export const SETPOINT_SENSITIVITY = 0.08;
+
+export function predictRoomTemp(
+  lastTemp: number,
+  currentSetpoint: number,
+  trialSetpoint: number
+): number {
+  return round(lastTemp + (trialSetpoint - currentSetpoint) * SETPOINT_SENSITIVITY, 2);
+}
 
 export function inRange(ts: number, range: DateRange): boolean {
   return ts >= range.start && ts <= range.end;
