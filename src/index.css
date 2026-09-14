@@ -159,7 +159,7 @@ a {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -169,6 +169,12 @@ a {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.kpi-card {
+  min-width: 0;
 }
 
 .kpi-card .label {
@@ -180,8 +186,11 @@ a {
 }
 
 .kpi-card .value {
-  font-size: 26px;
+  font-size: clamp(16px, 2.4vw, 24px);
   font-weight: 700;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.2;
 }
 
 .kpi-card .sub {

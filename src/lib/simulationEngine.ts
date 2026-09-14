@@ -103,3 +103,19 @@ function round(value: number, digits: number): number {
   const f = Math.pow(10, digits);
   return Math.round(value * f) / f;
 }
+
+// Büyük ölçek sonuçlarını (ör. Türkiye geneli milyarlarca TL) okunabilir
+// tutmak için kısaltılmış gösterim: "21,2 Milyar", "942,9 Milyon" vb.
+export function formatCompactNumber(value: number): string {
+  const abs = Math.abs(value);
+  if (abs >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 2 })} Milyar`;
+  }
+  if (abs >= 1_000_000) {
+    return `${(value / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 2 })} Milyon`;
+  }
+  if (abs >= 1_000) {
+    return `${(value / 1_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })} Bin`;
+  }
+  return value.toLocaleString("tr-TR");
+}

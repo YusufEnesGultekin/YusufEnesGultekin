@@ -14,6 +14,7 @@ import {
   GUNCEL_M3_FIYAT_VARSAYIM_TL,
   REFERENCE_SCHOOL,
   SCALE_LABELS,
+  formatCompactNumber,
   runSimulation,
   type SimulationScale,
 } from "../lib/simulationEngine";
@@ -199,17 +200,20 @@ export default function Simulation() {
           <div className="kpi-grid" style={{ marginBottom: 0 }}>
             <KpiCard
               label="Toplam Sezonluk Gaz Tasarrufu"
-              value={`${result.toplamSezonlukGazM3.toLocaleString("tr-TR")} m³`}
+              value={`${formatCompactNumber(result.toplamSezonlukGazM3)} m³`}
+              sub={`${result.toplamSezonlukGazM3.toLocaleString("tr-TR")} m³`}
               color="#2dd4bf"
             />
             <KpiCard
               label="Toplam Sezonluk TL Tasarrufu"
-              value={`${result.toplamSezonlukTasarrufTL.toLocaleString("tr-TR")} TL`}
+              value={`${formatCompactNumber(result.toplamSezonlukTasarrufTL)} TL`}
+              sub={`${result.toplamSezonlukTasarrufTL.toLocaleString("tr-TR")} TL`}
               color="#22c55e"
             />
             <KpiCard
               label="Toplam Sistem Maliyeti"
-              value={`${result.toplamSistemMaliyetiTL.toLocaleString("tr-TR")} TL`}
+              value={`${formatCompactNumber(result.toplamSistemMaliyetiTL)} TL`}
+              sub={`${result.toplamSistemMaliyetiTL.toLocaleString("tr-TR")} TL`}
               color="#eab308"
             />
             <KpiCard
