@@ -28,17 +28,20 @@ export interface SimulationResult {
   amortismanAy: number | null;
 }
 
-// Rapordaki referans örnek okul (deneysel ölçümün yapıldığı bina).
+// Rapordaki deneysel ölçümün yapıldığı referans bina 25 eğitim ortamı ve
+// 3.382 m² idi. Uygulama genelinde (izleme demosu ve simülasyon) esas alınan
+// okul ölçeği ise 50 sınıflık bir kamu okuludur; alan buna göre orantılı
+// büyütülmüştür (m²/eğitim-ortamı oranı sabit tutularak).
 export const REFERENCE_SCHOOL = {
-  binaAlaniM2: 3382,
+  binaAlaniM2: Math.round((3382 / 25) * 50), // 6.764 m²
   fazlaIsitmaDerece: 6,
   kisSezonuGun: 125,
   harcananSabiti: 0.00095,
-  egitimOrtamiSayisi: 25, // 16 derslik + 9 etkinlik salonu
-  ogrenciSayisi: 400,
-  personelSayisi: 30,
+  egitimOrtamiSayisi: 50,
+  ogrenciSayisi: 800,
+  personelSayisi: 55,
   katSayisi: 4,
-  sistemBirimMaliyetiTL: 11_875,
+  sistemBirimMaliyetiTL: 11_875 * 2,
 };
 
 // 2026 BOTAŞ toptan sanayi/ticarethane referans fiyatına (~15 TL/Sm³, KDV-ÖTV

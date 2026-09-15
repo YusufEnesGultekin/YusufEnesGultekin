@@ -76,11 +76,11 @@ export default function Simulation() {
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="section-title">Tasarruf Simülasyonu — Okuldan Türkiye Geneline</div>
         <p style={{ fontSize: 13, color: "var(--text-dim)" }}>
-          Bu hesaplama, projenin dayanağı olan saha ölçümüne (16 derslik + 9 etkinlik
-          salonundan oluşan, 3.382 m² ve 4 katlı örnek bir kamu okulu) ve orada türetilen{" "}
+          Bu hesaplama, projenin dayanağı olan saha ölçümünden türetilen{" "}
           <code>Fazla Harcama (m³) = Harcanan Sabiti × Alan (m²) × Fazla Derece (°C)</code>{" "}
-          formülüne dayanır. Tüm değerler aşağıdan güncellenebilir; ölçek seçerek bulguyu
-          ilçe, il, bölge veya Türkiye geneline (MEB — 61.011 okul) yansıtabilirsiniz.
+          formülüne, 50 sınıflık (yaklaşık {REFERENCE_SCHOOL.binaAlaniM2.toLocaleString("tr-TR")} m², 4 katlı)
+          bir kamu okulu ölçeğine göre dayanır. Tüm değerler aşağıdan güncellenebilir; ölçek
+          seçerek bulguyu ilçe, il, bölge veya Türkiye geneline (MEB — 61.011 okul) yansıtabilirsiniz.
         </p>
         <p style={{ fontSize: 12, color: "var(--text-dim)" }}>
           Benzer sonuçlar başka çalışmalarda da bildirilmiştir: İzmir'de bir kamu okulunda
@@ -251,7 +251,7 @@ export default function Simulation() {
               <td>{REFERENCE_SCHOOL.katSayisi}</td>
             </tr>
             <tr>
-              <td>Eğitim Ortamı Sayısı (16 derslik + 9 etkinlik salonu)</td>
+              <td>Eğitim Ortamı Sayısı (derslik + etkinlik salonları)</td>
               <td>{REFERENCE_SCHOOL.egitimOrtamiSayisi}</td>
             </tr>
             <tr>

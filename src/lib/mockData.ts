@@ -11,7 +11,7 @@ import type {
   Thresholds,
 } from "./types";
 import { SETPOINT_SENSITIVITY } from "./calculations";
-import { GUNCEL_M3_FIYAT_VARSAYIM_TL } from "./simulationEngine";
+import { GUNCEL_M3_FIYAT_VARSAYIM_TL, REFERENCE_SCHOOL } from "./simulationEngine";
 
 export const BUILDING: Building = {
   id: "bina-1",
@@ -128,8 +128,8 @@ export const DATA_HISTORY_START = NOW - 730 * 24 * MS_HOUR; // ~2 yıl geriye
 // 50 sınıflık bir okul ölçeğinde toplam bina alanı varsayımı (proje
 // raporundaki 25 eğitim ortamı / 3.382 m² referansının orantılı büyütülmüş
 // hali). Enerji/tüketim hesaplamaları bu ölçeğe göre yapılır.
-export const ENERGY_SINIF_SAYISI = 50;
-export const ENERGY_BINA_ALANI_M2 = Math.round(3382 * (ENERGY_SINIF_SAYISI / 25));
+export const ENERGY_SINIF_SAYISI = REFERENCE_SCHOOL.egitimOrtamiSayisi;
+export const ENERGY_BINA_ALANI_M2 = REFERENCE_SCHOOL.binaAlaniM2;
 
 function isHoliday(d: Date): boolean {
   const iso = d.toISOString().slice(0, 10);
@@ -356,6 +356,18 @@ function generateAll(): SimState {
     ts += stepMs;
   }
 
+  // Gerçek hayatta günler/haftalar önce oluşmuş bir alarm sonsuza kadar
+  // "açık" kalmaz — sonunda ilgilenilir. 2 yıllık geçmişte rastgele oluşan
+  // eski alarmların "aktif alarm sayısı"nı anlamsızca şişirmesini önlemek
+  // için belirli bir pencereden eski açık alarmlar otomatik kapatılır.
+  const RECENT_ALARM_WINDOW_MS = 3 * 24 * MS_HOUR;
+  const newestTs = readings.length ? readings[readings.length - 1].ts : NOW;
+  alarms.forEach((a) => {
+    if (a.durum === "acik" && newestTs - a.ts > RECENT_ALARM_WINDOW_MS) {
+      a.durum = "kapandi";
+    }
+  });
+
   applyLiveShowcase(readings, alarms);
 
   return { readings, boiler, alarms };
@@ -380,12 +392,15 @@ function applyLiveShowcase(readings: Reading[], alarms: AlarmRecord[]) {
     return ids;
   }
 
-  const aniDususRooms = pickEvery(0, 5, Math.max(2, Math.round(total * 0.11)));
-  const kronikRooms = pickEvery(1, 5, Math.max(2, Math.round(total * 0.11)));
-  const guvenEsigiRooms = pickEvery(2, 7, Math.max(1, Math.round(total * 0.06)));
-  const offlineAlarmRooms = pickEvery(3, 6, Math.max(2, Math.round(total * 0.08)));
-  const warmWarningRooms = pickEvery(4, 6, Math.max(2, Math.round(total * 0.08)));
-  const coldWarningRooms = pickEvery(5, 6, Math.max(2, Math.round(total * 0.08)));
+  // Toplamda sorunlu:normal oranı yaklaşık 1:3 (nokta sayısının %25'i) olacak
+  // şekilde dağıtılır; bunun içinde sadece 1 tanesi saf "uyarı" (alarm
+  // kaydı olmadan sadece eşik dışı), geri kalanı gerçek "alarm" durumudur.
+  const aniDususRooms = pickEvery(0, 5, Math.max(1, Math.round(total * 0.08)));
+  const kronikRooms = pickEvery(1, 5, Math.max(1, Math.round(total * 0.055)));
+  const guvenEsigiRooms = pickEvery(2, 7, Math.max(1, Math.round(total * 0.03)));
+  const offlineAlarmRooms = pickEvery(3, 6, Math.max(1, Math.round(total * 0.055)));
+  const warmWarningRooms = pickEvery(4, 6, Math.max(1, Math.round(total * 0.03)));
+  const coldWarningRooms: string[] = [];
 
   aniDususRooms.forEach((roomId, i) => {
     const room = ROOMS.find((r) => r.id === roomId);
