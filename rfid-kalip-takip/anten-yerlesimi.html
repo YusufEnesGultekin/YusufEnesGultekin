@@ -1998,11 +1998,39 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var mat = new THREE.MeshStandardMaterial({ color:color, roughness:0.85, metalness:0.05, transparent:opacity!==undefined, opacity:opacity!==undefined?opacity:1 });
     return new THREE.Mesh(new THREE.BoxGeometry(w,h,dd), mat);
   }
+  var vrFloorTexture = null;
+  function getFloorTexture(){
+    if(vrFloorTexture) return vrFloorTexture;
+    var c = document.createElement('canvas'); c.width=512; c.height=512;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = '#eef1f4'; ctx.fillRect(0,0,512,512);
+    ctx.strokeStyle = '#d7dee6'; ctx.lineWidth = 2;
+    for(var i=0;i<=512;i+=64){
+      ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,512); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(512,i); ctx.stroke();
+    }
+    var sw=16;
+    for(var s=0;s<512;s+=sw){
+      ctx.fillStyle = (Math.floor(s/sw)%2===0) ? '#f2a33d' : '#2b2f36';
+      ctx.fillRect(s,0,sw,sw); ctx.fillRect(s,512-sw,sw,sw);
+    }
+    vrFloorTexture = new THREE.CanvasTexture(c);
+    vrFloorTexture.wrapS = vrFloorTexture.wrapT = THREE.RepeatWrapping;
+    vrFloorTexture.repeat.set(24,24);
+    return vrFloorTexture;
+  }
+  function vrHuman(x,y,z){
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.CylinderGeometry(160,190,700,12), new THREE.MeshStandardMaterial({ color:0x2c6e8e, roughness:0.9 }));
+    body.position.set(0,470,0); g.add(body);
+    var head = new THREE.Mesh(new THREE.SphereGeometry(120,16,16), new THREE.MeshStandardMaterial({ color:0xe3b48c, roughness:0.9 }));
+    head.position.set(0,900,0); g.add(head);
+    g.position.set(x,y,z);
+    return g;
+  }
   function addFactoryDressing(group, spanX){
-    var floor = new THREE.Mesh(new THREE.PlaneGeometry(30000,30000), new THREE.MeshStandardMaterial({ color:0xf3f5f8, roughness:1 }));
+    var floor = new THREE.Mesh(new THREE.PlaneGeometry(30000,30000), new THREE.MeshStandardMaterial({ map:getFloorTexture(), roughness:1 }));
     floor.rotation.x = -Math.PI/2; group.add(floor);
-    var grid = new THREE.GridHelper(30000, 60, 0xd7dee6, 0xe3e7ec);
-    grid.position.y = 1; group.add(grid);
     var backWall = vrBox(spanX*3.4, 3200, 60, 0xe4e8ee);
     backWall.position.set(0, 1600, -Math.max(3200, spanX*1.4));
     group.add(backWall);
@@ -2036,18 +2064,25 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var m = dataset.results, d = dataset.depth;
     var gate = state.gate, ay = state.ay, h = state.h;
     var elFactor = Math.tan(toRad(state.el))/Math.tan(toRad(state.az));
-    var isMachine = wiz.tracking === 'makina';
+    var track = wiz.tracking;
     var coneMat = new THREE.MeshBasicMaterial({ color:0xec6a1f, transparent:true, opacity:0.13, side:THREE.DoubleSide, depthWrite:false });
     var coneWireMat = new THREE.MeshBasicMaterial({ color:0xc9550f, wireframe:true, transparent:true, opacity:0.3 });
+    function addAntennaCone(x,y,z,coneH){
+      var cone = new THREE.Mesh(new THREE.ConeGeometry(m.coneR, coneH, 28, 1, true), coneMat);
+      cone.scale.z = elFactor; cone.position.set(x,y,z); vrGroup.add(cone);
+      var wire = new THREE.Mesh(new THREE.ConeGeometry(m.coneR, coneH, 28, 1, true), coneWireMat);
+      wire.scale.z = elFactor; wire.position.copy(cone.position); vrGroup.add(wire);
+    }
+    function addTagDot(x,y,z){
+      var dot = new THREE.Mesh(new THREE.SphereGeometry(45,16,16), new THREE.MeshStandardMaterial({ color:0x1a9c62 }));
+      dot.position.set(x,y,z); vrGroup.add(dot);
+    }
 
-    if(isMachine){
+    if(track === 'makina'){
       var poleH = ay, coneH = h;
       var pole = vrBox(90,poleH,90, 0x555c66); pole.position.set(0, poleH/2, 0); vrGroup.add(pole);
       var antBox = vrBox(220,110,60, 0xec6a1f); antBox.position.set(0, poleH-60, 0); vrGroup.add(antBox);
-      var cone = new THREE.Mesh(new THREE.ConeGeometry(m.coneR, coneH, 28, 1, true), coneMat);
-      cone.scale.z = elFactor; cone.position.set(0, ay-coneH/2, d.centerOffset); vrGroup.add(cone);
-      var wire = new THREE.Mesh(new THREE.ConeGeometry(m.coneR, coneH, 28, 1, true), coneWireMat);
-      wire.scale.z = elFactor; wire.position.copy(cone.position); vrGroup.add(wire);
+      addAntennaCone(0, ay-coneH/2, d.centerOffset, coneH);
 
       var machineW=1500, machineD=1300, machineH=1700;
       var machineZ = d.centerOffset + machineD*0.35 + m.coneR*0.4;
@@ -2055,14 +2090,104 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       machine.position.set(0, machineH/2, machineZ); vrGroup.add(machine);
       var hopper = vrBox(420,520,420, 0x6b7280);
       hopper.position.set(-machineW*0.28, machineH+260, machineZ); vrGroup.add(hopper);
-      var tagDot = new THREE.Mesh(new THREE.SphereGeometry(45,16,16), new THREE.MeshStandardMaterial({ color:0x1a9c62 }));
-      tagDot.position.set(0, Math.max(20,ay-h)+30, d.centerOffset); vrGroup.add(tagDot);
+      addTagDot(0, Math.max(20,ay-h)+30, d.centerOffset);
 
       addFactoryDressing(vrGroup, Math.max(1600, m.coneR*2.4));
-      var camDist = Math.max(2600, m.coneR*3.2);
-      vrCamera.position.set(camDist*0.9, ay*1.3+800, camDist*1.05);
+      var camDistM = Math.max(2600, m.coneR*3.2);
+      vrCamera.position.set(camDistM*0.9, ay*1.3+800, camDistM*1.05);
       vrControls.target.set(0, ay*0.4, d.centerOffset*0.4);
+
+    } else if(track === 'konveyor'){
+      var beltLen = Math.max(gate, 3000), beltW=900, beltH=60;
+      var belt = vrBox(beltLen, beltH, beltW, 0x3a3f47); belt.position.set(0, beltH/2, 0); vrGroup.add(belt);
+      [-1,1].forEach(function(side){
+        var rail = vrBox(beltLen, 120, 40, 0x6b7280);
+        rail.position.set(0, beltH+60, side*beltW/2); vrGroup.add(rail);
+      });
+      for(var rx=-beltLen/2+150; rx<beltLen/2; rx+=280){
+        var roller = new THREE.Mesh(new THREE.CylinderGeometry(35,35,beltW,14), new THREE.MeshStandardMaterial({ color:0x8b93a1, roughness:0.6, metalness:0.3 }));
+        roller.rotation.x = Math.PI/2; roller.position.set(rx, beltH+10, 0); vrGroup.add(roller);
+      }
+      var mastX = beltLen/2+320;
+      var mast = vrBox(80,ay,80, 0x555c66); mast.position.set(mastX, ay/2, 0); vrGroup.add(mast);
+      var antBoxK = vrBox(200,100,60, 0xec6a1f); antBoxK.position.set(mastX, ay-60, 0); antBoxK.rotation.y = Math.PI/2; vrGroup.add(antBoxK);
+      addAntennaCone(mastX, ay-h/2, 0, h);
+      [-800,-200,500].forEach(function(bx,i){
+        var box = vrBox(260,200,220, i%2===0?0x7fb8c9:0xd9a066);
+        box.position.set(bx, beltH+100, 0); vrGroup.add(box);
+      });
+      addTagDot(-200, beltH+210, 0);
+      addFactoryDressing(vrGroup, beltLen*0.6);
+      var camDistK = beltLen*0.9;
+      vrCamera.position.set(camDistK*0.4, ay*1.1+700, camDistK*0.9);
+      vrControls.target.set(0, ay*0.35, 0);
+
+    } else if(track === 'raf'){
+      var rackW=1800, rackD=650, rackH=Math.max(ay,2200), levels=4;
+      [-1,1].forEach(function(sx){ [-1,1].forEach(function(sz){
+        var post = vrBox(60,rackH,60, 0x555c66);
+        post.position.set(sx*rackW/2, rackH/2, sz*rackD/2); vrGroup.add(post);
+      }); });
+      for(var lv=0; lv<levels; lv++){
+        var shelfY = (lv+1)*rackH/(levels+1);
+        var shelf = vrBox(rackW, 40, rackD, 0x8b93a1);
+        shelf.position.set(0, shelfY, 0); vrGroup.add(shelf);
+        for(var bxi=0;bxi<3;bxi++){
+          var box = vrBox(360,260,300, (bxi+lv)%2===0?0x7fb8c9:0xd9a066);
+          box.position.set(-rackW/2+280+bxi*560, shelfY+150, 0); vrGroup.add(box);
+        }
+      }
+      var armZ = rackD/2+700;
+      var arm = vrBox(80,80,700, 0x555c66); arm.position.set(0, ay, rackD/2+350); vrGroup.add(arm);
+      var antBoxR = vrBox(220,110,60, 0xec6a1f); antBoxR.position.set(0, ay-20, armZ); vrGroup.add(antBoxR);
+      addAntennaCone(0, ay-h/2, armZ-h*0.15, h);
+      addTagDot(-rackW/2+280, rackH/(levels+1)+150, 0);
+      addFactoryDressing(vrGroup, rackW);
+      var camDistR = rackW*1.4;
+      vrCamera.position.set(camDistR*0.9, ay*1.1+700, camDistR*1.0);
+      vrControls.target.set(0, rackH*0.4, 0);
+
+    } else if(track === 'arac'){
+      var bodyW=1000, bodyH=900, bodyD=1800;
+      var body = vrBox(bodyW,bodyH,bodyD, 0xd9a066); body.position.set(0, bodyH/2+300, -bodyD*0.2); vrGroup.add(body);
+      [[-bodyW/2+100,-bodyD*0.75],[bodyW/2-100,-bodyD*0.75],[-bodyW/2+100,bodyD*0.55],[bodyW/2-100,bodyD*0.55]].forEach(function(w){
+        var wheel = new THREE.Mesh(new THREE.CylinderGeometry(220,220,180,20), new THREE.MeshStandardMaterial({ color:0x2b2f36, roughness:0.8 }));
+        wheel.rotation.z = Math.PI/2; wheel.position.set(w[0], 220, w[1]); vrGroup.add(wheel);
+      });
+      [-1,1].forEach(function(sx){
+        var mastFk = vrBox(60,2200,60, 0x555c66); mastFk.position.set(sx*280, 1100, bodyD*0.75); vrGroup.add(mastFk);
+      });
+      [-1,1].forEach(function(sx){
+        var fork = vrBox(120,60,1000, 0x2b2f36); fork.position.set(sx*220, 260, bodyD*0.75+700); vrGroup.add(fork);
+      });
+      var antBoxA = vrBox(200,100,60, 0xec6a1f); antBoxA.position.set(0, bodyH+320, -bodyD*0.2); vrGroup.add(antBoxA);
+      addAntennaCone(0, bodyH+320-h/2, d.centerOffset+bodyD*0.75+600, h);
+      var pallet = vrBox(1000,240,1000, 0x8b93a1); pallet.position.set(0, 120, bodyD*0.75+1300); vrGroup.add(pallet);
+      [0,1].forEach(function(bi){
+        var box = vrBox(380,320,380, bi===0?0x7fb8c9:0xd9a066);
+        box.position.set(-200+bi*400, 240+160, bodyD*0.75+1300); vrGroup.add(box);
+      });
+      addTagDot(0, 400, bodyD*0.75+1300);
+      addFactoryDressing(vrGroup, 2200);
+      vrCamera.position.set(3200, ay*1.1+1400, 3600);
+      vrControls.target.set(0, 900, 800);
+
+    } else if(track === 'personel'){
+      var postH=Math.max(ay,2200), gap=Math.max(gate,900);
+      [-1,1].forEach(function(sx){
+        var post = vrBox(110,postH,110, 0x555c66); post.position.set(sx*gap/2, postH/2, 0); vrGroup.add(post);
+        var antBoxP = vrBox(90,180,50, 0xec6a1f); antBoxP.position.set(sx*gap/2, postH*0.55, 60); vrGroup.add(antBoxP);
+      });
+      addAntennaCone(0, ay-h/2, d.centerOffset, h);
+      vrGroup.add(vrHuman(0, 0, d.centerOffset-300));
+      addTagDot(0, 950, d.centerOffset-300);
+      addFactoryDressing(vrGroup, gap);
+      var camDistP = Math.max(gap*1.6, 2600);
+      vrCamera.position.set(camDistP*0.7, postH*1.1+600, camDistP*0.95);
+      vrControls.target.set(0, postH*0.4, 0);
+
     } else {
+      // 'gate' and 'kargo' (portal-type tracking)
       var colW=340, colD=300, beamH=160, colTopY=ay+beamH;
       var colL = vrBox(colW, colTopY, colD, 0x6b7280); colL.position.set(-gate/2-colW/2, colTopY/2, 0); vrGroup.add(colL);
       var colR = vrBox(colW, colTopY, colD, 0x6b7280); colR.position.set(gate/2+colW/2, colTopY/2, 0); vrGroup.add(colR);
@@ -2070,18 +2195,23 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
       m.offs.forEach(function(o){
         var antBox = vrBox(140,90,70, 0xec6a1f); antBox.position.set(o, ay-20, 0); vrGroup.add(antBox);
-        var coneH = h;
-        var cone = new THREE.Mesh(new THREE.ConeGeometry(m.coneR, coneH, 28, 1, true), coneMat);
-        cone.scale.z = elFactor; cone.position.set(o, ay-coneH/2, d.centerOffset); vrGroup.add(cone);
-        var wire = new THREE.Mesh(new THREE.ConeGeometry(m.coneR, coneH, 28, 1, true), coneWireMat);
-        wire.scale.z = elFactor; wire.position.copy(cone.position); vrGroup.add(wire);
+        addAntennaCone(o, ay-h/2, d.centerOffset, h);
       });
 
       var moldTopY = Math.max(20, ay-h);
-      var mold = vrBox(560, 340, 800, 0x7fb8c9, 0.9);
-      mold.position.set(0, moldTopY-170, d.centerOffset); vrGroup.add(mold);
-      var tagDot2 = new THREE.Mesh(new THREE.SphereGeometry(45,16,16), new THREE.MeshStandardMaterial({ color:0x1a9c62 }));
-      tagDot2.position.set(0, moldTopY+30, d.centerOffset); vrGroup.add(tagDot2);
+      if(track === 'kargo'){
+        var beltLenC = gate*0.95, beltHc=50;
+        var beltC = vrBox(beltLenC, beltHc, 700, 0x3a3f47); beltC.position.set(0, beltHc/2, d.centerOffset); vrGroup.add(beltC);
+        [[-500,300,220,340],[300,380,260,420]].forEach(function(bx){
+          var lug = vrBox(bx[2],bx[3],bx[3]*0.7, bx[0]<0?0x7fb8c9:0xd9a066);
+          lug.position.set(bx[0], beltHc+bx[3]/2, d.centerOffset); vrGroup.add(lug);
+        });
+        addTagDot(-500, beltHc+340+20, d.centerOffset);
+      } else {
+        var mold = vrBox(560, 340, 800, 0x7fb8c9, 0.9);
+        mold.position.set(0, moldTopY-170, d.centerOffset); vrGroup.add(mold);
+        addTagDot(0, moldTopY+30, d.centerOffset);
+      }
 
       addFactoryDressing(vrGroup, gate);
       var camDist2 = Math.max(gate*1.1, 3200);
@@ -2097,7 +2227,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       var now = new Date();
       var stamp = ('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
       var parts = [optLabel('tracking', wiz.tracking)];
-      if(!isMachine){ parts.push(state.n+' '+t('unit')); parts.push(state.gate+'mm'); }
+      if(track !== 'makina'){ parts.push(state.n+' '+t('unit')); parts.push(state.gate+'mm'); }
       parts.push(dataset.antLabel || '');
       infoEl.innerHTML = parts.filter(Boolean).join(' · ') + ' — <b>'+t('vrUpdated')+' '+stamp+'</b>';
       infoEl.hidden = false;
