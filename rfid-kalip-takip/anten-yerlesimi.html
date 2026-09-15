@@ -273,6 +273,12 @@
   #vrStage{ width:100%; height:min(70vh,520px); min-height:320px; background:#eef1f4; border:1px solid var(--line); border-radius:4px; overflow:hidden; touch-action:none; }
   #vrStage canvas{ display:block; width:100% !important; height:100% !important; }
   .vr-reset{ position:absolute; top:10px; right:10px; z-index:2; }
+  .vr-scene-info{
+    position:absolute; top:10px; left:10px; z-index:2; background:color-mix(in srgb, var(--panel) 88%, transparent);
+    border:1px solid var(--line); border-radius:4px; padding:6px 11px; font-family:var(--font-mono); font-size:10.5px;
+    color:var(--dim); max-width:70%;
+  }
+  .vr-scene-info b{ color:var(--accent-2); }
   #vrEmptyMsg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; background:#eef1f4; border:1px solid var(--line); border-radius:4px; }
 
   footer{ margin-top:38px; padding-top:16px; border-top:1px solid var(--line); color:var(--dim); font-size:12px; font-family:var(--font-mono); }
@@ -503,6 +509,7 @@
         <div class="vr-wrap">
           <div id="vrStage"></div>
           <div id="vrEmptyMsg" class="survey-empty" hidden data-i18n="vrEmpty">Önce "Sistemi Kur ve Simülasyonu Başlat" butonuna basın.</div>
+          <div id="vrSceneInfo" class="vr-scene-info" hidden></div>
           <button type="button" class="btn vr-reset" id="btnVrReset" data-i18n="vrReset">Görünümü Sıfırla</button>
         </div>
       </section>
@@ -1055,6 +1062,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     vrEmpty:{tr:'Önce "Sistemi Kur ve Simülasyonu Başlat" butonuna basın.', en:'Press "Build System & Start Simulation" first.'},
     vrUnsupported:{tr:'Bu tarayıcı/ortamda 3D (WebGL) görünümü desteklenmiyor. Dosyayı indirip bilgisayarınızda doğrudan bir tarayıcıda (Chrome/Edge/Firefox) açmayı deneyin.',
                    en:'3D (WebGL) view is not supported in this browser/environment. Try downloading the file and opening it directly in a browser (Chrome/Edge/Firefox) on your computer.'},
+    vrUpdated:{tr:'güncellendi', en:'updated'},
     marketNote:{tr:'Seçtiğiniz ürün türü, geçit anteni ve okuyucu kategorisine göre karşılaştırmalı piyasa/marka taraması — artı/eksi yönleriyle.',
                 en:'A comparative market/brand survey for your chosen product type, gate antenna and reader category — with pros and cons.'},
     marketEmpty:{tr:'Bu kategori için henüz piyasa taraması verisi eklenmedi.', en:'No market survey data has been added for this category yet.'},
@@ -2009,15 +2017,18 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
   function buildFactoryScene(dataset){
     var emptyMsg = document.getElementById('vrEmptyMsg');
+    var infoEl0 = document.getElementById('vrSceneInfo');
     if(!vrRenderer && !vrFailed){ initVR(); }
     if(vrFailed){
       if(emptyMsg){ emptyMsg.hidden = false; emptyMsg.textContent = t('vrUnsupported'); }
+      if(infoEl0) infoEl0.hidden = true;
       return;
     }
     if(!vrGroup) return;
     while(vrGroup.children.length){ var c=vrGroup.children[0]; vrGroup.remove(c); disposeObject3D(c); }
     if(!dataset || dataset.isMobile || !dataset.results){
       if(emptyMsg){ emptyMsg.hidden = false; emptyMsg.textContent = t('vrEmpty'); }
+      if(infoEl0) infoEl0.hidden = true;
       resizeVR();
       return;
     }
@@ -2081,6 +2092,16 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     vrHome.target.copy(vrControls.target);
     vrControls.update();
     resizeVR();
+    var infoEl = document.getElementById('vrSceneInfo');
+    if(infoEl){
+      var now = new Date();
+      var stamp = ('0'+now.getHours()).slice(-2)+':'+('0'+now.getMinutes()).slice(-2)+':'+('0'+now.getSeconds()).slice(-2);
+      var parts = [optLabel('tracking', wiz.tracking)];
+      if(!isMachine){ parts.push(state.n+' '+t('unit')); parts.push(state.gate+'mm'); }
+      parts.push(dataset.antLabel || '');
+      infoEl.innerHTML = parts.filter(Boolean).join(' · ') + ' — <b>'+t('vrUpdated')+' '+stamp+'</b>';
+      infoEl.hidden = false;
+    }
   }
   document.getElementById('btnVrReset').addEventListener('click', function(){
     if(!vrCamera || !vrControls || !vrHome.pos) return;
