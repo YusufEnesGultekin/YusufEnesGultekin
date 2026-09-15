@@ -1053,6 +1053,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             en:'A 3D preview generated from your configured scenario, that you can explore — drag to orbit, scroll to zoom, right-drag to pan.'},
     vrReset:{tr:'Görünümü Sıfırla', en:'Reset View'},
     vrEmpty:{tr:'Önce "Sistemi Kur ve Simülasyonu Başlat" butonuna basın.', en:'Press "Build System & Start Simulation" first.'},
+    vrUnsupported:{tr:'Bu tarayıcı/ortamda 3D (WebGL) görünümü desteklenmiyor. Dosyayı indirip bilgisayarınızda doğrudan bir tarayıcıda (Chrome/Edge/Firefox) açmayı deneyin.',
+                   en:'3D (WebGL) view is not supported in this browser/environment. Try downloading the file and opening it directly in a browser (Chrome/Edge/Firefox) on your computer.'},
     marketNote:{tr:'Seçtiğiniz ürün türü, geçit anteni ve okuyucu kategorisine göre karşılaştırmalı piyasa/marka taraması — artı/eksi yönleriyle.',
                 en:'A comparative market/brand survey for your chosen product type, gate antenna and reader category — with pros and cons.'},
     marketEmpty:{tr:'Bu kategori için henüz piyasa taraması verisi eklenmedi.', en:'No market survey data has been added for this category yet.'},
@@ -1928,27 +1930,38 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
 
   // ================= 3D virtual environment (Three.js, orbit-navigable) =================
-  var vrRenderer=null, vrScene=null, vrCamera=null, vrControls=null, vrGroup=null, vrAnimating=false;
+  var vrRenderer=null, vrScene=null, vrCamera=null, vrControls=null, vrGroup=null, vrAnimating=false, vrFailed=false;
   var vrHome = { pos:null, target:null };
+  function webglAvailable(){
+    try{
+      var c = document.createElement('canvas');
+      return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+    }catch(e){ return false; }
+  }
   function initVR(){
-    if(vrRenderer || typeof THREE==='undefined') return;
+    if(vrRenderer || vrFailed) return;
+    if(typeof THREE==='undefined' || typeof THREE.OrbitControls==='undefined' || !webglAvailable()){ vrFailed = true; return; }
     var container = document.getElementById('vrStage');
-    vrScene = new THREE.Scene();
-    vrScene.background = new THREE.Color(0xe9edf2);
-    vrScene.fog = new THREE.Fog(0xe9edf2, 9000, 28000);
-    vrCamera = new THREE.PerspectiveCamera(48, Math.max(container.clientWidth,1)/Math.max(container.clientHeight,1), 10, 120000);
-    vrRenderer = new THREE.WebGLRenderer({ antialias:true });
-    vrRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
-    vrRenderer.setSize(container.clientWidth||600, container.clientHeight||420);
-    container.innerHTML=''; container.appendChild(vrRenderer.domElement);
-    vrControls = new THREE.OrbitControls(vrCamera, vrRenderer.domElement);
-    vrControls.enableDamping = true; vrControls.dampingFactor = 0.09; vrControls.maxPolarAngle = Math.PI*0.49;
-    vrScene.add(new THREE.HemisphereLight(0xffffff, 0x55606e, 0.95));
-    var dir = new THREE.DirectionalLight(0xffffff, 0.6); dir.position.set(4000,6000,3000); vrScene.add(dir);
-    vrGroup = new THREE.Group(); vrScene.add(vrGroup);
-    window.addEventListener('resize', resizeVR);
-    vrHome.pos = new THREE.Vector3(); vrHome.target = new THREE.Vector3();
-    requestAnimationFrame(animateVR);
+    try{
+      vrScene = new THREE.Scene();
+      vrScene.background = new THREE.Color(0xe9edf2);
+      vrScene.fog = new THREE.Fog(0xe9edf2, 9000, 28000);
+      vrCamera = new THREE.PerspectiveCamera(48, Math.max(container.clientWidth,1)/Math.max(container.clientHeight,1), 10, 120000);
+      vrRenderer = new THREE.WebGLRenderer({ antialias:true });
+      vrRenderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+      vrRenderer.setSize(container.clientWidth||600, container.clientHeight||420);
+      container.innerHTML=''; container.appendChild(vrRenderer.domElement);
+      vrControls = new THREE.OrbitControls(vrCamera, vrRenderer.domElement);
+      vrControls.enableDamping = true; vrControls.dampingFactor = 0.09; vrControls.maxPolarAngle = Math.PI*0.49;
+      vrScene.add(new THREE.HemisphereLight(0xffffff, 0x55606e, 0.95));
+      var dir = new THREE.DirectionalLight(0xffffff, 0.6); dir.position.set(4000,6000,3000); vrScene.add(dir);
+      vrGroup = new THREE.Group(); vrScene.add(vrGroup);
+      window.addEventListener('resize', resizeVR);
+      vrHome.pos = new THREE.Vector3(); vrHome.target = new THREE.Vector3();
+      requestAnimationFrame(animateVR);
+    }catch(e){
+      vrFailed = true; vrRenderer = null;
+    }
   }
   function resizeVR(){
     if(!vrRenderer) return;
@@ -1995,12 +2008,16 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     });
   }
   function buildFactoryScene(dataset){
-    if(!vrRenderer){ initVR(); }
+    var emptyMsg = document.getElementById('vrEmptyMsg');
+    if(!vrRenderer && !vrFailed){ initVR(); }
+    if(vrFailed){
+      if(emptyMsg){ emptyMsg.hidden = false; emptyMsg.textContent = t('vrUnsupported'); }
+      return;
+    }
     if(!vrGroup) return;
     while(vrGroup.children.length){ var c=vrGroup.children[0]; vrGroup.remove(c); disposeObject3D(c); }
-    var emptyMsg = document.getElementById('vrEmptyMsg');
     if(!dataset || dataset.isMobile || !dataset.results){
-      if(emptyMsg) emptyMsg.hidden = false;
+      if(emptyMsg){ emptyMsg.hidden = false; emptyMsg.textContent = t('vrEmpty'); }
       resizeVR();
       return;
     }
@@ -2584,8 +2601,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       document.getElementById('panel-'+b.getAttribute('data-tab')).classList.add('active');
       vrAnimating = (b.getAttribute('data-tab')==='vr');
       if(vrAnimating){
-        if(!vrRenderer){ initVR(); }
-        if(lastResult){ buildFactoryScene(lastResult); }
+        buildFactoryScene(lastResult);
         resizeVR();
       }
     });
@@ -2643,7 +2659,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       var rows = bomRows(tag, null, null, readerPick, {n:0});
       renderBomTable('bomTableSimple', rows);
       lastResult = Object.assign(commonDatasetFields(), { rows:rows, isMobile:true, tagQty:inTagQty.value, tag:tag, readerPick:readerPick });
-      if(vrRenderer){ buildFactoryScene(lastResult); }
+      buildFactoryScene(lastResult);
     } else {
       var picked = readAllControls();
       var m = computeMargin(), d = computeDepth(), rg = computeRange(m,d);
@@ -2666,7 +2682,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         tag:tag, antLabel:antLabel, readerPick:readerPick2, antId:picked.antId
       });
       renderMarketTab(lastResult);
-      if(vrRenderer){ buildFactoryScene(lastResult); }
+      buildFactoryScene(lastResult);
     }
 
     var results = document.getElementById('results');
