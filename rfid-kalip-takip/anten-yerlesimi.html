@@ -470,7 +470,7 @@
           <summary><span data-i18n="depthTitle">Derinlik &amp; Menzil (Yandan Görünüş)</span> <span class="chips" id="chipsDepth"></span><span class="chevron">▸</span></summary>
           <div class="disclosure-body">
             <div class="calc-grid">
-              <div class="card"><svg class="diagram" id="sideSvg" viewBox="0 0 720 320"></svg></div>
+              <div class="card"><svg class="diagram" id="sideSvg" viewBox="0 0 720 380"></svg></div>
               <div class="card">
                 <div class="statrow" id="depthStats" style="margin-top:0;"></div>
                 <div class="formula">
@@ -1713,36 +1713,43 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
 
   function renderSvgSide(m,d,rg){
-    var svg=document.getElementById('sideSvg'), W=720,H=320,floorY=H-40;
+    var svg=document.getElementById('sideSvg'), W=720,H=380,floorY=H-64,topPad=44;
     var L = lang==='en';
-    var maxExtent=Math.max(Math.abs(d.nearDist),Math.abs(d.farDist),rg.effectiveRangeMm*0.65,800);
-    var scale=Math.min((W-100)/(2*maxExtent),(floorY-24)/state.ay);
+    var tagFloorH = Math.max(0, state.ay-state.h);
+    var maxExtent=Math.max(Math.abs(d.nearDist),Math.abs(d.farDist),400);
+    var scale=Math.min((W-140)/(2*maxExtent),(floorY-topPad)/state.ay);
     var beamY=floorY-state.ay*scale, cx=W/2;
-    function X(z){ return cx+z*scale; } function Y(h){ return floorY-h*scale; }
-    var antX=X(0), antY=beamY, tagY=Y(state.h), nearX=X(d.nearDist), farX=X(d.farDist);
+    function X(z){ return cx+z*scale; } function Y(hh){ return floorY-hh*scale; }
+    var antX=X(0), antY=beamY, tagY=Y(tagFloorH), nearX=X(d.nearDist), farX=X(d.farDist);
     var p=[];
     p.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="var(--panel)"></rect>');
-    var rangeR=rg.effectiveRangeMm*scale;
-    p.push('<circle cx="'+antX+'" cy="'+antY+'" r="'+rangeR+'" fill="none" stroke="'+(rg.rangeOk?'var(--good)':'var(--bad)')+'" stroke-width="1.3" stroke-dasharray="5,5" opacity="0.7"></circle>');
+    p.push('<text x="'+(W/2)+'" y="20" text-anchor="middle" font-size="9.5" fill="var(--dim)">tilt '+state.tilt+'° · el '+state.el+'° · '+(L?'depth':'derinlik')+' '+Math.round(d.depthLen)+'mm · '+(L?'eff. range':'etkin menzil')+' '+rg.effectiveRangeM.toFixed(2)+'m</text>');
+    var rangeR=rg.effectiveRangeMm*scale, maxR=Math.min(W,floorY)*0.62;
+    if(rangeR<=maxR){
+      p.push('<circle cx="'+antX+'" cy="'+antY+'" r="'+rangeR+'" fill="none" stroke="'+(rg.rangeOk?'var(--good)':'var(--bad)')+'" stroke-width="1.3" stroke-dasharray="5,5" opacity="0.55"></circle>');
+    } else {
+      p.push('<text x="'+(W-16)+'" y="34" text-anchor="end" font-size="9.5" fill="'+(rg.rangeOk?'var(--good)':'var(--bad)')+'">'+(L?'eff. range ':'etkin menzil ')+rg.effectiveRangeM.toFixed(2)+'m ('+(L?'off-scale':'ölçek dışı')+')</text>');
+    }
     p.push('<polygon points="'+antX+','+antY+' '+nearX+','+tagY+' '+farX+','+tagY+'" fill="var(--accent)" opacity="0.14"></polygon>');
     p.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+nearX+'" y2="'+tagY+'" stroke="var(--accent)" stroke-width="1.3"></line>');
     p.push('<line x1="'+antX+'" y1="'+antY+'" x2="'+farX+'" y2="'+tagY+'" stroke="var(--accent)" stroke-width="1.3"></line>');
-    p.push('<line x1="20" y1="'+floorY+'" x2="'+(W-20)+'" y2="'+floorY+'" stroke="var(--line)" stroke-width="1.4"></line>');
-    p.push('<text x="20" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">'+(L?'floor':'zemin')+'</text>');
-    p.push('<line x1="20" y1="'+tagY+'" x2="'+(W-20)+'" y2="'+tagY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
-    p.push('<text x="'+(W-24)+'" y="'+(tagY-6)+'" text-anchor="end" font-size="9.5" fill="var(--dim)">h ('+state.h+'mm)</text>');
-    p.push('<rect x="'+(antX-10)+'" y="'+(antY-8)+'" width="20" height="8" fill="var(--paper)"></rect>');
-    p.push('<text x="'+antX+'" y="'+(antY-14)+'" text-anchor="middle" font-size="10" fill="var(--paper)">(20)</text>');
+    p.push('<line x1="16" y1="'+floorY+'" x2="'+(W-16)+'" y2="'+floorY+'" stroke="var(--dim)" stroke-width="1.6"></line>');
+    p.push('<text x="16" y="'+(floorY+16)+'" font-size="9.5" fill="var(--dim)">'+(L?'floor':'zemin')+'</text>');
+    p.push('<line x1="16" y1="'+tagY+'" x2="'+(W-16)+'" y2="'+tagY+'" stroke="var(--dim)" stroke-width="1" stroke-dasharray="1,4" opacity="0.6"></line>');
+    p.push('<line x1="'+(antX+34)+'" y1="'+antY+'" x2="'+(antX+34)+'" y2="'+tagY+'" stroke="var(--dim)" stroke-width="1" marker-start="url(#dimS)" marker-end="url(#dimS)"></line>');
+    p.push('<text x="'+(antX+40)+'" y="'+((antY+tagY)/2+3)+'" font-size="9.5" fill="var(--dim)">h '+state.h+'mm</text>');
+    p.push('<rect x="'+(antX-9)+'" y="'+(antY-9)+'" width="18" height="9" fill="var(--dim)" rx="1"></rect>');
+    p.push('<text x="'+(antX-16)+'" y="'+(antY-13)+'" text-anchor="end" font-size="10" fill="var(--dim)">(20)</text>');
     var nearOk=Math.sqrt(d.nearDist*d.nearDist+state.h*state.h)<=rg.effectiveRangeMm;
     var farOk=Math.sqrt(d.farDist*d.farDist+state.h*state.h)<=rg.effectiveRangeMm;
     p.push('<circle cx="'+nearX+'" cy="'+tagY+'" r="4.5" fill="'+(nearOk?'var(--good)':'var(--bad)')+'"></circle>');
     p.push('<circle cx="'+farX+'" cy="'+tagY+'" r="4.5" fill="'+(farOk?'var(--good)':'var(--bad)')+'"></circle>');
     p.push('<text x="'+nearX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">'+(L?'near':'yakın')+'</text>');
     p.push('<text x="'+farX+'" y="'+(tagY+18)+'" text-anchor="middle" font-size="9" fill="var(--dim)">'+(L?'far':'uzak')+'</text>');
-    p.push('<line x1="'+(cx-70)+'" y1="'+(floorY+30)+'" x2="'+(cx+70)+'" y2="'+(floorY+30)+'" stroke="var(--blue)" stroke-width="1.3" marker-end="url(#arrowh)"></line>');
-    p.push('<text x="'+cx+'" y="'+(floorY+44)+'" text-anchor="middle" font-size="9.5" fill="var(--blue)">'+(L?'direction of travel':'ürünün geçiş yönü')+'</text>');
-    p.push('<defs><marker id="arrowh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--blue)"></path></marker></defs>');
-    p.push('<text x="'+cx+'" y="18" text-anchor="middle" font-size="9.5" fill="var(--dim)">tilt '+state.tilt+'° · el '+state.el+'° · '+(L?'depth':'derinlik')+' '+Math.round(d.depthLen)+'mm · '+(L?'eff. range':'etkin menzil')+' '+rg.effectiveRangeM.toFixed(2)+'m</text>');
+    p.push('<line x1="'+(cx-70)+'" y1="'+(floorY+34)+'" x2="'+(cx+70)+'" y2="'+(floorY+34)+'" stroke="var(--blue)" stroke-width="1.3" marker-end="url(#arrowh)"></line>');
+    p.push('<text x="'+cx+'" y="'+(floorY+48)+'" text-anchor="middle" font-size="9.5" fill="var(--blue)">'+(L?'direction of travel':'ürünün geçiş yönü')+'</text>');
+    p.push('<defs><marker id="arrowh" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--blue)"></path></marker>'+
+      '<marker id="dimS" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M4,0 L4,8" stroke="var(--dim)" stroke-width="1"></path></marker></defs>');
     svg.setAttribute('viewBox','0 0 '+W+' '+H); svg.innerHTML = p.join('');
   }
 
@@ -1764,7 +1771,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var colL = boxCorners(-gate/2-colW/2,0,colW,colD,0,colTopY);
     var colR = boxCorners(gate/2+colW/2,0,colW,colD,0,colTopY);
     var beamBox = boxCorners(0,0,gate+colW,180,ay,ay+150);
-    var groundHalfZ = Math.max(1300, Math.abs(centerZ)+coneRz*1.5+500);
+    var groundHalfZ = Math.max(900, Math.abs(centerZ)+coneRz*1.15+300);
     var ground = boxCorners(0,0,gate+colW*1.6, groundHalfZ*2, -6, 0);
 
     var basePts=20, coneBases=[], antennaPts=[];
@@ -1779,7 +1786,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     });
 
     var moldW=620,moldD=880,moldH=380;
-    var moldTopY = Math.min(h, ay-40);
+    var moldTopY = Math.max(20, ay-h);
     var moldBox = boxCorners(0, centerZ, moldW, moldD, Math.max(0,moldTopY-moldH), moldTopY);
     var tagPt = {x:0, y:moldTopY+22, z:centerZ};
 
@@ -1800,9 +1807,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     parts.push('<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="none"></rect>');
     parts.push('<polygon points="'+faceStr(ground,[4,5,6,7])+'" fill="var(--panel)" stroke="var(--line)" stroke-width="1"></polygon>');
     [colL,colR].forEach(function(box){
-      parts.push('<polygon points="'+faceStr(box,[1,2,6,5])+'" fill="color-mix(in srgb, var(--paper) 32%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
-      parts.push('<polygon points="'+faceStr(box,[0,1,5,4])+'" fill="color-mix(in srgb, var(--paper) 44%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
-      parts.push('<polygon points="'+faceStr(box,[4,5,6,7])+'" fill="color-mix(in srgb, var(--paper) 58%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
+      parts.push('<polygon points="'+faceStr(box,[1,2,6,5])+'" fill="color-mix(in srgb, var(--paper) 46%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
+      parts.push('<polygon points="'+faceStr(box,[0,1,5,4])+'" fill="color-mix(in srgb, var(--paper) 60%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
+      parts.push('<polygon points="'+faceStr(box,[4,5,6,7])+'" fill="color-mix(in srgb, var(--paper) 74%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
     });
     parts.push('<polygon points="'+faceStr(beamBox,[1,2,6,5])+'" fill="color-mix(in srgb, var(--paper) 58%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
     parts.push('<polygon points="'+faceStr(beamBox,[0,1,5,4])+'" fill="color-mix(in srgb, var(--paper) 68%, var(--panel-2))" stroke="var(--line)" stroke-width="1"></polygon>');
@@ -1814,12 +1821,12 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     order.forEach(function(idx){
       var ring = coneBases[idx], apex = antennaPts[idx];
       var pathPts = [apex].concat(ring);
-      parts.push('<polygon points="'+poly(pathPts)+'" fill="var(--accent)" opacity="0.17"></polygon>');
+      parts.push('<polygon points="'+poly(pathPts)+'" fill="var(--accent)" opacity="0.055"></polygon>');
       var ringClosed = ring.concat([ring[0]]);
-      parts.push('<polyline points="'+poly(ringClosed)+'" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.55"></polyline>');
+      parts.push('<polyline points="'+poly(ringClosed)+'" fill="none" stroke="var(--accent-2)" stroke-width="1.2" opacity="0.75"></polyline>');
       if(m.offs.length<=10){
         [0,5,10,15].forEach(function(ri){
-          parts.push('<line x1="'+S(apex).x+'" y1="'+S(apex).y+'" x2="'+S(ring[ri]).x+'" y2="'+S(ring[ri]).y+'" stroke="var(--accent)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"></line>');
+          parts.push('<line x1="'+S(apex).x+'" y1="'+S(apex).y+'" x2="'+S(ring[ri]).x+'" y2="'+S(ring[ri]).y+'" stroke="var(--accent)" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.3"></line>');
         });
       }
       var antBox = boxCorners(apex.x, apex.z, 90, 70, apex.y-40, apex.y);
