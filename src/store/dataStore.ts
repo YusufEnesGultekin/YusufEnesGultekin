@@ -12,6 +12,7 @@ import {
   SCHEDULE,
   THRESHOLDS,
   computeHissedilen,
+  computeLiveTodayEnergy,
 } from "../lib/mockData";
 import type {
   AlarmRecord,
@@ -49,6 +50,7 @@ interface DataState {
 
   systemMode: SistemModu;
   emergencyStop: boolean;
+  emergencyStopInfo: { kullanici: string; ts: number } | null;
   lastUpdate: number;
   connectionOk: boolean;
 
@@ -86,6 +88,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   systemMode: "otomatik",
   emergencyStop: false,
+  emergencyStopInfo: null,
   lastUpdate: NOW,
   connectionOk: true,
 
@@ -106,11 +109,20 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   tick: () => {
     const s = get();
+    const ts = Date.now();
+
+    // "Bugün" tüketimi otomasyon durumundan bağımsız, gün içinde her zaman
+    // kümülatif olarak artmaya devam eder (bkz. computeLiveTodayEnergy).
+    const liveToday = computeLiveTodayEnergy(ts, s.m3BirimFiyat);
+    const energyRecords = [
+      ...s.energyRecords.filter((e) => e.tarih !== liveToday.tarih),
+      liveToday,
+    ];
+
     if (s.emergencyStop) {
-      set({ lastUpdate: Date.now() });
+      set({ lastUpdate: ts, energyRecords });
       return;
     }
-    const ts = Date.now();
     const connectionOk = Math.random() > 0.03;
     const newReadings: Reading[] = s.rooms.map((room) => {
       const prior = [...s.readings]
@@ -154,6 +166,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       lastUpdate: ts,
       connectionOk,
       systemMode: s.systemMode === "manuel" ? "manuel" : systemMode,
+      energyRecords,
     });
   },
 
@@ -183,15 +196,26 @@ export const useDataStore = create<DataState>((set, get) => ({
   toggleEmergencyStop: (kullanici) => {
     const s = get();
     const next = !s.emergencyStop;
+    const ts = Date.now();
+    const latestSetpoint = [...s.boilerHistory].sort((a, b) => b.ts - a.ts)[0]?.setpoint ?? 55;
+    const boilerRec: BoilerRecord = {
+      ts,
+      setpoint: latestSetpoint,
+      acikMi: !next,
+      sebep: "manuel-override",
+      kullanici,
+    };
     set({
       emergencyStop: next,
+      emergencyStopInfo: next ? { kullanici, ts } : null,
       systemMode: next ? "manuel" : "otomatik",
+      boilerHistory: [...s.boilerHistory, boilerRec],
     });
     if (next) {
       const rec: AlarmRecord = {
-        id: `alarm-emergency-${Date.now()}`,
+        id: `alarm-emergency-${ts}`,
         roomId: s.rooms[0].id,
-        ts: Date.now(),
+        ts,
         tur: "guven-esigi",
         durum: "acik",
         mesaj: `ACİL DURDUR aktifleştirildi (${kullanici}). Tüm otomasyon durduruldu.`,

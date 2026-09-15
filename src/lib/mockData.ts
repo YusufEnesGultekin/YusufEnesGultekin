@@ -123,7 +123,13 @@ const rand = mulberry32(20260914);
 
 const MS_HOUR = 3600_000;
 export const NOW = Date.now();
-export const DATA_HISTORY_START = NOW - 100 * 24 * MS_HOUR; // ~100 gün geriye
+export const DATA_HISTORY_START = NOW - 730 * 24 * MS_HOUR; // ~2 yıl geriye
+
+// 50 sınıflık bir okul ölçeğinde toplam bina alanı varsayımı (proje
+// raporundaki 25 eğitim ortamı / 3.382 m² referansının orantılı büyütülmüş
+// hali). Enerji/tüketim hesaplamaları bu ölçeğe göre yapılır.
+export const ENERGY_SINIF_SAYISI = 50;
+export const ENERGY_BINA_ALANI_M2 = Math.round(3382 * (ENERGY_SINIF_SAYISI / 25));
 
 function isHoliday(d: Date): boolean {
   const iso = d.toISOString().slice(0, 10);
@@ -192,8 +198,11 @@ function generateAll(): SimState {
     roomBaseline[r.id] = 21 + cepheOffset[r.cephe] + (rand() - 0.5) * 0.6;
   });
 
-  const stepMs = MS_HOUR; // hourly resolution for history, denser for recent 48h
-  for (let ts = DATA_HISTORY_START; ts <= NOW; ts += stepMs) {
+  // Performans için: son 90 gün saatlik, daha eskisi 4 saatlik çözünürlükte
+  // üretilir. 2 yıllık geçmiş için toplam nokta sayısını makul tutar.
+  const RECENT_WINDOW_MS = 90 * 24 * MS_HOUR;
+  for (let ts = DATA_HISTORY_START; ts <= NOW; ) {
+    const stepMs = NOW - ts > RECENT_WINDOW_MS ? 4 * MS_HOUR : MS_HOUR;
     const d = new Date(ts);
     const outdoor = outdoorTemp(ts);
     const heatingActive = outdoor < 16;
@@ -343,6 +352,8 @@ function generateAll(): SimState {
           "Cephe kümesi içinde tutarsız veri tespit edildi, sistem pasif/güvenli moda geçti.",
       });
     }
+
+    ts += stepMs;
   }
 
   applyLiveShowcase(readings, alarms);
@@ -355,7 +366,7 @@ function generateAll(): SimState {
 // anda sınıfların büyükçe bir kısmında örnek uyarı/alarm durumu görülmesini
 // garanti eder. Oranlar toplam nokta sayısına göre otantik biçimde ölçeklenir.
 function applyLiveShowcase(readings: Reading[], alarms: AlarmRecord[]) {
-  const lastTs = Math.max(...readings.map((r) => r.ts));
+  const lastTs = readings.reduce((max, r) => (r.ts > max ? r.ts : max), 0);
   const findLast = (roomId: string) =>
     readings.find((r) => r.roomId === roomId && r.ts === lastTs);
   const HOUR = 3_600_000;
@@ -458,15 +469,37 @@ export const ALARMS: AlarmRecord[] = generated.alarms;
 
 export const M3_BIRIM_FIYAT = GUNCEL_M3_FIYAT_VARSAYIM_TL;
 
+// Proje raporunda bildirilen gerçek fatura verisinden ("Aralık 2024 ayı
+// doğalgaz faturası 62.500 TL", ~8 TL/m³, 3.382 m² bina, ~31 gün) türetilen
+// zirve kış günü tüketim yoğunluğu: (62.500/8)/31/3.382 ≈ 0.0745 m³/m²/gün.
+// Enerji hesapları burada bu gerçek referansa göre ölçeklenir.
+const PEAK_M3_PER_M2_GUN = 62_500 / 8 / 31 / 3382;
+
+function heatingIntensity(outdoor: number): number {
+  return Math.max(0, Math.min(1, (16 - outdoor) / 21));
+}
+
+function seededRatioForDate(iso: string): number {
+  let h = 0;
+  for (let i = 0; i < iso.length; i++) h = (h * 31 + iso.charCodeAt(i)) | 0;
+  const frac = Math.abs(h % 1000) / 1000;
+  return 0.11 + frac * 0.08; // %11-19 arası tasarruf, güne göre sabit
+}
+
 export function generateEnergyRecords(): EnergyRecord[] {
   const records: EnergyRecord[] = [];
   const dayMs = 24 * MS_HOUR;
-  for (let ts = DATA_HISTORY_START; ts <= NOW; ts += dayMs) {
+  const todayStart = new Date(NOW);
+  todayStart.setUTCHours(0, 0, 0, 0);
+  for (let ts = DATA_HISTORY_START; ts < todayStart.getTime(); ts += dayMs) {
     const d = new Date(ts);
     const iso = d.toISOString().slice(0, 10);
     const outdoor = outdoorTemp(ts);
-    const heating = outdoor < 16;
-    const referans = heating ? 38 + Math.max(0, 14 - outdoor) * 2.1 : 4;
+    const intensity = heatingIntensity(outdoor);
+    const heating = intensity > 0;
+    const referans = heating
+      ? ENERGY_BINA_ALANI_M2 * PEAK_M3_PER_M2_GUN * intensity
+      : ENERGY_BINA_ALANI_M2 * 0.0015;
     const savingsRatio = 0.11 + rand() * 0.08; // %11-19 arası tasarruf
     const tahmini = heating ? referans * (1 - savingsRatio) : referans * 0.97;
     const tasarrufM3 = referans - tahmini;
@@ -479,7 +512,41 @@ export function generateEnergyRecords(): EnergyRecord[] {
       m3BirimFiyat: M3_BIRIM_FIYAT,
     });
   }
+  records.push(computeLiveTodayEnergy(NOW, M3_BIRIM_FIYAT));
   return records;
+}
+
+// "Bugün" sekmesinin her zaman canlı ve kışın 50 sınıflık bir okulda
+// olduğu gibi sürekli artan, anlamlı bir tüketim göstermesi için: gerçek
+// takvim mevsimi ne olursa olsun bugünü kış günü olarak simüle eder ve
+// güne ait tüketimi, günün o ana kadar geçen kısmıyla orantılı (kümülatif
+// artan) şekilde hesaplar.
+export function computeLiveTodayEnergy(now: number, m3BirimFiyat: number): EnergyRecord {
+  const iso = new Date(now).toISOString().slice(0, 10);
+  const forcedWinterOutdoor = -3;
+  const intensity = heatingIntensity(forcedWinterOutdoor);
+  const referansFull = ENERGY_BINA_ALANI_M2 * PEAK_M3_PER_M2_GUN * intensity;
+  const savingsRatio = seededRatioForDate(iso);
+  const tahminiFull = referansFull * (1 - savingsRatio);
+
+  const d = new Date(now);
+  const hour = d.getUTCHours() + d.getUTCMinutes() / 60;
+  // Gece de düşük seviyede ısıtma/sıcak su tüketimi olur; gün boyunca sürekli
+  // artıp gece yarısında sıfırlanan kümülatif bir eğri (asla 0'da takılı kalmaz).
+  const fraction = Math.max(0.05, Math.min(1, hour / 24));
+
+  const referans = referansFull * fraction;
+  const tahmini = tahminiFull * fraction;
+  const tasarrufM3 = referans - tahmini;
+
+  return {
+    tarih: iso,
+    tahminiTuketimM3: Number(tahmini.toFixed(1)),
+    referansTuketimM3: Number(referans.toFixed(1)),
+    tasarrufM3: Number(tasarrufM3.toFixed(1)),
+    tasarrufTL: Number((tasarrufM3 * m3BirimFiyat).toFixed(0)),
+    m3BirimFiyat,
+  };
 }
 
 export const ENERGY_RECORDS: EnergyRecord[] = generateEnergyRecords();

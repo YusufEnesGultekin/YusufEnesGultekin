@@ -26,6 +26,7 @@ export default function BoilerControl() {
     applyOverride,
     role,
     emergencyStop,
+    emergencyStopInfo,
     toggleEmergencyStop,
     systemMode,
     thresholds,
@@ -88,6 +89,28 @@ export default function BoilerControl() {
 
   return (
     <div>
+      {emergencyStop && (
+        <div
+          className="card"
+          style={{
+            marginBottom: 16,
+            background: "rgba(239, 68, 68, 0.12)",
+            border: "1px solid var(--danger)",
+          }}
+        >
+          <div style={{ fontSize: 16, fontWeight: 700, color: "var(--danger)" }}>
+            🛑 ACİL DURDURMA AKTİF
+          </div>
+          <div style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 4 }}>
+            {emergencyStopInfo
+              ? `${emergencyStopInfo.kullanici} tarafından ${new Date(emergencyStopInfo.ts).toLocaleString("tr-TR")} itibarıyla etkinleştirildi.`
+              : "Etkinleştirildi."}{" "}
+            Kombi kapatıldı, tüm otomatik ayarlama durduruldu — sistem tam manuel modda. Aşağıdaki
+            "Acil Durdurmayı Kaldır" ile normale dönebilirsiniz.
+          </div>
+        </div>
+      )}
+
       <div className="kpi-grid">
         <KpiCard label="Güncel Setpoint" value={`${latest?.setpoint ?? "-"} °C`} />
         <KpiCard

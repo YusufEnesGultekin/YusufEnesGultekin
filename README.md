@@ -4,10 +4,13 @@ Kamu binalarında (okul, hastane) merkezi ısıtma sisteminden kaynaklanan enerj
 israfını azaltmak için geliştirilen IoT izleme/otomasyon prototipinin web
 tabanlı takip/dashboard arayüzü.
 
-Bu prototip, gerçekçi **simüle edilmiş veriyle** (3+ aylık sensör geçmişi,
+Bu prototip, gerçekçi **simüle edilmiş veriyle** (2 yıllık sensör geçmişi,
 cephe bazlı sıcaklık farklılıkları, alarm kayıtları, kombi setpoint geçmişi)
-önceden doldurulmuştur. Gerçek Modbus/RS-485 entegrasyonu sonraki bir aşamada
-eklenecektir.
+önceden doldurulmuştur. Enerji/tüketim hesapları, proje raporundaki gerçek
+fatura verisinden türetilen bir referansla 50 sınıflık bir okul ölçeğine göre
+yapılır; "Bugün" sekmesi gerçek takvim mevsimi ne olursa olsun kış günü
+varsayımıyla, gün içinde sürekli artan canlı bir tüketim gösterir. Gerçek
+Modbus/RS-485 entegrasyonu sonraki bir aşamada eklenecektir.
 
 ## Kurulum ve Çalıştırma
 
