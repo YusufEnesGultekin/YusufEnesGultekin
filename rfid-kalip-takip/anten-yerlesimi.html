@@ -332,12 +332,12 @@
   <section class="step" id="step-geom">
     <div class="step-head"><div class="step-num">5</div><h2 data-i18n="step4Title">Geçit / Montaj Geometrisi</h2><span class="info-tip-slot" data-tip-slot="step4Note"></span></div>
     <div class="ctl-grid">
-      <div class="ctl">
+      <div class="ctl" id="ctlAntCount">
         <label data-i18n="lblAntCount">Anten Sayısı</label>
         <input type="number" id="inN" min="1" step="1" value="4">
       </div>
       <div class="ctl">
-        <label data-i18n="lblGateWidth">Geçit/Alan Genişliği (mm)</label>
+        <label id="lblGateWidth">Geçit/Alan Genişliği (mm)</label>
         <input type="number" id="inGate" min="100" step="1" value="3496">
       </div>
       <div class="ctl">
@@ -971,6 +971,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     step4Note:{tr:'Değerleri yazın — sonuçlar yalnızca "Sistemi Kur" butonuna bastığınızda güncellenir.', en:'Type the values — results update only when you press "Build System".'},
     lblAntCount:{tr:'Anten Sayısı', en:'Antenna Count'},
     lblGateWidth:{tr:'Geçit/Alan Genişliği (mm)', en:'Gate/Area Width (mm)'},
+    lblGateWidthMachine:{tr:'Makine Çıkış Noktası — Kapsanacak Genişlik (mm)', en:'Machine Exit Point — Width to Cover (mm)'},
     lblMountHeight:{tr:'Montaj Yüksekliği (mm)', en:'Mounting Height (mm)'},
     lblVertDist:{tr:'Anten–Etiket Dikey Mesafe h (mm)', en:'Antenna–Tag Vertical Distance h (mm)'},
     presetMold:{tr:'Kalıp üstü·1500', en:'On mold·1500'}, presetCart:{tr:'Araba üstü·1000', en:'On cart·1000'},
@@ -1071,6 +1072,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     document.documentElement.lang = lang;
     document.title = lang==='en' ? 'RFID System Design & Simulation Tool' : 'RFID Sistem Tasarım ve Simülasyon Aracı';
     renderInfoTips();
+    if(typeof wiz !== 'undefined' && document.getElementById('lblGateWidth')){ applyGeomLabels(); }
   }
   function positionBubble(tip){
     var bubble = tip.querySelector('.bubble'); if(!bubble) return;
@@ -1144,6 +1146,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
      desc:{tr:'Genel amaçlı, paper-face UHF etiket — plastik, karton, ahşap yüzeyler için standart lojistik etiketi.', en:'General-purpose paper-face UHF tag — standard logistics tag for plastic, cardboard, wood surfaces.'}},
     {id:'metal', name:'Xerafy Metal Skin Mercury 86 Max', price:[1.5,5],
      desc:{tr:'On-metal etiket, doğrudan metal yüzeye montaj — 13 m\'ye kadar okuma mesafesi (üretici verisi).', en:'On-metal tag for direct mounting on metal — up to 13 m read range per datasheet.'}},
+    {id:'metal_eko', name:'SCIVAS C2626-1', price:[1.0,9.5],
+     desc:{tr:'Kompakt on-metal etiket (26.5×26.5mm), IP68, -40/+300°C — yüksek hacimde ekonomik seçenek (MOQ 100).', en:'Compact on-metal tag (26.5×26.5mm), IP68, -40/+300°C — economical option at high volume (MOQ 100).'}},
     {id:'sivi', name:'Confidex Survivor', price:[3,8],
      desc:{tr:'IP68 gövde, yıkama/nem dayanımlı rugged etiket — sıvı dolu kap ve nemli ortamlar için.', en:'IP68, wash/moisture-resistant rugged tag — for liquid-filled containers and wet environments.'}},
     {id:'tekstil', name:'Xerafy TEX TRAK (70×15mm)', price:[1.5,4],
@@ -1245,9 +1249,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
      l:{tr:'Diğer / Genel (ETSI benzeri varsayım)', en:'Other / General (assumes ETSI-like limits)'}}
   ];
 
-  function pickTag(product){
+  function pickTag(product, budget){
     var id = {metal:'metal', genel:'genel', sivi:'sivi', tekstil:'tekstil', agir:'agir',
               gida:'genel', elektronik:'metal', cam:'genel', kargo:'genel', personel:'genel'}[product] || 'genel';
+    if(id==='metal' && budget==='eko'){ id = 'metal_eko'; }
     return TAGS.filter(function(x){ return x.id===id; })[0];
   }
   var TRACKING_ANTENNA_CLASS = { gate:'gate', kargo:'gate', konveyor:'shelf', raf:'shelf', personel:'shelf', mobil:null, arac:'arac', makina:'shelf' };
@@ -1261,10 +1266,14 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       : { eko:'kompakt', standart:'genis', premium:'a6034' };
     return tiers[budget] || tiers.standart;
   }
-  function pickReader(tracking, n){
-    if(tracking==='mobil'){ return { reader:READERS.filter(function(r){return r.id==='rh';})[0], qty:1, antennaNeeded:false }; }
-    var r = n<=2 ? READERS.filter(function(x){return x.id==='r2';})[0] : READERS.filter(function(x){return x.id==='r4';})[0];
-    return { reader:r, qty:Math.ceil(n/r.ports), antennaNeeded:true };
+  function pickReader(tracking, n, budget, reliability){
+    if(tracking==='mobil'){ return { reader:READERS.filter(function(r){return r.id==='rh';})[0], qty:1, antennaNeeded:false, redundant:false }; }
+    var r2 = READERS.filter(function(x){return x.id==='r2';})[0], r4 = READERS.filter(function(x){return x.id==='r4';})[0];
+    var useR4 = n>r2.ports || budget==='premium' || reliability==='yuksek';
+    var r = useR4 ? r4 : r2;
+    var redundant = reliability==='yuksek';
+    var qty = Math.ceil(n/r.ports) + (redundant ? 1 : 0);
+    return { reader:r, qty:qty, antennaNeeded:true, redundant:redundant };
   }
   function currentRegion(){ return REGIONS.filter(function(r){ return r.id===wiz.region; })[0] || REGIONS[0]; }
 
@@ -1344,12 +1353,22 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         }
         if(group==='region'){ renderRegionInfo(); }
         if(group==='product'){ applyMetalproxCompat(); }
+        if(group==='tracking' || group==='budget'){ updateAutoAntennaDesc(); }
       });
     });
+  }
+  function updateAutoAntennaDesc(){
+    var card = document.querySelector('#gridAntenna .opt-card[data-value="oto"] .desc');
+    if(!card) return;
+    var id = recommendAntennaId(wiz.tracking, wiz.budget);
+    if(id===null){ card.textContent = OPTS.antenna.filter(function(o){return o.v==='oto';})[0].d[lang]; return; }
+    var spec = ANTENNAS.filter(function(a){ return a.id===id; })[0];
+    card.textContent = spec ? '→ '+spec.name : OPTS.antenna.filter(function(o){return o.v==='oto';})[0].d[lang];
   }
   function renderAllGrids(){
     ['product','tracking','region','env','metalprox','antenna','budget','reliability'].forEach(function(g){ renderGrid('grid'+g.charAt(0).toUpperCase()+g.slice(1), g); });
     applyMetalproxCompat();
+    updateAutoAntennaDesc();
   }
   var METALPROX_LOCK = { metal:'dogrudan' };
   function applyMetalproxCompat(){
@@ -1387,11 +1406,17 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     document.getElementById('step-geom').hidden = isMobile;
     document.getElementById('step-antenna').hidden = isMobile;
     document.getElementById('reqMarginCtls').hidden = isMobile;
+    applyGeomLabels();
     renumberSteps();
     document.getElementById('topnavSteps').querySelectorAll('a').forEach(function(a){
       var target = document.getElementById(a.getAttribute('data-target'));
       a.toggleAttribute('data-hidden', target.hidden);
     });
+  }
+  function applyGeomLabels(){
+    var isMachine = wiz.tracking === 'makina';
+    document.getElementById('ctlAntCount').hidden = isMachine;
+    document.getElementById('lblGateWidth').textContent = t(isMachine ? 'lblGateWidthMachine' : 'lblGateWidth');
   }
   function renumberSteps(){
     var visible = Array.prototype.slice.call(document.querySelectorAll('.step')).filter(function(s){ return !s.hidden; });
@@ -1450,7 +1475,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     return idx===0 || idx===n-1 || idx%step===0;
   }
 
-  var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0, regionMult:1 };
+  var state = { n:4, gate:3496, ay:3000, h:1500, az:30, el:15, tilt:0, gain:9, refRange:6.5, reqAngle:0, reqLinear:0, regionMult:1, reqAngleRaw:0, reqLinearRaw:0, reliabilityBuffer:{angle:0,linear:0} };
+  var RELIABILITY_MARGIN = { standart:{angle:0,linear:0}, yuksek:{angle:3,linear:150} };
 
   function marginFor(n, gate, h, az){
     var offs = offsetsFor(n, gate);
@@ -1510,7 +1536,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
   }
   function altCardHtml(alt){
     var L = lang==='en';
-    var readerPick = pickReader(wiz.tracking, alt.n);
+    var readerPick = pickReader(wiz.tracking, alt.n, wiz.budget, wiz.reliability);
     var unitPrice = alt.antSpec.price;
     var estLo = unitPrice[0]*alt.n + readerPick.reader.price[0]*readerPick.qty;
     var estHi = unitPrice[1]*alt.n + readerPick.reader.price[1]*readerPick.qty;
@@ -1555,11 +1581,17 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     var el = document.getElementById('reqResult');
     el.classList.remove('ok','bad'); el.classList.add(overall?'ok':'bad');
     var L = lang==='en';
+    var buf = state.reliabilityBuffer;
+    var hasBuf = buf && (buf.angle>0 || buf.linear>0);
     var rows = '<div class="req-rows">'+
       '<span>'+(L?'Angular margin':'Açısal marj')+': '+m.marginDeg.toFixed(1)+'° / '+(L?'target':'hedef')+' ≥'+state.reqAngle+'° '+(passA?'✓':'✗')+'</span>'+
       '<span>'+(L?'Linear margin':'Doğrusal marj')+': '+Math.round(m.marginLin)+' mm / '+(L?'target':'hedef')+' ≥'+state.reqLinear+' mm '+(passL?'✓':'✗')+'</span>'+
       '<span>'+(L?'Range':'Menzil')+': '+Math.round(rg.worstSlantMm)+' mm / '+(L?'effective':'etkin')+' '+Math.round(rg.effectiveRangeMm)+' mm '+(passR?'✓':'✗')+'</span>'+
-    '</div>';
+    '</div>'+
+    (hasBuf ? '<div class="detail" style="margin-top:6px;">'+(L?
+      ('High reliability applies an automatic safety margin: +'+buf.angle+'° angular / +'+buf.linear+'mm linear on top of your entered requirement ('+state.reqAngleRaw+'° / '+state.reqLinearRaw+'mm).')
+      :('Yüksek güvenilirlik, girdiğiniz gereksinime ('+state.reqAngleRaw+'° / '+state.reqLinearRaw+'mm) otomatik olarak +'+buf.angle+'° açısal / +'+buf.linear+'mm doğrusal emniyet payı ekler.')
+    )+'</div>' : '');
     if(overall){
       var headline = '<div class="headline">✓ '+(L?('Current settings ('+state.n+' antennas) meet your requirement.'):('Mevcut ayarlar ('+state.n+' anten) girdiğiniz gereksinimi karşılıyor.'))+'</div>';
       var savingsHtml = '';
@@ -1832,7 +1864,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       rows.push({label:lang==='en'?'Antenna Cable':'Anten Kablosu', model: lang==='en'?'Standard RF cable (LMR-195/240 class)':'Standart RF kablo (LMR-195/240 sınıfı)', desc: lang==='en'?'Antenna-to-reader connection.':'Anten–okuyucu bağlantısı.', qty:m.n+' '+t('unit'), price:priceStr(ACCESSORY_PRICE.cable,m.n), total:[ACCESSORY_PRICE.cable[0]*m.n,ACCESSORY_PRICE.cable[1]*m.n]});
       rows.push({label:lang==='en'?'Mounting Bracket':'Montaj Braketi', model: lang==='en'?'Adjustable mounting bracket':'Ayarlanabilir montaj braketi', desc: lang==='en'?'Fixing the antenna to the beam.':'Kiriş üzerine anten sabitleme.', qty:m.n+' '+t('unit'), price:priceStr(ACCESSORY_PRICE.bracket,m.n), total:[ACCESSORY_PRICE.bracket[0]*m.n,ACCESSORY_PRICE.bracket[1]*m.n]});
     }
-    rows.push({label:lang==='en'?'Reader':'Okuyucu', model:readerPick.reader.name, desc:readerPick.reader.desc[lang], qty:readerPick.qty+' '+t('unit'), price:priceStr(readerPick.reader.price,readerPick.qty), total:[readerPick.reader.price[0]*readerPick.qty, readerPick.reader.price[1]*readerPick.qty]});
+    var readerDesc = readerPick.reader.desc[lang] + (readerPick.redundant ? (lang==='en'?' Includes 1 redundant standby unit for dual-read confirmation.':' Çift okuma teyidi için 1 yedek/standby ünite dahildir.') : '');
+    rows.push({label:lang==='en'?'Reader':'Okuyucu', model:readerPick.reader.name, desc:readerDesc, qty:readerPick.qty+' '+t('unit'), price:priceStr(readerPick.reader.price,readerPick.qty), total:[readerPick.reader.price[0]*readerPick.qty, readerPick.reader.price[1]*readerPick.qty]});
     return rows;
   }
   function renderBomTable(tableId, rows){
@@ -2204,6 +2237,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         [L?'Effective range':'Etkin menzil', dataset.range.effectiveRangeM.toFixed(2)+' m'],
         [L?'Range status':'Menzil durumu', dataset.range.rangeOk ? (L?'Sufficient':'Yeterli') : (L?'Insufficient':'Yetersiz')]
       ]);
+      if(state.reliabilityBuffer && (state.reliabilityBuffer.angle>0 || state.reliabilityBuffer.linear>0)){
+        para(L?'High reliability applies an automatic safety margin on top of the entered requirement ('+state.reqAngleRaw+'° / '+state.reqLinearRaw+'mm): +'+state.reliabilityBuffer.angle+'° angular, +'+state.reliabilityBuffer.linear+'mm linear.'
+              :'Yüksek güvenilirlik, girilen gereksinime ('+state.reqAngleRaw+'° / '+state.reqLinearRaw+'mm) otomatik olarak +'+state.reliabilityBuffer.angle+'° açısal, +'+state.reliabilityBuffer.linear+'mm doğrusal emniyet payı ekler.');
+      }
       if(dataset.overallPass){
         para(L?'The current configuration meets the entered performance requirement.':'Mevcut konfigürasyon, girilen performans gereksinimini karşılamaktadır.');
         try{
@@ -2372,7 +2409,10 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     clampInputs();
     state.n=parseInt(inN.value,10)||1; state.gate=parseInt(inGate.value,10)||1000; state.ay=parseInt(inAY.value,10)||1000;
     state.h=parseInt(inH.value,10)||100; state.tilt=parseInt(inTilt.value,10)||0; state.refRange=parseFloat(inRefRange.value)||1;
-    state.reqAngle=parseFloat(inReqAngle.value)||0; state.reqLinear=parseFloat(inReqLinear.value)||0;
+    state.reqAngleRaw=parseFloat(inReqAngle.value)||0; state.reqLinearRaw=parseFloat(inReqLinear.value)||0;
+    state.reliabilityBuffer = RELIABILITY_MARGIN[wiz.reliability] || RELIABILITY_MARGIN.standart;
+    state.reqAngle = state.reqAngleRaw + state.reliabilityBuffer.angle;
+    state.reqLinear = state.reqLinearRaw + state.reliabilityBuffer.linear;
     state.regionMult = currentRegion().mult;
     var antId = wiz.antenna==='oto' ? recommendAntennaId(wiz.tracking, wiz.budget) : wiz.antenna;
     var antSpec = (wiz.antenna==='manuel' || antId===null) ? null : ANTENNAS.filter(function(a){return a.id===antId;})[0];
@@ -2400,13 +2440,13 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
   function runBuild(){
     var isMobile = wiz.tracking === 'mobil';
-    var tag = pickTag(wiz.product);
+    var tag = pickTag(wiz.product, wiz.budget);
 
     document.getElementById('fullResultTabs').hidden = isMobile;
     document.getElementById('simpleResult').hidden = !isMobile;
 
     if(isMobile){
-      var readerPick = pickReader('mobil', 1);
+      var readerPick = pickReader('mobil', 1, wiz.budget, wiz.reliability);
       renderSimpleRequirement(tag, readerPick);
       var rows = bomRows(tag, null, null, readerPick, {n:0});
       renderBomTable('bomTableSimple', rows);
@@ -2414,7 +2454,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     } else {
       var picked = readAllControls();
       var m = computeMargin(), d = computeDepth(), rg = computeRange(m,d);
-      var readerPick2 = pickReader(wiz.tracking, m.n);
+      var readerPick2 = pickReader(wiz.tracking, m.n, wiz.budget, wiz.reliability);
       var antLabel = wiz.antenna==='manuel' ? (lang==='en'?'Manual (custom parameters)':'Manuel (özel parametreler)') : (picked.antSpec ? picked.antSpec.name : (lang==='en'?'Built-in antenna':'Dahili anten'));
 
       renderCalcStats(m); renderSimStats(m,d,rg); renderDepthStats(m,d,rg); renderRequirement(m,d,rg,picked.antId);
