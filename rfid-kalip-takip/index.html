@@ -277,6 +277,7 @@
   thead th[data-field]{cursor:pointer;user-select:none;}
   thead th[data-field]:hover{color:#3a3f4b;}
   .sort-ind{font-size:9px;letter-spacing:0;}
+  .qmark{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:rgba(107,114,128,0.25);color:#4b5563;font-size:10px;font-weight:700;font-style:normal;cursor:help;vertical-align:middle;}
 
   /* Location summary bar */
   .loc-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin:14px 0 6px;background:#EFEFEF;}
@@ -574,6 +575,7 @@
               <th data-field="location">Konum <span class="sort-ind"></span></th>
               <th data-field="total">Toplam Üretim <span class="sort-ind"></span></th>
               <th data-field="lastMaint">Son Bakım <span class="sort-ind"></span></th>
+              <th data-field="maintFreq">Bakım Sıklığı <span class="qmark" title="Kalıbın bakıma girme geçmişine göre hesaplanan ortalama aralık">?</span> <span class="sort-ind"></span></th>
               <th data-field="status">Durum <span class="sort-ind"></span></th>
             </tr></thead>
             <tbody id="sicil-table"></tbody>
@@ -595,6 +597,7 @@
           <div class="stat-card"><div class="lbl">ÜRETİMHANEDE</div><div class="val">1.070</div><div class="sub">480 Enj. · 350 Oto.Pres · 240 Eks.Pres</div></div>
           <div class="stat-card"><div class="lbl">BAKIMDA</div><div class="val">80</div><div class="sub">Bakım atölyesinde</div></div>
           <div class="stat-card"><div class="lbl">TOPLAM KALIP</div><div class="val accent">~3.000</div><div class="sub">Tüm konumlar toplamı</div></div>
+          <div class="stat-card"><div class="lbl">ORT. YÜKLEME SÜRESİ <span class="qmark" title="Tüm çıkış hareketlerinin ortalama yükleme (makinaya bağlama) süresi">?</span></div><div class="val" id="stat-avg-load">—</div><div class="sub">Tüm kalıplar ortalaması</div></div>
         </div>
         <div class="panel">
           <div class="loc-bar">
@@ -632,6 +635,7 @@
               <th data-field="person">Kim <span class="sort-ind"></span></th>
               <th data-field="ts">Tarih / Saat <span class="sort-ind"></span></th>
               <th data-field="reason">Amaç <span class="sort-ind"></span></th>
+              <th data-field="loadMinutes">Yükleme Süresi <span class="qmark" title="Kalıbın makinaya bağlanıp üretime hazır hale getirilmesi için geçen süre (yalnızca çıkış hareketlerinde kaydedilir)">?</span> <span class="sort-ind"></span></th>
               <th data-field="status">Durum <span class="sort-ind"></span></th>
             </tr></thead>
             <tbody id="hareket-table"></tbody>
@@ -965,21 +969,52 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
     return order.filter(c=>totals[c]).map(c=>({name:c, sum:totals[c].sum, unit:totals[c].unit}));
   }
 
+  /* ---------- BAKIM SIKLIĞI & YÜKLEME SÜRESİ (hareket geçmişinden hesaplanır) ---------- */
+  const MAINT_REASONS = ['Periyodik bakım zamanı geldi','Yüzeyde aşınma tespit edildi','Arıza var - tamir gerekiyor'];
+  function maintStatsFor(code){
+    const events = movementLog.filter(r=>r.code===code && r.dir==='GİRİŞ' && MAINT_REASONS.includes(r.reason))
+      .slice().sort((a,b)=>a.ts-b.ts);
+    if(events.length < 2) return {count: events.length, avgDays: null};
+    let totalDays = 0;
+    for(let i=1;i<events.length;i++){ totalDays += (events[i].ts - events[i-1].ts) / 86400000; }
+    return {count: events.length, avgDays: Math.round(totalDays/(events.length-1))};
+  }
+  function maintFrequencyLabel(code){
+    const s = maintStatsFor(code);
+    if(s.avgDays!=null) return `~${s.avgDays} günde bir (${s.count} bakım)`;
+    if(s.count===1) return '1 bakım — sıklık için yetersiz veri';
+    return 'Bakım kaydı yok';
+  }
+  function loadEventsFor(code){
+    return movementLog.filter(r=>r.code===code && r.dir==='ÇIKIŞ' && r.loadMinutes!=null);
+  }
+  function avgLoadMinutesFor(code){
+    const events = loadEventsFor(code);
+    if(!events.length) return null;
+    return Math.round(events.reduce((s,r)=>s+r.loadMinutes,0)/events.length);
+  }
+  function avgLoadMinutesOverall(){
+    const events = movementLog.filter(r=>r.dir==='ÇIKIŞ' && r.loadMinutes!=null);
+    if(!events.length) return null;
+    return Math.round(events.reduce((s,r)=>s+r.loadMinutes,0)/events.length);
+  }
+
   /* ---------- KALIP HAREKETLERİ (giriş/çıkış kaydı) ---------- */
   // Yön sabittir: GİRİŞ = Üretimhane -> Kalıphane, ÇIKIŞ = Kalıphane -> Üretimhane. Seçim yok.
   let movementIdCounter = 1;
   function seedTs(day,h,mi){ return new Date(2026,8,day,h,mi).getTime(); } // 2026 Eylül (ay index 8)
   const movementLog = [
+    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'S. Yıldız', reason:'Periyodik bakım zamanı geldi', ts:seedTs(5-38,9,0), status:'ok'},
     {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'S. Yıldız', reason:'Periyodik bakım zamanı geldi', ts:seedTs(5,8,12), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'S. Yıldız', reason:'Bakımı tamamlandı - üretime hazır', ts:seedTs(5,8,40), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0087', name:'Kapak Preslemesi', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(6,7,5), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0301', name:'Röle Kapağı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(6,22,5), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0210', name:'Klemens Alt Gövde', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'S. Yıldız', reason:'Bakımı tamamlandı - üretime hazır', ts:seedTs(5,8,40), status:'ok', loadMinutes:18},
+    {id:movementIdCounter++, code:'KLP-0087', name:'Kapak Preslemesi', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(6,7,5), status:'ok', loadMinutes:24},
+    {id:movementIdCounter++, code:'KLP-0301', name:'Röle Kapağı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'S. Yıldız', reason:'Üretime gönderildi', ts:seedTs(6,22,5), status:'ok', loadMinutes:21},
     {id:movementIdCounter++, code:'KLP-0044', name:'Terminal Klipsi', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'C. Aydın', reason:'Yüzeyde aşınma tespit edildi', ts:seedTs(6,22,50), status:'ok'},
     {id:movementIdCounter++, code:'KLP-0055', name:'Gövde Kapağı', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'—', reason:'—', ts:seedTs(7,6,55), status:'missed'},
-    {id:movementIdCounter++, code:'KLP-0271', name:'Yay Baskı Parçası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'B. Koç', reason:'Üretime gönderildi', ts:seedTs(7,6,5), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0119', name:'Röle Tabanı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(7,5,45), status:'ok'},
+    {id:movementIdCounter++, code:'KLP-0271', name:'Yay Baskı Parçası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'B. Koç', reason:'Üretime gönderildi', ts:seedTs(7,6,5), status:'ok', loadMinutes:16},
+    {id:movementIdCounter++, code:'KLP-0119', name:'Röle Tabanı', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'A. Demir', reason:'Üretime gönderildi', ts:seedTs(7,5,45), status:'ok', loadMinutes:27},
     {id:movementIdCounter++, code:'KLP-0033', name:'Terminal Kapağı', dir:'GİRİŞ', from:'Üretimhane', to:'Kalıphane', person:'M. Şahin', reason:'Arıza yok - üretim sonu teslim', ts:seedTs(7,7,40), status:'ok'},
-    {id:movementIdCounter++, code:'KLP-0362', name:'Baza Plakası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'H. Kara', reason:'Üretime gönderildi', ts:seedTs(7,9,35), status:'ok'}
+    {id:movementIdCounter++, code:'KLP-0362', name:'Baza Plakası', dir:'ÇIKIŞ', from:'Kalıphane', to:'Üretimhane', person:'H. Kara', reason:'Üretime gönderildi', ts:seedTs(7,9,35), status:'ok', loadMinutes:19}
   ];
 
   /* ---------- SIRALAMA ALTYAPISI ---------- */
@@ -1090,6 +1125,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
   function sicilAccessor(m, field){
     if(field==='lastMaint') return parseTRDate(m.lastMaint);
     if(field==='status') return statusLabel[m.status];
+    if(field==='maintFreq') return maintStatsFor(m.code).avgDays==null ? -1 : maintStatsFor(m.code).avgDays;
     return m[field];
   }
   function renderSicil(){
@@ -1112,8 +1148,9 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
         <td>${m.location}</td>
         <td>${fmt(m.total)} ${m.unit}</td>
         <td>${m.lastMaint}</td>
+        <td>${maintFrequencyLabel(m.code)}</td>
         <td>${badge(m.status)}</td>
-      </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Sonuç bulunamadı.</td></tr>`;
+      </tr>`).join('') || `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px;">Sonuç bulunamadı.</td></tr>`;
     const moreNote = document.getElementById('sicil-more-note');
     moreNote.textContent = (!q && activeChip==='hepsi')
       ? `+ ~${fmt(TOTAL_MOLDS - molds.length)} kalıp daha — arama ve filtreleme ile tam liste görüntülenebilir.`
@@ -1243,6 +1280,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
   }
   function hareketAccessor(r, field){
     if(field==='status') return movementStatusLabel(r.status);
+    if(field==='loadMinutes') return r.loadMinutes==null ? -1 : r.loadMinutes;
     return r[field];
   }
   function renderMovementPage(){
@@ -1265,8 +1303,14 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
         <td>${r.person}</td>
         <td>${formatDateTime(r.ts)}</td>
         <td>${r.reason}</td>
+        <td>${r.dir==='ÇIKIŞ' && r.loadMinutes!=null ? r.loadMinutes+' dk' : '—'}</td>
         <td>${movementStatusBadge(r.status)}</td>
-      </tr>`).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Kayıt bulunamadı.</td></tr>`;
+      </tr>`).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px;">Kayıt bulunamadı.</td></tr>`;
+    const avgLoadEl = document.getElementById('stat-avg-load');
+    if(avgLoadEl){
+      const avg = avgLoadMinutesOverall();
+      avgLoadEl.textContent = avg==null ? '—' : avg+' dk';
+    }
   }
   function renderDashboardEvents(){
     const wrap = document.getElementById('event-log');
@@ -1401,17 +1445,20 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
     document.getElementById('detail-code').textContent = mold.code;
     document.getElementById('detail-name').textContent = mold.name;
     document.getElementById('detail-status-badge').innerHTML = badge(mold.status);
+    const avgLoad = avgLoadMinutesFor(mold.code);
     document.getElementById('detail-stats').innerHTML = `
       <div class="d-stat"><div class="lbl">KONUM</div><div class="val">${mold.location}</div></div>
       <div class="d-stat"><div class="lbl">TOPLAM ÜRETİM</div><div class="val">${fmt(mold.total)} ${mold.unit}</div></div>
-      <div class="d-stat"><div class="lbl">SON BAKIM</div><div class="val">${mold.lastMaint}</div></div>`;
+      <div class="d-stat"><div class="lbl">SON BAKIM</div><div class="val">${mold.lastMaint}</div></div>
+      <div class="d-stat"><div class="lbl">BAKIM SIKLIĞI</div><div class="val">${maintFrequencyLabel(mold.code)}</div></div>
+      <div class="d-stat"><div class="lbl">ORT. YÜKLEME SÜRESİ</div><div class="val">${avgLoad==null ? 'Veri yok' : avgLoad+' dk'}</div></div>`;
     document.getElementById('detail-life-bar').innerHTML = lifeBar(mold.life, mold.status);
     const history = movementLog.filter(r=>r.code===code).slice().sort((a,b)=>b.ts-a.ts);
     document.getElementById('detail-timeline').innerHTML = history.length
       ? history.map(r=>`
         <div class="timeline-item ${r.dir==='GİRİŞ'?'giris':'cikis'}">
           <div class="t-head"><span>${r.dir} — ${r.from} → ${r.to}</span><span>${formatDateTime(r.ts)}</span></div>
-          <div class="t-meta">${r.reason}${r.person!=='—' ? ' · '+r.person : ''}${r.status!=='ok' ? ' · '+movementStatusLabel(r.status) : ''}</div>
+          <div class="t-meta">${r.reason}${r.person!=='—' ? ' · '+r.person : ''}${r.dir==='ÇIKIŞ' && r.loadMinutes!=null ? ' · Yükleme: '+r.loadMinutes+' dk' : ''}${r.status!=='ok' ? ' · '+movementStatusLabel(r.status) : ''}</div>
         </div>`).join('')
       : `<div class="detail-empty">Bu kalıp için henüz hareket kaydı yok.</div>`;
     document.getElementById('detail-modal').classList.remove('hidden');
@@ -1531,14 +1578,14 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
     return new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
   }
   document.getElementById('sicil-export').addEventListener('click', async function(){
-    const header = ['Kalıp Kodu','Adı','Konum','Toplam Üretim','Birim','Son Bakım','Durum'];
-    const rows = molds.map(m=>[m.code,m.name,m.location,m.total,m.unit,m.lastMaint,statusLabel[m.status]]);
+    const header = ['Kalıp Kodu','Adı','Konum','Toplam Üretim','Birim','Son Bakım','Bakım Sıklığı','Durum'];
+    const rows = molds.map(m=>[m.code,m.name,m.location,m.total,m.unit,m.lastMaint,maintFrequencyLabel(m.code),statusLabel[m.status]]);
     const ok = await saveBlob('kalip-sicili.csv', rowsToCsvBlob([header, ...rows]));
     if(ok) toast('Kalıp sicili CSV olarak indirildi.', 'ok');
   });
   document.getElementById('hareket-export').addEventListener('click', async function(){
-    const header = ['Kalıp Kodu','Adı','Yön','Nereden','Nereye','Kim','Tarih/Saat','Amaç','Durum'];
-    const rows = movementLog.map(r=>[r.code,r.name,r.dir,r.from,r.to,r.person,formatDateTime(r.ts),r.reason,movementStatusLabel(r.status)]);
+    const header = ['Kalıp Kodu','Adı','Yön','Nereden','Nereye','Kim','Tarih/Saat','Amaç','Yükleme Süresi (dk)','Durum'];
+    const rows = movementLog.map(r=>[r.code,r.name,r.dir,r.from,r.to,r.person,formatDateTime(r.ts),r.reason,(r.dir==='ÇIKIŞ' && r.loadMinutes!=null)?r.loadMinutes:'',movementStatusLabel(r.status)]);
     const ok = await saveBlob('kalip-hareketleri.csv', rowsToCsvBlob([header, ...rows]));
     if(ok) toast('Hareket geçmişi CSV olarak indirildi.', 'ok');
   });
@@ -1623,11 +1670,11 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 
     // Kalıp Sicili
     const sicilRows = [
-      ['Kalıp Kodu','Adı','Konum','Toplam Üretim','Birim','Son Bakım','Durum'],
-      ...molds.map(m=>[m.code,m.name,m.location,m.total,m.unit,m.lastMaint,statusLabel[m.status]])
+      ['Kalıp Kodu','Adı','Konum','Toplam Üretim','Birim','Son Bakım','Bakım Sıklığı','Durum'],
+      ...molds.map(m=>[m.code,m.name,m.location,m.total,m.unit,m.lastMaint,maintFrequencyLabel(m.code),statusLabel[m.status]])
     ];
     const wsSicil = XLSX.utils.aoa_to_sheet(sicilRows);
-    wsSicil['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:14},{wch:8},{wch:12},{wch:16}];
+    wsSicil['!cols'] = [{wch:12},{wch:22},{wch:20},{wch:14},{wch:8},{wch:12},{wch:22},{wch:16}];
     XLSX.utils.book_append_sheet(wb, wsSicil, 'Kalıp Sicili');
 
     // Kalıp Hareketleri (tarih aralığına göre filtrelenmiş)
@@ -1636,11 +1683,11 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
       .slice()
       .sort((a,b)=>b.ts-a.ts);
     const hareketRows = [
-      ['Kalıp Kodu','Adı','Yön','Nereden','Nereye','Kim','Tarih/Saat','Amaç','Durum'],
-      ...filteredLog.map(r=>[r.code,r.name,r.dir,r.from,r.to,r.person,formatDateTime(r.ts),r.reason,movementStatusLabel(r.status)])
+      ['Kalıp Kodu','Adı','Yön','Nereden','Nereye','Kim','Tarih/Saat','Amaç','Yükleme Süresi (dk)','Durum'],
+      ...filteredLog.map(r=>[r.code,r.name,r.dir,r.from,r.to,r.person,formatDateTime(r.ts),r.reason,(r.dir==='ÇIKIŞ' && r.loadMinutes!=null)?r.loadMinutes:'',movementStatusLabel(r.status)])
     ];
     const wsHareket = XLSX.utils.aoa_to_sheet(hareketRows);
-    wsHareket['!cols'] = [{wch:12},{wch:20},{wch:8},{wch:14},{wch:14},{wch:12},{wch:16},{wch:28},{wch:14}];
+    wsHareket['!cols'] = [{wch:12},{wch:20},{wch:8},{wch:14},{wch:14},{wch:12},{wch:16},{wch:28},{wch:16},{wch:14}];
     XLSX.utils.book_append_sheet(wb, wsHareket, 'Kalıp Hareketleri');
 
     // Üretim Takibi
@@ -1875,7 +1922,9 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
         <label>Teslim Eden</label>
         <select id="f-person">
           <option>M. Şahin</option><option>A. Demir</option><option>S. Yıldız</option><option>C. Aydın</option>
-        </select>`;
+        </select>
+        <label>Yükleme Süresi (dk)</label>
+        <input type="number" id="f-loadmin" min="1" step="1" placeholder="Kalıbın makinaya bağlanma süresi">`;
     }
 
     modal.classList.remove('hidden');
@@ -1924,6 +1973,11 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
       record.reason = reason;
       record.person = person;
       record.status = 'ok';
+      if(dir==='ÇIKIŞ'){
+        const loadInput = document.getElementById('f-loadmin');
+        const loadMinutes = loadInput ? parseInt(loadInput.value,10) : NaN;
+        record.loadMinutes = isNaN(loadMinutes) || loadMinutes<=0 ? null : loadMinutes;
+      }
       toast(`Kayıt tamamlandı — ${dir==='GİRİŞ'?'Sorun':'İşlem'}: ${reason} (${person})`, 'ok');
       renderDashboardEvents();
       renderMovementPage();
