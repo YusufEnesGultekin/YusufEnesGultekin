@@ -1257,16 +1257,21 @@ https://github.com/nodeca/pako/blob/main/LICENSE
           cons:{tr:['IP54 koruma sınıfı — tozlu/nemli kalıphane ortamı için yetersiz kalabilir'], en:['IP54 rating may be insufficient for a dusty/humid mold-shop environment']} },
         { brand:'Kathrein', model:'Wide Range 70°', spec:'Geniş huzmeli panel anten',
           pros:{tr:['Geniş huzme açısı, kısa mesafede esnek kapsama'], en:['Wide beam angle gives flexible short-range coverage']},
-          cons:{tr:['~45mm kalınlık — kirişe flush montaj için hacimli kalabilir'], en:['~45mm thickness can be bulky for flush beam mounting']} }
+          cons:{tr:['~45mm kalınlık — kirişe flush montaj için hacimli kalabilir'], en:['~45mm thickness can be bulky for flush beam mounting']} },
+        { brand:'SICK', model:'RFU650 (entegre okuyucu+anten)', spec:'80° dikey / 55° yatay huzme · dairesel polarizasyon · IP67 · AB/TR: 865.7–867.5 MHz, 1.6 W ERP (RFU650-10100) · ABD/Kanada/Meksika: 902–928 MHz, 2.5 W EIRP (RFU650-10101)',
+          pros:{tr:['Okuyucu ve anten tek IP67 gövdede — Zebra FXR90\'a benzer şekilde ayrı kablo/braket gerekmez','Bölgeye özel sertifikalı sipariş kodu (AB/TR ve ABD/Kanada/Meksika için ayrı model) ile doğrudan mevzuata uyum'],
+                en:['Reader and antenna in one IP67 housing — like the Zebra FXR90, no separate cable/bracket needed','Region-certified order codes (separate EU/TR and US/Canada/Mexico models) give direct regulatory compliance']},
+          cons:{tr:['400×252×70mm / 3.9kg — FXR90\'dan belirgin biçimde daha büyük ve ağır, daha güçlü montaj braketi gerektirir','Datasheet\'te fiyat yok — bütçe karşılaştırması için tedarikçi teklifi gerekir'],
+                en:['400×252×70mm / 3.9kg — noticeably larger and heavier than the FXR90, needs a stronger mounting bracket','No price in the datasheet — needs a supplier quote for budget comparison']} }
       ]
     },
     reader: {
       fixed:[
-        { brand:'SICK', model:'RFU63x', spec:'Endüstriyel UHF okuma/yazma cihazı · ISO 18000-6C/EPC Gen2 · CAN ağı desteği',
-          pros:{tr:['Endüstriyel otomasyon sınıfı gövde, SOPAS arayüzüyle PLC entegrasyonu kolay','CAN ağı üzerinden çoklu cihaz yönetimi'],
-                en:['Industrial automation-grade housing, easy PLC integration via SOPAS','Multi-device management over a CAN network']},
-          cons:{tr:['UHF okuma menzili, RAIN RFID\'ye özel Impinj/Zebra çözümlerine göre daha sınırlı olabilir'],
-                en:['UHF read range can be more limited than RAIN-RFID-specific Impinj/Zebra readers']} },
+        { brand:'SICK', model:'RFU63x (Long Range)', spec:'4× harici anten portu (TNC reverse, port başına 30 dBm) · IP67, -30/+60°C · Ethernet/PROFINET/EtherNet-IP/EtherCAT/PROFIBUS/CAN/RS-232-422/USB · ISO 18000-6C/EPC Gen2 RAIN · bölgeye özel sipariş kodu (ör. RFU630-04104 Brezilya, -04106 Japonya, -04109 Singapur)',
+          pros:{tr:['Tek gövdede 4 harici anten portu — geniş/çok noktalı geçitte tek okuyucu yeterli olabilir','Neredeyse tüm endüstriyel fieldbus protokollerini destekler (PROFINET, EtherNet/IP, EtherCAT, PROFIBUS, CAN) — PLC entegrasyonunda esneklik','IP67 ve -30/+60°C aralığı, tozlu/nemli kalıphane ortamına uygun'],
+                en:['4 external antenna ports in one housing — a single reader can cover a wide/multi-point gate','Supports nearly every industrial fieldbus (PROFINET, EtherNet/IP, EtherCAT, PROFIBUS, CAN) for flexible PLC integration','IP67 and -30/+60°C range suit a dusty/humid mold-shop environment']},
+          cons:{tr:['Anten dahil değil — her port için ayrı anten, kablo ve montaj braketi gerekir (Impinj R700/Zebra FX9600\'e benzer ek maliyet)','Bölgeye özel sabit sipariş kodları var (ör. -04106 sadece Japonya onaylı) — yanlış kod sipariş edilirse cihaz o bölgede kullanılamaz'],
+                en:['Antenna not included — each port needs its own antenna, cable and mounting bracket (similar added cost to the Impinj R700/Zebra FX9600)','Fixed region-specific order codes (e.g. -04106 is Japan-only certified) — ordering the wrong code makes the unit unusable in that region']} },
         { brand:'HID Global', model:'Acura HexaPad', spec:'Kompakt, dahili antenli sabit okuyucu',
           pros:{tr:['Dahili anten tasarımı, istenmeyen (komşu geçit) okumalarını sınırlar'], en:['Built-in antenna design limits unwanted (neighboring-gate) reads']},
           cons:{tr:['Dahili anten, geniş geçit genişliklerinde tek başına yeterli kapsama sağlamayabilir'], en:['Built-in antenna alone may not cover very wide gates']} }
